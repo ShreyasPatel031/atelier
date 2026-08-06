@@ -1,0 +1,81 @@
+{
+    "title": "Training & Inference Tools",
+    "summary": "This module provides essential tools for both training and deploying models, encompassing advanced text generation capabilities, integrations with external MLOps platforms, and command-line utilities for model serving.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "generation_utilities_node",
+                "label": "Text Generation Utilities",
+                "type": "module",
+                "link": "generation_utilities",
+                "title": "Model Generation Core",
+                "description": "Provides comprehensive functionalities for text generation, including various decoding strategies, continuous batching, and state management for efficient inference."
+            },
+            {
+                "id": "integrations_node",
+                "label": "External System Integrations",
+                "type": "module",
+                "link": "integrations",
+                "title": "External Tool Connectors",
+                "description": "Offers utilities for connecting with external tools like Weights & Biases for hyperparameter search, DVCLive for experiment tracking, and PEFT for efficient fine-tuning."
+            },
+            {
+                "id": "cli_tools_node",
+                "label": "CLI Model Serving Tools",
+                "type": "module",
+                "link": "cli_tools",
+                "title": "Command-Line Interface for Serving",
+                "description": "Enables serving Hugging Face models via an HTTP API, supporting features like continuous batching, quantization, and various generation tasks through a command-line interface."
+            },
+            {
+                "id": "trainer_node",
+                "label": "Model Trainer Class",
+                "type": "component",
+                "link": null,
+                "title": "Core Training & Evaluation Loop",
+                "description": "The central utility for orchestrating model training, evaluation, and prediction loops, interacting with callbacks, optimizers, and schedulers."
+            }
+        ],
+        "edges": [
+            {
+                "source": "trainer_node",
+                "target": "integrations_node",
+                "label": "Leverages external services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_tools_node",
+                "target": "generation_utilities_node",
+                "label": "Utilizes for inference",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "training_support",
+                "label": "Training & Experimentation Support",
+                "nodes": [
+                    "trainer_node",
+                    "integrations_node"
+                ],
+                "title": "Training & Experimentation Support",
+                "description": "Components that facilitate model training, evaluation, and integration with MLOps platforms for experiment tracking and hyperparameter optimization.",
+                "role": null
+            },
+            {
+                "id": "inference_deployment",
+                "label": "Inference & Deployment",
+                "nodes": [
+                    "generation_utilities_node",
+                    "cli_tools_node"
+                ],
+                "title": "Inference & Deployment",
+                "description": "Tools designed for efficient model inference, including advanced text generation capabilities and command-line interfaces for deploying models as services.",
+                "role": null
+            }
+        ]
+    }
+}

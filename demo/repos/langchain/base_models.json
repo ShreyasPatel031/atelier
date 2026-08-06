@@ -1,0 +1,154 @@
+{
+  "title": "Base Language Models",
+  "summary": "This module defines the foundational interfaces for interacting with various language models, including abstract base classes for LLMs and chat models, enabling consistent integration and extensibility.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_language_model",
+        "label": "BaseLanguageModel",
+        "type": "component",
+        "link": null,
+        "title": "Base Language Model",
+        "description": "Abstract base class for all language model wrappers, providing common functionalities like caching, verbosity, callbacks, and token counting."
+      },
+      {
+        "id": "llm",
+        "label": "LLM",
+        "type": "component",
+        "link": null,
+        "title": "Large Language Model (LLM)",
+        "description": "A simplified interface for implementing custom Large Language Models, focusing on text generation and providing methods for synchronous and asynchronous calls."
+      },
+      {
+        "id": "simple_chat_model",
+        "label": "SimpleChatModel",
+        "type": "component",
+        "link": null,
+        "title": "Simple Chat Model",
+        "description": "A simplified implementation for chat models, primarily for backward compatibility, allowing basic chat interactions."
+      },
+      {
+        "id": "callback_manager",
+        "label": "CallbackManagerForLLMRun",
+        "type": "external",
+        "link": null,
+        "title": "Callback Manager",
+        "description": "Manages callbacks during LLM runs, allowing for custom actions like logging or streaming."
+      },
+      {
+        "id": "async_callback_manager",
+        "label": "AsyncCallbackManagerForLLMRun",
+        "type": "external",
+        "link": null,
+        "title": "Async Callback Manager",
+        "description": "Manages asynchronous callbacks during LLM runs, enabling non-blocking operations."
+      },
+      {
+        "id": "retry_state",
+        "label": "RetryCallState",
+        "type": "external",
+        "link": null,
+        "title": "Retry Call State",
+        "description": "Represents the state of a retried function call, used for handling retries and logging."
+      },
+      {
+        "id": "before_sleep",
+        "label": "_before_sleep",
+        "type": "component",
+        "link": null,
+        "title": "Before Sleep Hook",
+        "description": "A utility function executed before a retry sleep, handling logging and callback invocation for both synchronous and asynchronous contexts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "llm",
+        "target": "base_language_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simple_chat_model",
+        "target": "base_language_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "callback_manager",
+        "label": "uses for sync calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "async_callback_manager",
+        "label": "uses for async calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simple_chat_model",
+        "target": "callback_manager",
+        "label": "uses for sync calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simple_chat_model",
+        "target": "async_callback_manager",
+        "label": "uses for async calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_sleep",
+        "target": "retry_state",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_sleep",
+        "target": "callback_manager",
+        "label": "invokes on_retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_sleep",
+        "target": "async_callback_manager",
+        "label": "invokes on_retry",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_interfaces",
+        "label": "Core Interfaces",
+        "nodes": [
+          "base_language_model",
+          "llm",
+          "simple_chat_model"
+        ],
+        "title": "Core Language Model Interfaces",
+        "description": "Defines the fundamental abstract base classes for all language models and chat models, establishing common properties and methods.",
+        "role": "analytical"
+      },
+      {
+        "id": "utility_functions",
+        "label": "Utility Functions",
+        "nodes": [
+          "before_sleep"
+        ],
+        "title": "Utility and Helper Functions",
+        "description": "Contains helper functions for retry mechanisms and callback handling within the language model operations.",
+        "role": "generative"
+      }
+    ]
+  }
+}

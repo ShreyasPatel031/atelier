@@ -1,0 +1,200 @@
+{
+    "title": "Pipelines and CLI Tools",
+    "summary": "This module provides high-level, ready-to-use abstractions for various NLP, vision, and audio tasks through pipelines, and command-line interfaces for model serving and interaction.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "pipelines_module",
+                "label": "Pipelines Module",
+                "type": "module",
+                "link": "pipelines",
+                "title": "Pipelines Module",
+                "description": "Provides high-level, ready-to-use abstractions for various NLP, vision, and audio tasks, simplifying model inference and data processing for end-users."
+            },
+            {
+                "id": "cli_tools_module",
+                "label": "CLI Tools Module",
+                "type": "module",
+                "link": "cli_tools",
+                "title": "CLI Tools Module",
+                "description": "Provides command-line interfaces for various functionalities, primarily focusing on serving models via an API."
+            },
+            {
+                "id": "model_architectures",
+                "label": "Model Architectures",
+                "type": "module",
+                "link": "model_architectures",
+                "title": "Model Architectures",
+                "description": "Defines the various model architectures available in the library, including text, vision, and audio models."
+            },
+            {
+                "id": "data_processing",
+                "label": "Data Processing",
+                "type": "module",
+                "link": "data_processing",
+                "title": "Data Processing",
+                "description": "Handles the preprocessing and postprocessing of data for different modalities, including tokenization, feature extraction, and image manipulation."
+            },
+            {
+                "id": "pipeline_tasks",
+                "label": "Specific Pipeline Tasks",
+                "type": "component",
+                "link": null,
+                "title": "Specific Pipeline Tasks",
+                "description": "Concrete pipeline classes for various tasks like Automatic Speech Recognition, Document Question Answering, and Image-Text-to-Text generation."
+            },
+            {
+                "id": "pipeline_base",
+                "label": "Pipeline Base Classes",
+                "type": "component",
+                "link": null,
+                "title": "Pipeline Base Classes",
+                "description": "Foundational classes like `ChunkPipeline` that provide common structure and functionalities for all pipelines."
+            },
+            {
+                "id": "model_serving_cli",
+                "label": "Model Serving CLI",
+                "type": "component",
+                "link": null,
+                "title": "Model Serving CLI",
+                "description": "The `Serve` command-line tool for initializing and running a FastAPI server to expose Hugging Face models via a REST API."
+            },
+            {
+                "id": "api_handlers",
+                "label": "API Request Handlers",
+                "type": "component",
+                "link": null,
+                "title": "API Request Handlers",
+                "description": "Dedicated handlers for different types of API requests, such as chat completion, text completion, and audio transcription."
+            },
+            {
+                "id": "model_management",
+                "label": "Model Management",
+                "type": "component",
+                "link": null,
+                "title": "Model Management",
+                "description": "Components responsible for loading, unloading, and managing the lifecycle of models within the serving infrastructure."
+            }
+        ],
+        "edges": [
+            {
+                "source": "pipelines_module",
+                "target": "pipeline_tasks",
+                "label": "implements",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pipelines_module",
+                "target": "pipeline_base",
+                "label": "defines base for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pipeline_tasks",
+                "target": "pipeline_base",
+                "label": "inherits from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pipeline_tasks",
+                "target": "model_architectures",
+                "label": "uses models from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pipeline_tasks",
+                "target": "data_processing",
+                "label": "uses processors from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_tools_module",
+                "target": "model_serving_cli",
+                "label": "provides",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_serving_cli",
+                "target": "model_management",
+                "label": "orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_serving_cli",
+                "target": "api_handlers",
+                "label": "routes requests to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_management",
+                "target": "pipelines_module",
+                "label": "loads models via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_handlers",
+                "target": "model_management",
+                "label": "requests models from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_facing_interfaces",
+                "label": "User-Facing Interfaces",
+                "nodes": [
+                    "pipelines_module",
+                    "cli_tools_module"
+                ],
+                "title": "User-Facing Interfaces",
+                "description": "These modules provide the primary ways users interact with the library's functionalities, offering high-level abstractions and command-line tools.",
+                "role": null
+            },
+            {
+                "id": "pipeline_components",
+                "label": "Pipeline Components",
+                "nodes": [
+                    "pipeline_tasks",
+                    "pipeline_base"
+                ],
+                "title": "Pipeline Components",
+                "description": "The building blocks and specific implementations that constitute the ready-to-use pipelines for various tasks.",
+                "role": null
+            },
+            {
+                "id": "cli_serving_components",
+                "label": "CLI Serving Components",
+                "nodes": [
+                    "model_serving_cli",
+                    "api_handlers",
+                    "model_management"
+                ],
+                "title": "CLI Serving Components",
+                "description": "The core components that enable model serving via the command-line interface, including the server, request handlers, and model lifecycle management.",
+                "role": null
+            },
+            {
+                "id": "dependencies",
+                "label": "Core Dependencies",
+                "nodes": [
+                    "model_architectures",
+                    "data_processing"
+                ],
+                "title": "Core Dependencies",
+                "description": "Fundamental modules that provide the underlying models and data processing capabilities utilized by both pipelines and CLI tools.",
+                "role": null
+            }
+        ]
+    }
+}

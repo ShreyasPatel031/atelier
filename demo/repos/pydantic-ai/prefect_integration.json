@@ -1,0 +1,93 @@
+{
+  "title": "Prefect Integration",
+  "summary": "This module integrates Pydantic-AI agents with Prefect for durable execution, enabling agents to run as Prefect flows and tasks for enhanced reliability and observability.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "prefect_agent",
+        "label": "PrefectAgent",
+        "type": "module",
+        "link": "prefect_integration",
+        "title": "PrefectAgent",
+        "description": "Wraps an existing Pydantic-AI agent to enable its execution within Prefect flows, offloading model requests and tool calls to Prefect tasks."
+      },
+      {
+        "id": "prefectify_toolset",
+        "label": "Prefectify Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Prefectify Toolset",
+        "description": "A utility function that wraps a given toolset, such as FunctionToolset or MCPServer, to integrate it with Prefect's task execution model."
+      },
+      {
+        "id": "prefect_agent_inputs",
+        "label": "PrefectAgentInputs",
+        "type": "component",
+        "link": null,
+        "title": "PrefectAgentInputs Cache Policy",
+        "description": "A custom cache policy for PrefectAgent that computes cache keys by filtering out non-deterministic fields from inputs, ensuring consistent caching for durable execution."
+      },
+      {
+        "id": "agent_framework",
+        "label": "Agent Framework",
+        "type": "module",
+        "link": "agent_framework",
+        "title": "Agent Framework",
+        "description": "Provides the core agent abstractions and execution logic that PrefectAgent wraps."
+      },
+      {
+        "id": "capabilities_and_tools",
+        "label": "Capabilities and Tools",
+        "type": "module",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities and Tools",
+        "description": "Defines the toolsets and capabilities that can be integrated and managed by agents, including those wrapped for Prefect."
+      }
+    ],
+    "edges": [
+      {
+        "source": "prefect_agent",
+        "target": "agent_framework",
+        "label": "wraps agent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefect_agent",
+        "target": "prefectify_toolset",
+        "label": "uses to wrap toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "capabilities_and_tools",
+        "label": "wraps toolsets from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefect_agent_inputs",
+        "target": "prefect_agent",
+        "label": "provides cache policy for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "prefect_integration_core",
+        "label": "Prefect Integration Core",
+        "nodes": [
+          "prefect_agent",
+          "prefectify_toolset",
+          "prefect_agent_inputs"
+        ],
+        "title": "Prefect Integration Core Components",
+        "description": "The primary components responsible for adapting Pydantic-AI agents and their tools to run within the Prefect orchestration framework.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

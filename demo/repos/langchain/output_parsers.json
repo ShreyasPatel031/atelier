@@ -1,0 +1,289 @@
+{
+  "title": "Output Parsers",
+  "summary": "This module provides various output parsers to structure language model responses into specific formats like lists, XML, JSON, or Pydantic objects, and includes mechanisms for error handling and retries.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_output_parser",
+        "label": "BaseOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Base Output Parser",
+        "description": "The foundational class for all output parsers, defining the interface for parsing language model outputs into structured formats."
+      },
+      {
+        "id": "base_generation_output_parser",
+        "label": "BaseGenerationOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Base Generation Output Parser",
+        "description": "A base class for parsing language model generations, supporting both synchronous and asynchronous parsing of results."
+      },
+      {
+        "id": "list_output_parsers",
+        "label": "List Output Parsers",
+        "type": "component",
+        "link": null,
+        "title": "List Output Parsers",
+        "description": "Parsers designed to extract and format lists from raw text, including comma-separated, numbered, and Markdown lists."
+      },
+      {
+        "id": "transform_output_parsers",
+        "label": "Transform Output Parsers",
+        "type": "component",
+        "link": null,
+        "title": "Transform Output Parsers",
+        "description": "Parsers that can handle streaming input and transform it incrementally, useful for real-time processing of LLM outputs."
+      },
+      {
+        "id": "xml_output_parser",
+        "label": "XMLOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "XML Output Parser",
+        "description": "Parses XML formatted strings from LLM outputs into a dictionary structure, with options for secure parsing."
+      },
+      {
+        "id": "datetime_output_parser",
+        "label": "DatetimeOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Datetime Output Parser",
+        "description": "Converts LLM-generated strings into datetime objects based on a specified format."
+      },
+      {
+        "id": "enum_output_parser",
+        "label": "EnumOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Enum Output Parser",
+        "description": "Parses LLM output to match one of the predefined values in an enumeration."
+      },
+      {
+        "id": "output_fixing_parser",
+        "label": "OutputFixingParser",
+        "type": "component",
+        "link": null,
+        "title": "Output Fixing Parser",
+        "description": "Wraps another parser and attempts to fix parsing errors by re-prompting the LLM with error details."
+      },
+      {
+        "id": "pandas_dataframe_output_parser",
+        "label": "PandasDataFrameOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Pandas DataFrame Output Parser",
+        "description": "Parses LLM output into operations or selections on a Pandas DataFrame, supporting various query types."
+      },
+      {
+        "id": "retry_output_parser",
+        "label": "RetryOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Retry Output Parser",
+        "description": "Similar to OutputFixingParser, this parser retries parsing by providing the original prompt and completion to an LLM for correction."
+      },
+      {
+        "id": "structured_output_parser",
+        "label": "StructuredOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Output Parser",
+        "description": "Parses LLM output into a structured dictionary based on a list of defined response schemas."
+      },
+      {
+        "id": "yaml_output_parser",
+        "label": "YamlOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "YAML Output Parser",
+        "description": "Parses YAML formatted strings from LLM outputs into a Pydantic object, validating against a defined schema."
+      },
+      {
+        "id": "convo_output_parser",
+        "label": "ConvoOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Conversational Output Parser",
+        "description": "Parses conversational agent output into either an AgentAction (tool use) or AgentFinish (final answer)."
+      },
+      {
+        "id": "react_json_single_input_output_parser",
+        "label": "ReActJsonSingleInputOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "ReAct JSON Single Input Output Parser",
+        "description": "Parses ReAct-style LLM outputs with a single tool input in JSON format, determining if an action or final answer is provided."
+      },
+      {
+        "id": "structured_chat_output_parser_with_retries",
+        "label": "StructuredChatOutputParserWithRetries",
+        "type": "component",
+        "link": null,
+        "title": "Structured Chat Output Parser with Retries",
+        "description": "An output parser for structured chat agents that includes retry logic to handle parsing errors."
+      },
+      {
+        "id": "structured_query_output_parser",
+        "label": "StructuredQueryOutputParser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Query Output Parser",
+        "description": "Parses LLM output into a structured query object, including query string and filter directives."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_generation_output_parser",
+        "target": "base_output_parser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_output_parsers",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "transform_output_parsers",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xml_output_parser",
+        "target": "transform_output_parsers",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "datetime_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enum_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_fixing_parser",
+        "target": "base_output_parser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pandas_dataframe_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retry_output_parser",
+        "target": "base_output_parser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "yaml_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "convo_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_json_single_input_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_chat_output_parser_with_retries",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_query_output_parser",
+        "target": "base_output_parser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_parsers",
+        "label": "Core Parsers",
+        "nodes": [
+          "base_output_parser",
+          "base_generation_output_parser",
+          "list_output_parsers",
+          "transform_output_parsers",
+          "xml_output_parser"
+        ],
+        "title": "Core Output Parsers",
+        "description": "Fundamental classes and common utility parsers for structuring LLM outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "specialized_parsers",
+        "label": "Specialized Parsers",
+        "nodes": [
+          "datetime_output_parser",
+          "enum_output_parser",
+          "pandas_dataframe_output_parser",
+          "structured_output_parser",
+          "yaml_output_parser"
+        ],
+        "title": "Specialized Output Parsers",
+        "description": "Parsers tailored for specific data types or complex output structures, such as dates, enums, or dataframes.",
+        "role": "analytical"
+      },
+      {
+        "id": "robustness_parsers",
+        "label": "Robustness & Agent Parsers",
+        "nodes": [
+          "output_fixing_parser",
+          "retry_output_parser",
+          "convo_output_parser",
+          "react_json_single_input_output_parser",
+          "structured_chat_output_parser_with_retries",
+          "structured_query_output_parser"
+        ],
+        "title": "Robustness and Agent-Specific Parsers",
+        "description": "Parsers designed to improve robustness through error fixing and retries, and those specifically for agent interactions.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

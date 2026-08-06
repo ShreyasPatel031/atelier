@@ -1,0 +1,2408 @@
+{
+  "benchmark_execution": {
+    "path": "src/helm/benchmark",
+    "components": [],
+    "children": {
+      "run_management": {
+        "path": "src/helm/benchmark",
+        "components": [
+          "src.helm.benchmark.run.main",
+          "src.helm.benchmark.runner.Runner",
+          "src.helm.benchmark.multi_gpu_runner.MultiGPURunner",
+          "src.helm.benchmark.slurm_runner.main",
+          "src.helm.benchmark.reeval_run.main",
+          "src.helm.benchmark.reeval_runner.REEvalRunner"
+        ],
+        "title": "Run Management",
+        "_title_auto_generated": true,
+        "description": "Provides 6 component(s) for run management operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_management",
+              "label": "Run Management",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "main",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "Runner",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "MultiGPURunner",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "main",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "main",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+1 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "run_management",
+              "target": "c0"
+            },
+            {
+              "source": "run_management",
+              "target": "c1"
+            },
+            {
+              "source": "run_management",
+              "target": "c2"
+            },
+            {
+              "source": "run_management",
+              "target": "c3"
+            },
+            {
+              "source": "run_management",
+              "target": "c4"
+            },
+            {
+              "source": "run_management",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "scenario_and_data": {
+        "path": "src/helm/benchmark/scenarios",
+        "components": [
+          "src.helm.benchmark.scenarios.code_scenario.CodeScenario",
+          "src.helm.benchmark.scenarios.medhelm_configurable_scenario.MedHELMConfigurableScenario",
+          "src.helm.benchmark.scenarios.sct_bench_scenario.SCTBenchScenario",
+          "src.helm.benchmark.scenarios.audio_language.speech_robust_bench_scenario.SpeechRobustBenchScenario",
+          "src.helm.benchmark.test_data_preprocessor.test_data_preprocessor",
+          "src.helm.benchmark.test_data_preprocessor.test_data_preprocessor_with_data_augmentation"
+        ],
+        "title": "Scenario And Data",
+        "_title_auto_generated": true,
+        "description": "Provides 6 component(s) for scenario and data operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "scenario_and_data",
+              "label": "Scenario And Data",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "CodeScenario",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "MedHELMConfigurableScenario",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "SCTBenchScenario",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "SpeechRobustBenchScenario",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "test_data_preprocessor",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+1 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "scenario_and_data",
+              "target": "c0"
+            },
+            {
+              "source": "scenario_and_data",
+              "target": "c1"
+            },
+            {
+              "source": "scenario_and_data",
+              "target": "c2"
+            },
+            {
+              "source": "scenario_and_data",
+              "target": "c3"
+            },
+            {
+              "source": "scenario_and_data",
+              "target": "c4"
+            },
+            {
+              "source": "scenario_and_data",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "scenario_tests": {
+        "path": "src/helm/benchmark/scenarios",
+        "components": [
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_process_json_single_entry",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_process_json_multiple_entries",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_process_json_empty_data_list",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_process_json_preserves_special_characters",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_process_json_propagates_split",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_aci_bench_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_aci_bench_scenario_split_distribution",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_aci_bench_scenario_instance_structure",
+          "src.helm.benchmark.scenarios.test_aci_bench_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_chw_care_plan_scenario.test_get_metadata_description_warns_against_hallucination",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_label_one_marks_choice_a",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_label_zero_marks_choice_b",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_label_two_marks_choice_c_uncertain",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_references_always_have_three_options_in_fixed_order",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_unknown_label_falls_back_to_literal",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_skips_rows_with_whitespace_only_text",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_does_not_skip_rows_with_nan_values_documented_limitation",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_empty_dataframe_returns_no_instances",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_propagates_test_split",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_input_text_contains_condition_choices_and_answer_prompt",
+          "src.helm.benchmark.scenarios.test_clear_scenario.test_get_instances_strips_whitespace_from_text_and_label",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_instances_emits_two_instances_per_admission",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_instances_alternates_brief_hospital_course_and_discharge_instructions",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_instances_references_carry_the_gold_target_answer",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_instances_every_instance_has_one_correct_reference_and_test_split",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_instances_prompt_excludes_task_objective_answer_from_input_text",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_read_file_strips_and_returns_lines",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_metadata_returns_expected_taxonomy",
+          "src.helm.benchmark.scenarios.test_dischargeme_scenario.test_get_metadata_description_cites_physionet_link",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_single_create_table",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_multiple_create_tables",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_drops_single_line_table_due_to_parser_limitation",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_multiline_create_table",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_ignores_drop_and_other_statements",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_no_create_table_returns_empty_string",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_extract_schema_drops_unterminated_table",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_basic_entry_creates_instance",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_filters_out_null_string_queries",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_skips_entries_missing_question_or_query",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_propagates_is_impossible_flag",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_includes_schema_prompt_in_every_input",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_propagates_split",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_scenario_has_no_metadata_method",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_value_defaults_to_empty_dict_when_missing",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_process_json_empty_list_returns_no_instances",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_setup_database_targets_correct_url_and_path",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_download_sql_schema_targets_correct_url_and_path",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_download_json_builds_split_specific_url_and_filename",
+          "src.helm.benchmark.scenarios.test_ehr_sql_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_get_instances_end_to_end_with_synthetic_parquets",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_get_instances_creates_cached_parquet_on_first_run",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_get_instances_skips_prompts_exceeding_max_length",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_get_instances_prompt_contains_task_specific_section",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_scenario_init_stores_subject_data_path_and_max_length",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_scenario_init_max_length_defaults_to_none",
+          "src.helm.benchmark.scenarios.test_ehrshot_scenario.test_get_instances_raises_when_data_parquet_is_missing",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_english_default",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_spanish",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_filter_by_category",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_instance_structure",
+          "src.helm.benchmark.scenarios.test_headqa_scenario.test_headqa_scenario_init_defaults",
+          "src.helm.benchmark.scenarios.test_health_bench_scenario.test_health_bench_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_health_bench_scenario.test_health_bench_scenario_get_instances_parses_prompt_and_extra_data",
+          "src.helm.benchmark.scenarios.test_health_bench_scenario.test_health_bench_professional_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_health_bench_scenario.test_health_bench_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_health_bench_scenario.test_health_bench_professional_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_basic_processing",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_builds_subset_specific_url",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_preserves_entry_order",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_only_downloads_test_split",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_handles_dialogue_special_characters",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_writes_subset_specific_subdirectory",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_get_instances_returns_empty_when_data_is_empty",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_init_accepts_valid_subsets",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_init_rejects_empty_subset",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_med_dialog_scenario_icliniq_integration",
+          "src.helm.benchmark.scenarios.test_med_dialog_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_get_instances_basic_processing",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_get_instances_marks_correct_option_per_cop",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_get_instances_preserves_option_order",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_get_instances_handles_multiple_jsonl_rows",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_get_instances_with_empty_splits_returns_no_instances",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_med_mcqa_scenario_integration",
+          "src.helm.benchmark.scenarios.test_med_mcqa_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_med_qa_scenario.test_med_qa_scenario",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_get_metadata_returns_expected_taxonomy",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_get_metadata_description_cites_fleming_paper",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_single_row_creates_single_instance",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_returns_passage_question_input_with_empty_passage",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_preserves_row_order",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_returns_empty_list_for_empty_dataframe",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_marks_every_instance_as_test_split",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_every_instance_has_exactly_one_correct_reference",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_preserves_multiline_responses_verbatim",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_process_tsv_preserves_unicode_in_prompt_and_response",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_get_instances_returns_empty_list_for_empty_helper_result",
+          "src.helm.benchmark.scenarios.test_medalign_scenario.test_init_stores_max_length_and_data_path",
+          "src.helm.benchmark.scenarios.test_medalign_scenario_helper.test_return_dataset_dataframe_raises_when_references_tsv_missing",
+          "src.helm.benchmark.scenarios.test_medbullets_scenario.test_medbullets_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_medbullets_scenario.test_medbullets_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_medbullets_scenario.test_medbullets_scenario_instance_structure",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_scenario_metadata",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_process_csv_skips_empty_sentences",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_process_csv_strips_whitespace",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_scenario_instance_structure",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_scenario_label_distribution",
+          "src.helm.benchmark.scenarios.test_medec_scenario.test_medec_scenario_basic_attributes",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_process_csv_single_row_produces_full_instance",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_process_csv_multiple_rows_keep_order_and_ids",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_process_csv_row_without_rank_one_still_creates_instance_with_empty_reference",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_process_csv_propagates_split",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_instances_with_mocked_load_test_rows",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_highest_ranked_answer_returns_rank_one_answer",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_highest_ranked_answer_returns_empty_string_when_no_rank_one",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_highest_ranked_answer_breaks_on_first_match",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_highest_ranked_answer_picks_rank_one_regardless_of_position",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_highest_ranked_answer_returns_empty_string_for_empty_list",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_process_csv_empty_data_returns_no_instances",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_get_instances_returns_empty_when_test_split_is_empty",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_medi_qa_scenario_get_instances_integration",
+          "src.helm.benchmark.scenarios.test_medi_qa_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_basic_dataframe",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_filters_rows_with_missing_answers",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_returns_empty_when_all_answers_missing",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_returns_empty_for_empty_spreadsheet",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_preserves_row_order",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_handles_long_freeform_answers",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_get_instances_only_questions_with_answers_become_instances",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_medication_qa_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_download_medication_qa_builds_correct_source_and_target",
+          "src.helm.benchmark.scenarios.test_medication_qa_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_mental_health_scenario.test_get_metadata_description_mentions_empathetic_communication",
+          "src.helm.benchmark.scenarios.test_mental_health_scenario.test_get_instances_end_to_end_with_synthetic_csv",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_pairs_input_with_target_as_correct_reference",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_emits_one_instance_per_jsonl_row_in_order",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_assigns_test_split_to_every_instance",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_every_instance_has_exactly_one_correct_reference",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_skips_rows_with_empty_input",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_skips_rows_with_empty_target",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_does_not_strip_whitespace_only_inputs",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_returns_empty_list_for_empty_jsonl_file",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_returns_empty_list_when_every_row_is_filtered",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_raises_when_row_is_missing_input_field",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_raises_when_row_is_missing_target_field",
+          "src.helm.benchmark.scenarios.test_mimic_bhc_scenario.test_get_instances_preserves_unicode_and_multiline_content",
+          "src.helm.benchmark.scenarios.test_mimic_rrs_scenario.test_get_instances_pairs_findings_with_impressions",
+          "src.helm.benchmark.scenarios.test_mimic_rrs_scenario.test_get_instances_emits_one_instance_per_row",
+          "src.helm.benchmark.scenarios.test_mmlu_clinical_afr_scenario.test_mmlu_clinical_afr_scenario",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_processes_only_test_split_documented_quirk",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_emits_one_instance_per_test_patient",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_yes_label_maps_to_first_reference_correct",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_no_label_maps_to_second_reference_correct",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_references_always_in_yes_no_order_with_exactly_one_correct",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_input_text_contains_per_patient_note_body",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_get_instances_supports_multiple_subjects_with_same_test_corpus",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_n2c2_ct_matching_scenario.test_metadata_description_mentions_candidate_classification",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_basic_single_entry",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_marks_correct_answer_for_every_decision",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_titlecases_labels",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_joins_passages_with_newline",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_handles_multiple_entries",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_input_contains_question_with_trailing_newline",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_uses_passage_question_input_with_expected_format",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_raises_when_labels_and_contexts_length_mismatch",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_get_instances_returns_empty_for_empty_input",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_pubmed_qa_scenario_get_instances",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_pubmed_qa_answer_distribution_matches_dataset",
+          "src.helm.benchmark.scenarios.test_pubmed_qa_scenario.test_basic_attributes",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_metadata",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_metadata_description_mentions_bias_detection_and_fairness",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_true_label_maps_to_yes",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_false_label_maps_to_no",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_any_non_True_string_maps_to_no_documented_quirk",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_prompt_format_contract",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_prompt_label_choices_use_a_b_letters_documented_mismatch",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_multiple_rows_produce_multiple_entries",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_duplicate_prompts_collapse_with_last_win",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_create_benchmark_returns_empty_dict_for_csv_with_only_header",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_yes_label_marks_first_reference_correct",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_no_label_marks_second_reference_correct",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_emits_references_in_fixed_yes_no_order",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_every_instance_has_exactly_one_correct_reference",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_uses_test_split_for_every_instance",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_input_text_contains_question_and_response",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_get_instances_preserves_unicode_in_question_and_response",
+          "src.helm.benchmark.scenarios.test_race_based_med_scenario.test_scenario_has_no_custom_init"
+        ],
+        "title": "Scenario Tests",
+        "_title_auto_generated": true,
+        "description": "Provides 197 component(s) for scenario tests operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "scenario_tests",
+              "label": "Scenario Tests",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "test_metadata",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "test_process_json_single_entry",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "test_process_json_multiple_ent",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "test_process_json_empty_data_l",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "test_process_json_preserves_sp",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+192 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "scenario_tests",
+              "target": "c0"
+            },
+            {
+              "source": "scenario_tests",
+              "target": "c1"
+            },
+            {
+              "source": "scenario_tests",
+              "target": "c2"
+            },
+            {
+              "source": "scenario_tests",
+              "target": "c3"
+            },
+            {
+              "source": "scenario_tests",
+              "target": "c4"
+            },
+            {
+              "source": "scenario_tests",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "run_specs": {
+        "path": "src/helm/benchmark/run_specs",
+        "components": [
+          "src.helm.benchmark.run_spec_factory.alter_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medhelm_configurable_benchmark_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mtsamples_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medalign_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_dischargeme_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_aci_bench_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mtsamples_procedures_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mimic_rrs_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mimic_bhc_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_chw_care_plan_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medication_qa_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_starr_patient_instructions_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_med_dialog_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medi_qa_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mental_health_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_clear_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_ehrshot_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_head_qa_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medbullets_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medhelm_med_qa_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medhelm_med_mcqa_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_ptbm_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_sei_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_conf_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_pubmed_qa_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_bmt_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_race_based_med_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_n2c2_ct_matching_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_gip_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_sequoia_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_cdi_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_ent_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_privacy_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_shc_proxy_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_medxpert_qa_text_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_healthqa_br_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_mmlu_clinical_afr_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_health_bench_run_spec",
+          "src.helm.benchmark.run_specs.medhelm_run_specs.get_health_bench_professional_run_spec",
+          "src.helm.benchmark.run_specs.medical_multimodal_run_specs.get_mental_disorders_spec",
+          "src.helm.benchmark.run_specs.medical_multimodal_run_specs.get_radiology_spec",
+          "src.helm.benchmark.run_specs.simple_run_specs.get_simple_mcqa_run_spec",
+          "src.helm.benchmark.run_specs.speech_disorder_audio_run_specs.get_ultra_suite_classification_run_spec",
+          "src.helm.benchmark.run_specs.speech_disorder_audio_run_specs.get_ultra_suite_disorder_breakdown_run_spec",
+          "src.helm.benchmark.run_specs.speech_disorder_audio_run_specs.get_ultra_suite_disorder_symptoms_run_spec"
+        ],
+        "title": "Run Specs",
+        "_title_auto_generated": true,
+        "description": "Provides 45 component(s) for run specs operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_specs",
+              "label": "Run Specs",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "alter_run_spec",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "get_medhelm_configurable_bench",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "get_mtsamples_spec",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "get_medalign_spec",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "get_dischargeme_spec",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+40 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "run_specs",
+              "target": "c0"
+            },
+            {
+              "source": "run_specs",
+              "target": "c1"
+            },
+            {
+              "source": "run_specs",
+              "target": "c2"
+            },
+            {
+              "source": "run_specs",
+              "target": "c3"
+            },
+            {
+              "source": "run_specs",
+              "target": "c4"
+            },
+            {
+              "source": "run_specs",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      }
+    },
+    "title": "Benchmark Execution",
+    "description": "Orchestrates end-to-end benchmark runs by coordinating scenario data loading, model adaptation, metric evaluation, and result presentation. Manages execution workflows across single and multi-GPU environments.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "benchmark_execution",
+          "label": "Benchmark Execution",
+          "type": "module"
+        },
+        {
+          "id": "run_mgmt",
+          "label": "Manage Run Lifecycle",
+          "type": "module",
+          "link": "run_management",
+          "title": "Run Management",
+          "description": "Coordinates benchmark execution from start to finish. Handles single-GPU, multi-GPU, and SLURM-based job scheduling. Supports re-evaluation of existing runs."
+        },
+        {
+          "id": "scenario_load",
+          "label": "Load Scenarios & Data",
+          "type": "module",
+          "link": "scenario_and_data",
+          "title": "Scenario & Data Loading",
+          "description": "Retrieves benchmark scenarios and test data. Preprocesses and augments data as needed. Supports diverse medical and general-purpose datasets."
+        },
+        {
+          "id": "run_spec",
+          "label": "Define Run Specifications",
+          "type": "module",
+          "link": "run_specs",
+          "title": "Run Specifications",
+          "description": "Defines benchmark configurations including model selection, adapter settings, and evaluation parameters. Factory functions generate task-specific run specs."
+        },
+        {
+          "id": "adapt_model",
+          "label": "Adapt Model to Task",
+          "type": "module",
+          "link": "model_adaptation",
+          "title": "Model Adaptation",
+          "description": "Applies task-specific adapters and augmentations to prepare models for evaluation. Handles prompt engineering and input transformations."
+        },
+        {
+          "id": "infer",
+          "label": "Generate Model Outputs",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Inference & Clients",
+          "description": "Executes model inference across language, vision, audio, and image generation models. Manages API calls and local model execution."
+        },
+        {
+          "id": "eval_metrics",
+          "label": "Compute Metrics",
+          "type": "module",
+          "link": "evaluation_and_metrics",
+          "title": "Evaluation & Metrics",
+          "description": "Calculates performance metrics, annotations, and robustness measures. Generates detailed evaluation reports and visualizations."
+        },
+        {
+          "id": "present",
+          "label": "Present Results",
+          "type": "module",
+          "link": "evaluation_and_metrics",
+          "title": "Result Presentation",
+          "description": "Summarizes benchmark results and creates interactive dashboards. Generates plots, tables, and comparative analysis across runs."
+        },
+        {
+          "id": "infra",
+          "label": "Infrastructure & Utilities",
+          "type": "module",
+          "link": "infrastructure_and_utilities",
+          "title": "Infrastructure Support",
+          "description": "Provides tokenization, proxy services, window management, and logging. Enables distributed execution and remote service communication."
+        },
+        {
+          "id": "run_management",
+          "label": "Run Management",
+          "type": "module",
+          "link": "run_management"
+        },
+        {
+          "id": "scenario_and_data",
+          "label": "Scenario And Data",
+          "type": "module",
+          "link": "scenario_and_data"
+        },
+        {
+          "id": "scenario_tests",
+          "label": "Scenario Tests",
+          "type": "module",
+          "link": "scenario_tests"
+        },
+        {
+          "id": "run_specs",
+          "label": "Run Specs",
+          "type": "module",
+          "link": "run_specs"
+        }
+      ],
+      "edges": [
+        {
+          "source": "run_mgmt",
+          "target": "run_spec",
+          "label": "reads",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "run_mgmt",
+          "target": "scenario_load",
+          "label": "requests",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "scenario_load",
+          "target": "adapt_model",
+          "label": "provides instances",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "run_spec",
+          "target": "adapt_model",
+          "label": "specifies adapters",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "adapt_model",
+          "target": "infer",
+          "label": "sends prompts",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "infer",
+          "target": "eval_metrics",
+          "label": "returns outputs",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "eval_metrics",
+          "target": "present",
+          "label": "aggregates scores",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "run_mgmt",
+          "target": "infra",
+          "label": "uses",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "infer",
+          "target": "infra",
+          "label": "uses",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "eval_metrics",
+          "target": "infra",
+          "label": "uses",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "benchmark_execution",
+          "target": "run_management"
+        },
+        {
+          "source": "benchmark_execution",
+          "target": "scenario_and_data"
+        },
+        {
+          "source": "benchmark_execution",
+          "target": "scenario_tests"
+        },
+        {
+          "source": "benchmark_execution",
+          "target": "run_specs"
+        }
+      ],
+      "groups": [
+        {
+          "id": "orchestration",
+          "label": "Orchestration",
+          "nodes": [
+            "run_mgmt",
+            "run_spec"
+          ],
+          "title": "Execution Control",
+          "description": "Manages the overall benchmark workflow and coordinates all downstream components.",
+          "role": null
+        },
+        {
+          "id": "data_prep",
+          "label": "Data Preparation",
+          "nodes": [
+            "scenario_load",
+            "adapt_model"
+          ],
+          "title": "Input Setup",
+          "description": "Loads scenarios, preprocesses data, and adapts models for task-specific evaluation.",
+          "role": null
+        },
+        {
+          "id": "execution",
+          "label": "Execution & Evaluation",
+          "nodes": [
+            "infer",
+            "eval_metrics"
+          ],
+          "title": "Core Processing",
+          "description": "Runs inference and computes metrics to measure model performance.",
+          "role": null
+        },
+        {
+          "id": "output",
+          "label": "Output & Support",
+          "nodes": [
+            "present",
+            "infra"
+          ],
+          "title": "Results & Infrastructure",
+          "description": "Presents results and provides underlying infrastructure services.",
+          "role": null
+        }
+      ]
+    }
+  },
+  "model_adaptation": {
+    "path": "src/helm/benchmark/adaptation",
+    "components": [],
+    "children": {
+      "adapters": {
+        "path": "src/helm/benchmark/adaptation/adapters",
+        "components": [
+          "src.helm.benchmark.adaptation.adapters.adapter_factory.AdapterFactory",
+          "src.helm.benchmark.adaptation.adapters.test_adapter.TestAdapter",
+          "src.helm.benchmark.adaptation.adapters.test_generation_adapter.TestGenerationAdapter",
+          "src.helm.benchmark.adaptation.adapters.multimodal.test_in_context_learning_multimodal_adapter.TestInContextLearningMultimodalAdapter"
+        ],
+        "title": "Adapters",
+        "_title_auto_generated": true,
+        "description": "Provides 4 component(s) for adapters operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "adapters",
+              "label": "Adapters",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "AdapterFactory",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "TestAdapter",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "TestGenerationAdapter",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "TestInContextLearningMultimoda",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "adapters",
+              "target": "c0"
+            },
+            {
+              "source": "adapters",
+              "target": "c1"
+            },
+            {
+              "source": "adapters",
+              "target": "c2"
+            },
+            {
+              "source": "adapters",
+              "target": "c3"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "augmentations": {
+        "path": "src/helm/benchmark/augmentations",
+        "components": [
+          "src.helm.benchmark.augmentations.person_name_perturbation.__init__",
+          "src.helm.benchmark.augmentations.translate_perturbation.__init__",
+          "src.helm.benchmark.augmentations.test_perturbation.test_multimodal_text_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_contraction_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_expansion_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_lowercase_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_dialect_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_person_name_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_extra_space_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_filler_words_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_gender_pronoun_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_gender_term_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_gender_term_perturbation_edge_word",
+          "src.helm.benchmark.augmentations.test_perturbation.test_misspelling_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_typos_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_synonym_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_space_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_suffix_perturbation",
+          "src.helm.benchmark.augmentations.test_perturbation.test_gender_term_perturbation_consequtive_words"
+        ],
+        "title": "Augmentations",
+        "_title_auto_generated": true,
+        "description": "Provides 19 component(s) for augmentations operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "augmentations",
+              "label": "Augmentations",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "__init__",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "__init__",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "test_multimodal_text_perturbat",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "test_contraction_perturbation",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "test_expansion_perturbation",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+14 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "augmentations",
+              "target": "c0"
+            },
+            {
+              "source": "augmentations",
+              "target": "c1"
+            },
+            {
+              "source": "augmentations",
+              "target": "c2"
+            },
+            {
+              "source": "augmentations",
+              "target": "c3"
+            },
+            {
+              "source": "augmentations",
+              "target": "c4"
+            },
+            {
+              "source": "augmentations",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      }
+    },
+    "title": "Model Adaptation",
+    "description": "Enables flexible model input preparation through adapters and data augmentation. Transforms raw instances into model-ready prompts while applying perturbations for robustness testing.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "model_adaptation",
+          "label": "Model Adaptation",
+          "type": "module"
+        },
+        {
+          "id": "input_instances",
+          "label": "Receive Benchmark Instances",
+          "type": "module",
+          "link": "input_instances",
+          "title": "Instance intake",
+          "description": "Accepts benchmark instances containing input text, references, and metadata from scenarios."
+        },
+        {
+          "id": "adapter_selection",
+          "label": "Select Adaptation Strategy",
+          "type": "module",
+          "link": "adapter_selection",
+          "title": "Adapter factory",
+          "description": "Routes instances to appropriate adapter based on task type (generation, classification, multiple-choice) and model requirements."
+        },
+        {
+          "id": "prompt_construction",
+          "label": "Construct Model Prompts",
+          "type": "module",
+          "link": "prompt_construction",
+          "title": "Prompt building",
+          "description": "Formats instances into model-specific prompts, handling in-context examples, instructions, and token constraints."
+        },
+        {
+          "id": "augmentation_engine",
+          "label": "Apply Data Augmentations",
+          "type": "module",
+          "link": "augmentation_engine",
+          "title": "Perturbation system",
+          "description": "Applies text transformations (typos, contractions, dialect shifts, gender terms) to test model robustness across input variations."
+        },
+        {
+          "id": "output_prompts",
+          "label": "Emit Adapted Prompts",
+          "type": "module",
+          "link": "output_prompts",
+          "title": "Prompt output",
+          "description": "Returns model-ready prompts with optional augmented variants for inference and evaluation."
+        },
+        {
+          "id": "adapters",
+          "label": "Adapters",
+          "type": "module",
+          "link": "adapters"
+        },
+        {
+          "id": "augmentations",
+          "label": "Augmentations",
+          "type": "module",
+          "link": "augmentations"
+        }
+      ],
+      "edges": [
+        {
+          "source": "input_instances",
+          "target": "adapter_selection",
+          "label": "raw instances",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "adapter_selection",
+          "target": "prompt_construction",
+          "label": "adapter type",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "prompt_construction",
+          "target": "augmentation_engine",
+          "label": "formatted prompts",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "augmentation_engine",
+          "target": "output_prompts",
+          "label": "augmented variants",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "model_adaptation",
+          "target": "adapters"
+        },
+        {
+          "source": "model_adaptation",
+          "target": "augmentations"
+        }
+      ],
+      "groups": [
+        {
+          "id": "adaptation_pipeline",
+          "label": "Adaptation Pipeline",
+          "nodes": [
+            "input_instances",
+            "adapter_selection",
+            "prompt_construction",
+            "augmentation_engine",
+            "output_prompts"
+          ],
+          "title": "End-to-end adaptation",
+          "description": "Transforms benchmark instances into model-ready prompts with optional robustness augmentations.",
+          "role": null
+        }
+      ]
+    }
+  },
+  "evaluation_and_metrics": {
+    "path": "src/helm/benchmark",
+    "components": [],
+    "children": {
+      "metrics": {
+        "path": "src/helm/benchmark/metrics",
+        "components": [
+          "src.helm.benchmark.metrics.metric.Metric",
+          "src.helm.benchmark.metrics.basic_metrics.BasicGenerationMetric",
+          "src.helm.benchmark.metrics.summarization_metrics.SummarizationMetric",
+          "src.helm.benchmark.metrics.image_generation.aesthetics_metrics.AestheticsMetric",
+          "src.helm.benchmark.metrics.image_generation.watermark_metrics.WatermarkMetric",
+          "src.helm.benchmark.metrics.test_classification_metrics.test_evaluate_instances_default_parameters",
+          "src.helm.benchmark.metrics.test_classification_metrics.test_evaluate_instances_yes_and_no",
+          "src.helm.benchmark.metrics.tokens.test_openai_token_cost_estimator.TestOpenAITokenCostEstimator"
+        ],
+        "title": "Metrics",
+        "_title_auto_generated": true,
+        "description": "Provides 8 component(s) for metrics operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "metrics",
+              "label": "Metrics",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "Metric",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "BasicGenerationMetric",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "SummarizationMetric",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "AestheticsMetric",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "WatermarkMetric",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+3 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "metrics",
+              "target": "c0"
+            },
+            {
+              "source": "metrics",
+              "target": "c1"
+            },
+            {
+              "source": "metrics",
+              "target": "c2"
+            },
+            {
+              "source": "metrics",
+              "target": "c3"
+            },
+            {
+              "source": "metrics",
+              "target": "c4"
+            },
+            {
+              "source": "metrics",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "annotation": {
+        "path": "src/helm/benchmark/annotation",
+        "components": [
+          "src.helm.benchmark.annotation.test_annotator_factory.TestAnnotatorFactory"
+        ],
+        "title": "Annotation",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for annotation operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "annotation",
+              "label": "Annotation",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "TestAnnotatorFactory",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "annotation",
+              "target": "c0"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "presentation": {
+        "path": "src/helm/benchmark/presentation",
+        "components": [
+          "src.helm.benchmark.presentation.create_plots.main",
+          "src.helm.benchmark.presentation.run_display.write_run_display_json",
+          "src.helm.benchmark.presentation.summarize.main",
+          "src.helm.benchmark.presentation.test_run_entry.TestRunEntry",
+          "src.helm.benchmark.presentation.test_summarize.test_summarize_suite",
+          "src.helm.benchmark.presentation.test_summarize.test_summarize_release",
+          "src.helm.benchmark.presentation.torr_robustness_summarizer.ToRRRobustnessSummarizer"
+        ],
+        "title": "Presentation",
+        "_title_auto_generated": true,
+        "description": "Provides 7 component(s) for presentation operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "presentation",
+              "label": "Presentation",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "main",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "write_run_display_json",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "main",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "TestRunEntry",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "test_summarize_suite",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+2 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "presentation",
+              "target": "c0"
+            },
+            {
+              "source": "presentation",
+              "target": "c1"
+            },
+            {
+              "source": "presentation",
+              "target": "c2"
+            },
+            {
+              "source": "presentation",
+              "target": "c3"
+            },
+            {
+              "source": "presentation",
+              "target": "c4"
+            },
+            {
+              "source": "presentation",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      }
+    },
+    "title": "Evaluation and Metrics",
+    "description": "Computes performance metrics, generates visualizations, and produces evaluation reports for benchmark runs. Integrates metric calculation, annotation workflows, and result presentation into a cohesive evaluation pipeline.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "evaluation_and_metrics",
+          "label": "Evaluation and Metrics",
+          "type": "module"
+        },
+        {
+          "id": "metric_calc",
+          "label": "Calculate Performance Metrics",
+          "type": "module",
+          "link": "metrics",
+          "title": "Metric Computation",
+          "description": "Computes quantitative metrics (accuracy, BLEU, F1, etc.) on model outputs. Supports classification, generation, summarization, and image quality assessment across diverse task types."
+        },
+        {
+          "id": "annotation_flow",
+          "label": "Manage Annotations",
+          "type": "module",
+          "link": "annotation",
+          "title": "Annotation Workflow",
+          "description": "Orchestrates human and automated annotation processes. Handles annotator selection, result aggregation, and quality control for evaluation tasks."
+        },
+        {
+          "id": "result_agg",
+          "label": "Aggregate Results",
+          "type": "module",
+          "link": "presentation",
+          "title": "Result Aggregation",
+          "description": "Combines metrics and annotations into structured result sets. Prepares data for downstream visualization and reporting."
+        },
+        {
+          "id": "viz_gen",
+          "label": "Generate Visualizations",
+          "type": "module",
+          "link": "presentation",
+          "title": "Visualization Generation",
+          "description": "Creates plots, charts, and interactive dashboards. Renders performance comparisons, trend analysis, and robustness summaries for human review."
+        },
+        {
+          "id": "report_gen",
+          "label": "Produce Evaluation Reports",
+          "type": "module",
+          "link": "presentation",
+          "title": "Report Generation",
+          "description": "Synthesizes metrics, visualizations, and metadata into comprehensive evaluation reports. Outputs JSON, HTML, and summary documents for stakeholders."
+        },
+        {
+          "id": "metrics",
+          "label": "Metrics",
+          "type": "module",
+          "link": "metrics"
+        },
+        {
+          "id": "annotation",
+          "label": "Annotation",
+          "type": "module",
+          "link": "annotation"
+        },
+        {
+          "id": "presentation",
+          "label": "Presentation",
+          "type": "module",
+          "link": "presentation"
+        }
+      ],
+      "edges": [
+        {
+          "source": "metric_calc",
+          "target": "result_agg",
+          "label": "computed metrics",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "annotation_flow",
+          "target": "result_agg",
+          "label": "annotated data",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "result_agg",
+          "target": "viz_gen",
+          "label": "aggregated results",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "result_agg",
+          "target": "report_gen",
+          "label": "aggregated results",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "viz_gen",
+          "target": "report_gen",
+          "label": "visualizations",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "evaluation_and_metrics",
+          "target": "metrics"
+        },
+        {
+          "source": "evaluation_and_metrics",
+          "target": "annotation"
+        },
+        {
+          "source": "evaluation_and_metrics",
+          "target": "presentation"
+        }
+      ],
+      "groups": [
+        {
+          "id": "eval_core",
+          "label": "Evaluation Core",
+          "nodes": [
+            "metric_calc",
+            "annotation_flow"
+          ],
+          "title": "Core Evaluation",
+          "description": "Metric computation and annotation management form the foundation of evaluation, producing raw scores and labeled data.",
+          "role": null
+        },
+        {
+          "id": "result_pipeline",
+          "label": "Result Pipeline",
+          "nodes": [
+            "result_agg",
+            "viz_gen",
+            "report_gen"
+          ],
+          "title": "Result Processing",
+          "description": "Aggregates evaluation outputs and prepares them for presentation through visualization and reporting.",
+          "role": null
+        }
+      ]
+    }
+  },
+  "client_and_inference": {
+    "path": "src/helm/clients",
+    "components": [],
+    "children": {
+      "language_models": {
+        "path": "src/helm/clients",
+        "components": [
+          "src.helm.clients.aleph_alpha_client.AlephAlphaClient",
+          "src.helm.clients.anthropic_client.AnthropicMessagesClient",
+          "src.helm.clients.bedrock_client.BedrockPalmyraClient",
+          "src.helm.clients.bedrock_client.BedrockTitanClient",
+          "src.helm.clients.bedrock_client.BedrockMistralClient",
+          "src.helm.clients.bedrock_client.BedrockLlamaClient",
+          "src.helm.clients.dspy_client.DSPyClient",
+          "src.helm.clients.openai_client.OpenAITranscriptionThenCompletionClient",
+          "src.helm.clients.openai_client.OpenAILegacyCompletionsClient",
+          "src.helm.clients.test_auto_client.TestAutoClient",
+          "src.helm.clients.test_client.test_truncate_and_tokenize_response_text",
+          "src.helm.clients.test_huggingface_client.TestHuggingFaceClient",
+          "src.helm.clients.test_openrouter_client.TestOpenRouterClient",
+          "src.helm.clients.test_together_client.test_together_chat_client_make_request",
+          "src.helm.clients.test_together_client.TestTogetherClient",
+          "src.helm.clients.test_together_client.test_together_completion_client_make_request"
+        ],
+        "title": "Language Models",
+        "_title_auto_generated": true,
+        "description": "Provides 16 component(s) for language models operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "language_models",
+              "label": "Language Models",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "AlephAlphaClient",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "AnthropicMessagesClient",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "BedrockPalmyraClient",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "BedrockTitanClient",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "BedrockMistralClient",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+11 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "language_models",
+              "target": "c0"
+            },
+            {
+              "source": "language_models",
+              "target": "c1"
+            },
+            {
+              "source": "language_models",
+              "target": "c2"
+            },
+            {
+              "source": "language_models",
+              "target": "c3"
+            },
+            {
+              "source": "language_models",
+              "target": "c4"
+            },
+            {
+              "source": "language_models",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "multimodal_models": {
+        "path": "src/helm/clients",
+        "components": [
+          "src.helm.clients.audio_language.llama_omni_client.LlamaOmniAudioLMClient",
+          "src.helm.clients.audio_language.qwen2_5_omni_client.Qwen2_5OmniAudioLMClient",
+          "src.helm.clients.audio_language.qwen_omni.modeling_qwen2_5_omni.Qwen2_5OmniToken2WavDiTModel",
+          "src.helm.clients.vision_language.huggingface_vision2seq_client.HuggingFaceVision2SeqClient",
+          "src.helm.clients.vision_language.idefics_client.IDEFICSClient",
+          "src.helm.clients.vision_language.open_flamingo_client.OpenFlamingoClient",
+          "src.helm.clients.vision_language.paligemma_client.PaliGemmaClient",
+          "src.helm.clients.vision_language.palmyra_vision_client.PalmyraVisionClient",
+          "src.helm.clients.vision_language.qwen_vlm_client.QwenVLMClient"
+        ],
+        "title": "Multimodal Models",
+        "_title_auto_generated": true,
+        "description": "Provides 9 component(s) for multimodal models operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "multimodal_models",
+              "label": "Multimodal Models",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "LlamaOmniAudioLMClient",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "Qwen2_5OmniAudioLMClient",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "Qwen2_5OmniToken2WavDiTModel",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "HuggingFaceVision2SeqClient",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "IDEFICSClient",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+4 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "multimodal_models",
+              "target": "c0"
+            },
+            {
+              "source": "multimodal_models",
+              "target": "c1"
+            },
+            {
+              "source": "multimodal_models",
+              "target": "c2"
+            },
+            {
+              "source": "multimodal_models",
+              "target": "c3"
+            },
+            {
+              "source": "multimodal_models",
+              "target": "c4"
+            },
+            {
+              "source": "multimodal_models",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "image_generation": {
+        "path": "src/helm/clients/image_generation",
+        "components": [
+          "src.helm.clients.image_generation.adobe_vision_client.AdobeVisionClient",
+          "src.helm.clients.image_generation.aleph_alpha_image_generation_client.AlephAlphaImageGenerationClient",
+          "src.helm.clients.image_generation.cogview2_client.CogView2Client",
+          "src.helm.clients.image_generation.dalle2_client.DALLE2Client",
+          "src.helm.clients.image_generation.dalle_mini.data.Dataset",
+          "src.helm.clients.image_generation.dalle_mini.model.processor.DalleBartProcessor",
+          "src.helm.clients.image_generation.dalle_mini_client.DALLEMiniClient",
+          "src.helm.clients.image_generation.deep_floyd_client.DeepFloydClient",
+          "src.helm.clients.image_generation.huggingface_diffusers_client.HuggingFaceDiffusersClient",
+          "src.helm.clients.image_generation.lexica_client.LexicaClient",
+          "src.helm.clients.image_generation.mindalle.models.__init__.Dalle",
+          "src.helm.clients.image_generation.mindalle.models.__init__.ImageGPT",
+          "src.helm.clients.image_generation.mindalle_client.MinDALLEClient",
+          "src.helm.clients.image_generation.together_image_generation_client.TogetherImageGenerationClient"
+        ],
+        "title": "Image Generation",
+        "_title_auto_generated": true,
+        "description": "Provides 14 component(s) for image generation operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "image_generation",
+              "label": "Image Generation",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "AdobeVisionClient",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "AlephAlphaImageGenerationClien",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "CogView2Client",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "DALLE2Client",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "Dataset",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+9 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "image_generation",
+              "target": "c0"
+            },
+            {
+              "source": "image_generation",
+              "target": "c1"
+            },
+            {
+              "source": "image_generation",
+              "target": "c2"
+            },
+            {
+              "source": "image_generation",
+              "target": "c3"
+            },
+            {
+              "source": "image_generation",
+              "target": "c4"
+            },
+            {
+              "source": "image_generation",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      }
+    },
+    "title": "Client and Inference",
+    "description": "Provides unified interfaces for interacting with diverse language models, multimodal models, and image generation services. Abstracts API differences across providers to enable seamless model inference and token management.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "client_and_inference",
+          "label": "Client and Inference",
+          "type": "module"
+        },
+        {
+          "id": "request_intake",
+          "label": "Accept inference requests",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Request intake",
+          "description": "Receives and normalizes inference requests from benchmark runners and adapters, handling prompt formatting and parameter validation."
+        },
+        {
+          "id": "model_routing",
+          "label": "Route to appropriate model client",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Model routing",
+          "description": "Dispatches requests to the correct client implementation based on model identifier and type (language, vision, audio, image generation)."
+        },
+        {
+          "id": "language_models",
+          "label": "Language model clients",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Language models",
+          "description": "Implements clients for text-based models including OpenAI, Anthropic, HuggingFace, Together, and other providers with unified completion interface."
+        },
+        {
+          "id": "multimodal_models",
+          "label": "Multimodal model clients",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Multimodal models",
+          "description": "Handles vision-language and audio-language models including IDEFICS, Qwen VLM, and Llama Omni for cross-modal inference tasks."
+        },
+        {
+          "id": "image_generation",
+          "label": "Image generation clients",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Image generation",
+          "description": "Manages text-to-image models like DALL-E, Stable Diffusion, and CogView2 with unified generation and quality assessment."
+        },
+        {
+          "id": "token_management",
+          "label": "Count and estimate tokens",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Token management",
+          "description": "Tracks token usage across requests, estimates costs, and enforces context window limits for each model provider."
+        },
+        {
+          "id": "response_processing",
+          "label": "Parse and normalize responses",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Response processing",
+          "description": "Converts provider-specific response formats into standardized completion objects with metadata and error handling."
+        },
+        {
+          "id": "result_return",
+          "label": "Return inference results",
+          "type": "module",
+          "link": "client_and_inference",
+          "title": "Result return",
+          "description": "Delivers processed completions back to benchmark runners with token counts, latency, and provider-specific metadata."
+        }
+      ],
+      "edges": [
+        {
+          "source": "request_intake",
+          "target": "model_routing",
+          "label": "normalized request",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "model_routing",
+          "target": "language_models",
+          "label": "text completion",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "model_routing",
+          "target": "multimodal_models",
+          "label": "multimodal input",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "model_routing",
+          "target": "image_generation",
+          "label": "image prompt",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "language_models",
+          "target": "token_management",
+          "label": "request tokens",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "multimodal_models",
+          "target": "token_management",
+          "label": "request tokens",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "image_generation",
+          "target": "token_management",
+          "label": "request tokens",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "language_models",
+          "target": "response_processing",
+          "label": "raw response",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "multimodal_models",
+          "target": "response_processing",
+          "label": "raw response",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "image_generation",
+          "target": "response_processing",
+          "label": "raw response",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "token_management",
+          "target": "response_processing",
+          "label": "token counts",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "response_processing",
+          "target": "result_return",
+          "label": "completion object",
+          "title": null,
+          "description": null
+        }
+      ],
+      "groups": [
+        {
+          "id": "model_layer",
+          "label": "Model Clients",
+          "nodes": [
+            "language_models",
+            "multimodal_models",
+            "image_generation"
+          ],
+          "title": "Model client implementations",
+          "description": "Specialized client implementations for different model types and providers, each handling provider-specific APIs and protocols.",
+          "role": null
+        },
+        {
+          "id": "inference_pipeline",
+          "label": "Inference Pipeline",
+          "nodes": [
+            "request_intake",
+            "model_routing",
+            "response_processing",
+            "result_return"
+          ],
+          "title": "End-to-end inference flow",
+          "description": "Main request-response pipeline from intake through routing, model execution, and result delivery.",
+          "role": null
+        },
+        {
+          "id": "support_services",
+          "label": "Support Services",
+          "nodes": [
+            "token_management"
+          ],
+          "title": "Cross-cutting services",
+          "description": "Shared utilities for token counting, cost estimation, and response normalization across all model types.",
+          "role": null
+        }
+      ]
+    }
+  },
+  "infrastructure_and_utilities": {
+    "path": "src/helm",
+    "components": [],
+    "children": {
+      "tokenization": {
+        "path": "src/helm/tokenizers",
+        "components": [
+          "src.helm.tokenizers.test_anthropic_tokenizer.TestAnthropicTokenizer",
+          "src.helm.tokenizers.test_huggingface_tokenizer.TestHuggingFaceGPT2Tokenizer"
+        ],
+        "title": "Tokenization",
+        "_title_auto_generated": true,
+        "description": "Provides 2 component(s) for tokenization operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "tokenization",
+              "label": "Tokenization",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "TestAnthropicTokenizer",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "TestHuggingFaceGPT2Tokenizer",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "tokenization",
+              "target": "c0"
+            },
+            {
+              "source": "tokenization",
+              "target": "c1"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "proxy_and_services": {
+        "path": "src/helm/proxy",
+        "components": [
+          "src.helm.proxy.server.perform",
+          "src.helm.proxy.services.test_remote_service.TestRemoteServerService",
+          "src.helm.proxy.services.test_service.test_prod_continue",
+          "src.helm.proxy.services.test_service.test_prod_echo",
+          "src.helm.proxy.services.test_service.TestServerService",
+          "src.helm.proxy.static.index.renderQueryInterface",
+          "src.helm.proxy.token_counters.test_auto_token_counter.TestAutoTokenCounter"
+        ],
+        "title": "Proxy And Services",
+        "_title_auto_generated": true,
+        "description": "Provides 7 component(s) for proxy and services operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "proxy_and_services",
+              "label": "Proxy And Services",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "perform",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "TestRemoteServerService",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "test_prod_continue",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "test_prod_echo",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "TestServerService",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+2 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "proxy_and_services",
+              "target": "c0"
+            },
+            {
+              "source": "proxy_and_services",
+              "target": "c1"
+            },
+            {
+              "source": "proxy_and_services",
+              "target": "c2"
+            },
+            {
+              "source": "proxy_and_services",
+              "target": "c3"
+            },
+            {
+              "source": "proxy_and_services",
+              "target": "c4"
+            },
+            {
+              "source": "proxy_and_services",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "window_services": {
+        "path": "src/helm/benchmark/window_services",
+        "components": [
+          "src.helm.benchmark.window_services.image_generation.test_clip_window_service.TestCLIPWindowService",
+          "src.helm.benchmark.window_services.image_generation.test_openai_dalle_window_service.TestOpenAIDALLEWindowService",
+          "src.helm.benchmark.window_services.test_anthropic_window_service.TestAnthropicWindowService",
+          "src.helm.benchmark.window_services.test_bloom_window_service.TestBloomWindowService",
+          "src.helm.benchmark.window_services.test_flan_t5_window_service.TestFlanT5WindowService",
+          "src.helm.benchmark.window_services.test_gpt2_window_service.TestGPT2WindowService",
+          "src.helm.benchmark.window_services.test_gpt4_window_service.TestOpenAIWindowService",
+          "src.helm.benchmark.window_services.test_gptj_window_service.TestGPTJWindowService",
+          "src.helm.benchmark.window_services.test_gptneox_window_service.TestGPTNeoXWindowService",
+          "src.helm.benchmark.window_services.test_openai_window_service.TestOpenAIWindowService",
+          "src.helm.benchmark.window_services.test_opt_window_service.TestOPTWindowService",
+          "src.helm.benchmark.window_services.test_palmyra_window_service.TestPalmyraWindowService",
+          "src.helm.benchmark.window_services.test_t0pp_window_service.TestT0ppWindowService",
+          "src.helm.benchmark.window_services.test_t511b_window_service.TestT511bWindowService",
+          "src.helm.benchmark.window_services.test_ul2_window_service.TestUL2WindowService",
+          "src.helm.benchmark.window_services.test_yalm_window_service.TestYaLMWindowService"
+        ],
+        "title": "Window Services",
+        "_title_auto_generated": true,
+        "description": "Provides 16 component(s) for window services operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "window_services",
+              "label": "Window Services",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "TestCLIPWindowService",
+              "type": "component"
+            },
+            {
+              "id": "c1",
+              "label": "TestOpenAIDALLEWindowService",
+              "type": "component"
+            },
+            {
+              "id": "c2",
+              "label": "TestAnthropicWindowService",
+              "type": "component"
+            },
+            {
+              "id": "c3",
+              "label": "TestBloomWindowService",
+              "type": "component"
+            },
+            {
+              "id": "c4",
+              "label": "TestFlanT5WindowService",
+              "type": "component"
+            },
+            {
+              "id": "more",
+              "label": "+11 more",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "window_services",
+              "target": "c0"
+            },
+            {
+              "source": "window_services",
+              "target": "c1"
+            },
+            {
+              "source": "window_services",
+              "target": "c2"
+            },
+            {
+              "source": "window_services",
+              "target": "c3"
+            },
+            {
+              "source": "window_services",
+              "target": "c4"
+            },
+            {
+              "source": "window_services",
+              "target": "more"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "common": {
+        "path": "src/helm/common",
+        "components": [
+          "src.helm.common.test_logging.test_run_with_custom_logging_config"
+        ],
+        "title": "Common",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for common operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "common",
+              "label": "Common",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "test_run_with_custom_logging_c",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "common",
+              "target": "c0"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "scripts": {
+        "path": "scripts/medhelm",
+        "components": [
+          "scripts.medhelm.redact_annotations.main"
+        ],
+        "title": "Scripts",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for scripts operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "scripts",
+              "label": "Scripts",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "main",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "scripts",
+              "target": "c0"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      },
+      "frontend": {
+        "path": "helm-frontend/src/routes",
+        "components": [
+          "helm-frontend.src.routes.Run.Run"
+        ],
+        "title": "Frontend",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for frontend operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "frontend",
+              "label": "Frontend",
+              "type": "module"
+            },
+            {
+              "id": "c0",
+              "label": "Run",
+              "type": "component"
+            }
+          ],
+          "edges": [
+            {
+              "source": "frontend",
+              "target": "c0"
+            }
+          ],
+          "groups": [],
+          "_auto_generated": true
+        }
+      }
+    },
+    "title": "Infrastructure and Utilities",
+    "description": "Provides core infrastructure services including tokenization, proxy services, window management, and common utilities that support the benchmark execution pipeline. Enables token counting, model communication, context window handling, and logging across the system.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "infrastructure_and_utilities",
+          "label": "Infrastructure and Utilities",
+          "type": "module"
+        },
+        {
+          "id": "tokenization",
+          "label": "Tokenize and Count Tokens",
+          "type": "module",
+          "link": "tokenization",
+          "title": "Tokenization layer",
+          "description": "Converts text into tokens and counts token usage for various language models. Supports multiple tokenizer backends including Anthropic and HuggingFace implementations."
+        },
+        {
+          "id": "proxy_services",
+          "label": "Route Requests and Manage Services",
+          "type": "module",
+          "link": "proxy_and_services",
+          "title": "Proxy and service layer",
+          "description": "Handles request routing, service orchestration, and remote communication. Provides server endpoints and manages interactions between clients and backend services."
+        },
+        {
+          "id": "window_services",
+          "label": "Manage Context Windows",
+          "type": "module",
+          "link": "window_services",
+          "title": "Window management",
+          "description": "Tracks and manages context window sizes for different models. Ensures prompts fit within model constraints and handles window-specific operations like CLIP for image generation."
+        },
+        {
+          "id": "token_counters",
+          "label": "Count and Estimate Tokens",
+          "type": "module",
+          "link": "proxy_and_services",
+          "title": "Token counting service",
+          "description": "Estimates token costs and counts tokens across different model families. Provides automatic token counter selection based on model type."
+        },
+        {
+          "id": "common_utilities",
+          "label": "Provide Logging and Utilities",
+          "type": "module",
+          "link": "common",
+          "title": "Common utilities",
+          "description": "Supplies shared infrastructure including logging configuration, error handling, and utility functions used throughout the system."
+        },
+        {
+          "id": "frontend",
+          "label": "Render Web Interface",
+          "type": "module",
+          "link": "frontend",
+          "title": "Frontend interface",
+          "description": "Provides web-based user interface for viewing and interacting with benchmark results and run information."
+        },
+        {
+          "id": "proxy_and_services",
+          "label": "Proxy And Services",
+          "type": "module",
+          "link": "proxy_and_services"
+        },
+        {
+          "id": "common",
+          "label": "Common",
+          "type": "module",
+          "link": "common"
+        },
+        {
+          "id": "scripts",
+          "label": "Scripts",
+          "type": "module",
+          "link": "scripts"
+        }
+      ],
+      "edges": [
+        {
+          "source": "tokenization",
+          "target": "token_counters",
+          "label": "token counts",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "token_counters",
+          "target": "proxy_services",
+          "label": "cost estimates",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "window_services",
+          "target": "proxy_services",
+          "label": "context constraints",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "common_utilities",
+          "target": "tokenization",
+          "label": "logging config",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "common_utilities",
+          "target": "proxy_services",
+          "label": "logging config",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "proxy_services",
+          "target": "frontend",
+          "label": "API responses",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "infrastructure_and_utilities",
+          "target": "proxy_and_services"
+        },
+        {
+          "source": "infrastructure_and_utilities",
+          "target": "common"
+        },
+        {
+          "source": "infrastructure_and_utilities",
+          "target": "scripts"
+        }
+      ],
+      "groups": [
+        {
+          "id": "token_management",
+          "label": "Token Management",
+          "nodes": [
+            "tokenization",
+            "token_counters"
+          ],
+          "title": "Token handling",
+          "description": "Tokenization and token counting services that measure and manage token usage across models.",
+          "role": null
+        },
+        {
+          "id": "service_layer",
+          "label": "Service Layer",
+          "nodes": [
+            "proxy_services",
+            "window_services"
+          ],
+          "title": "Core services",
+          "description": "Proxy and window services that route requests and manage model-specific constraints.",
+          "role": null
+        },
+        {
+          "id": "support_layer",
+          "label": "Support Layer",
+          "nodes": [
+            "common_utilities",
+            "frontend"
+          ],
+          "title": "Supporting infrastructure",
+          "description": "Common utilities and frontend that provide logging, configuration, and user interface.",
+          "role": null
+        }
+      ]
+    }
+  }
+}

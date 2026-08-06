@@ -1,0 +1,70 @@
+{
+  "title": "Core Module Primitives",
+  "summary": "This module defines the foundational classes for building DSPy programs, including the base module for parameter management and the core module for program logic and execution.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_module",
+        "label": "BaseModule",
+        "type": "component",
+        "link": null,
+        "title": "BaseModule Class",
+        "description": "Provides core functionalities for DSPy modules, including parameter management, deep copying, state serialization, and dependency versioning. It serves as the foundation for all DSPy modules."
+      },
+      {
+        "id": "module",
+        "label": "Module",
+        "type": "component",
+        "link": null,
+        "title": "Module Class",
+        "description": "The primary building block for DSPy programs. It extends BaseModule, adding capabilities for program logic (forward method), LM interaction, callback handling, and parallel execution."
+      },
+      {
+        "id": "program_execution_and_primitives",
+        "label": "Program Execution & Primitives",
+        "type": "external",
+        "link": null,
+        "title": "Program Execution and Primitives",
+        "description": "The parent module encompassing core DSPy primitives and program execution logic."
+      },
+      {
+        "id": "data_types_and_interfaces",
+        "label": "Data Types and Interfaces",
+        "type": "module",
+        "link": "data_types_and_interfaces",
+        "title": "Data Types and Interfaces",
+        "description": "Defines the fundamental data structures and interfaces used across DSPy, including LM requests, system roles, and streaming events."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_module",
+        "target": "module",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module",
+        "target": "data_types_and_interfaces",
+        "label": "uses types from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "base_module",
+          "module"
+        ],
+        "title": "Core Abstractions",
+        "description": "Fundamental classes that define the structure and behavior of DSPy programs and their components.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

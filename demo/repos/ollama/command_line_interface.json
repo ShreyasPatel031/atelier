@@ -1,0 +1,127 @@
+{
+    "title": "Command Line Interface",
+    "summary": "This module provides the main entry points for interacting with the application via the command line, enabling users to run models, manage integrations, and configure settings.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "runner_entrypoint",
+                "label": "Runner Entrypoint",
+                "type": "module",
+                "link": "runner_entrypoint",
+                "title": "Runner Entrypoint",
+                "description": "The main entry point for the command-line runner, handling argument parsing and execution of core logic."
+            },
+            {
+                "id": "cli_commands",
+                "label": "CLI Commands",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "CLI Commands",
+                "description": "Defines and implements various command-line interface commands for model interaction and management."
+            },
+            {
+                "id": "integration_launchers",
+                "label": "Integration Launchers",
+                "type": "module",
+                "link": "integration_launchers",
+                "title": "Integration Launchers",
+                "description": "Orchestrates the launch, configuration, and management of external integrations."
+            },
+            {
+                "id": "configuration_management",
+                "label": "Configuration Management",
+                "type": "module",
+                "link": "configuration_management",
+                "title": "Configuration Management",
+                "description": "Handles the storage, retrieval, and migration of application configurations."
+            },
+            {
+                "id": "model_serving_api",
+                "label": "Model Serving API",
+                "type": "module",
+                "link": "api_endpoints",
+                "title": "Model Serving API",
+                "description": "Provides API endpoints for model operations like generation, embedding, and management."
+            }
+        ],
+        "edges": [
+            {
+                "source": "runner_entrypoint",
+                "target": "cli_commands",
+                "label": "invokes commands",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_commands",
+                "target": "integration_launchers",
+                "label": "requests integration launch",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_commands",
+                "target": "model_serving_api",
+                "label": "sends model requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_commands",
+                "target": "configuration_management",
+                "label": "accesses/modifies config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integration_launchers",
+                "target": "configuration_management",
+                "label": "reads/writes integration config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integration_launchers",
+                "target": "model_serving_api",
+                "label": "requests model info/pull",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "cli_core",
+                "label": "CLI Core",
+                "nodes": [
+                    "runner_entrypoint",
+                    "cli_commands"
+                ],
+                "title": "CLI Core",
+                "description": "The central components responsible for processing command-line input and executing corresponding application logic.",
+                "role": "surface"
+            },
+            {
+                "id": "integration_and_config",
+                "label": "Integration & Configuration",
+                "nodes": [
+                    "integration_launchers",
+                    "configuration_management"
+                ],
+                "title": "Integration and Configuration Management",
+                "description": "Modules handling the setup, launch, and persistent storage of external integrations and application settings.",
+                "role": "analytical"
+            },
+            {
+                "id": "backend_services",
+                "label": "Backend Services",
+                "nodes": [
+                    "model_serving_api"
+                ],
+                "title": "Backend Services",
+                "description": "The API layer that provides core model serving and management functionalities to the CLI and other clients.",
+                "role": "data"
+            }
+        ]
+    }
+}

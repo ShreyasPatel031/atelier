@@ -1,0 +1,110 @@
+{
+  "title": "D&D Playground Endpoints",
+  "summary": "This module provides API endpoints for interacting with the D&D Playground, enabling streaming responses for gameplay and retrieving metadata about available presets and configurations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "dnd_playground_stream",
+        "label": "D&D Playground Stream",
+        "type": "component",
+        "link": null,
+        "title": "D&D Playground Stream Endpoint",
+        "description": "Handles streaming requests for the D&D Playground, providing real-time event updates to clients."
+      },
+      {
+        "id": "dnd_playground_meta",
+        "label": "D&D Playground Metadata",
+        "type": "component",
+        "link": null,
+        "title": "D&D Playground Metadata Endpoint",
+        "description": "Retrieves metadata for the D&D Playground, including default questions, alignments, and configuration paths."
+      },
+      {
+        "id": "load_playground_bundle",
+        "label": "Load Playground Bundle",
+        "type": "component",
+        "link": null,
+        "title": "Load D&D Playground Bundle",
+        "description": "Loads the D&D Playground configuration bundle, including presets and questions, from the file system."
+      },
+      {
+        "id": "streaming_response",
+        "label": "Streaming Response",
+        "type": "external",
+        "link": null,
+        "title": "FastAPI Streaming Response",
+        "description": "Utilizes FastAPI's StreamingResponse to send server-sent events (SSE) to the client."
+      },
+      {
+        "id": "http_exception",
+        "label": "HTTP Exception Handling",
+        "type": "external",
+        "link": null,
+        "title": "FastAPI HTTP Exception",
+        "description": "Handles and raises HTTP exceptions for error conditions, such as file not found errors."
+      },
+      {
+        "id": "dnd_playground_logic",
+        "label": "D&D Playground Core Logic",
+        "type": "module",
+        "link": "grid_generation_and_dnd",
+        "title": "D&D Playground Core Logic",
+        "description": "Encapsulates the core logic for D&D playground interactions, including grid generation and alpha calculations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dnd_playground_stream",
+        "target": "streaming_response",
+        "label": "sends SSE",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_meta",
+        "target": "load_playground_bundle",
+        "label": "calls to load data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_playground_bundle",
+        "target": "http_exception",
+        "label": "raises on error",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_meta",
+        "target": "dnd_playground_logic",
+        "label": "uses config from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_interface",
+        "label": "API Interface",
+        "nodes": [
+          "dnd_playground_stream",
+          "dnd_playground_meta"
+        ],
+        "title": "API Endpoints for D&D Playground",
+        "description": "User-facing endpoints for interacting with the D&D Playground functionality.",
+        "role": "surface"
+      },
+      {
+        "id": "data_access",
+        "label": "Data Access & Configuration",
+        "nodes": [
+          "load_playground_bundle"
+        ],
+        "title": "Data Loading and Configuration Management",
+        "description": "Components responsible for loading and managing D&D Playground configuration data.",
+        "role": "data"
+      }
+    ]
+  }
+}

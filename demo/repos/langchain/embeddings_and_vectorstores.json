@@ -1,0 +1,173 @@
+{
+  "title": "Embeddings and Vectorstores",
+  "summary": "This module provides functionalities for generating text embeddings and storing them in vector databases. It includes tools for creating, managing, and querying vector stores, as well as caching embedding results.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "init_embeddings",
+        "label": "Initialize Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Embeddings",
+        "description": "Dynamically initializes an embedding model from a given model name and optional provider, supporting various external embedding services."
+      },
+      {
+        "id": "cache_backed_embeddings",
+        "label": "Cache Backed Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Cache Backed Embeddings",
+        "description": "Provides an interface for caching embedding results from underlying embedding models, improving performance by reducing redundant computations."
+      },
+      {
+        "id": "vectorstore_index_creator",
+        "label": "Vectorstore Index Creator",
+        "type": "component",
+        "link": null,
+        "title": "Vectorstore Index Creator",
+        "description": "Facilitates the creation of vector store indexes from documents or loaders, handling text splitting and embedding generation."
+      },
+      {
+        "id": "qdrant_vector_store",
+        "label": "Qdrant Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Store",
+        "description": "Integrates with Qdrant, a vector similarity search engine, allowing for efficient storage, retrieval, and management of vector embeddings."
+      },
+      {
+        "id": "fireworks_embeddings",
+        "label": "Fireworks Embeddings",
+        "type": "external",
+        "link": null,
+        "title": "Fireworks Embeddings",
+        "description": "Provides an integration for generating embeddings using Fireworks AI models."
+      },
+      {
+        "id": "text_splitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": null,
+        "title": "Text Splitter",
+        "description": "A utility for splitting large texts into smaller, manageable chunks suitable for embedding."
+      },
+      {
+        "id": "base_loader",
+        "label": "Base Loader",
+        "type": "external",
+        "link": null,
+        "title": "Base Loader",
+        "description": "An abstract base class for loading documents from various sources."
+      },
+      {
+        "id": "byte_store",
+        "label": "Byte Store",
+        "type": "external",
+        "link": null,
+        "title": "Byte Store",
+        "description": "An interface for storing and retrieving byte sequences, used for caching serialized embeddings."
+      },
+      {
+        "id": "qdrant_client",
+        "label": "Qdrant Client",
+        "type": "external",
+        "link": null,
+        "title": "Qdrant Client",
+        "description": "The client library for interacting with the Qdrant vector database."
+      }
+    ],
+    "edges": [
+      {
+        "source": "init_embeddings",
+        "target": "cache_backed_embeddings",
+        "label": "underlying embedder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embeddings",
+        "target": "fireworks_embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_backed_embeddings",
+        "target": "byte_store",
+        "label": "stores embeddings in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "init_embeddings",
+        "label": "uses embeddings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "text_splitter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "base_loader",
+        "label": "loads documents from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_vector_store",
+        "target": "init_embeddings",
+        "label": "uses embeddings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_vector_store",
+        "target": "qdrant_client",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "embedding_creation",
+        "label": "Embedding Creation",
+        "nodes": [
+          "init_embeddings",
+          "fireworks_embeddings"
+        ],
+        "title": "Embedding Creation",
+        "description": "Components responsible for generating vector embeddings from text.",
+        "role": "generative"
+      },
+      {
+        "id": "vector_storage_and_indexing",
+        "label": "Vector Storage and Indexing",
+        "nodes": [
+          "vectorstore_index_creator",
+          "qdrant_vector_store"
+        ],
+        "title": "Vector Storage and Indexing",
+        "description": "Components for storing, indexing, and managing vector embeddings in databases.",
+        "role": "data"
+      },
+      {
+        "id": "caching_and_optimization",
+        "label": "Caching and Optimization",
+        "nodes": [
+          "cache_backed_embeddings"
+        ],
+        "title": "Caching and Optimization",
+        "description": "Components focused on improving performance through caching of embedding results.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

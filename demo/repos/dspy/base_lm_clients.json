@@ -1,0 +1,159 @@
+{
+  "title": "Base Language Model Clients",
+  "summary": "This module defines the foundational `BaseLM` class for all DSPy language models, along with concrete implementations for local and cloud-based (Databricks, OpenAI) LM providers, including support for finetuning and deployment.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_lm",
+        "label": "BaseLM",
+        "type": "module",
+        "link": "base_lm_clients",
+        "title": "BaseLM Class",
+        "description": "The abstract base class for all DSPy language models, defining the core interface for interacting with LMs, including synchronous and asynchronous calls, history tracking, and state management."
+      },
+      {
+        "id": "local_provider",
+        "label": "LocalProvider",
+        "type": "component",
+        "link": null,
+        "title": "Local Model Provider",
+        "description": "Manages the launching, finetuning, and killing of local language models, typically using SGLang for server management."
+      },
+      {
+        "id": "tokenize_function",
+        "label": "tokenize_function",
+        "type": "component",
+        "link": null,
+        "title": "Tokenization Utility",
+        "description": "A utility function used by LocalProvider for tokenizing data during local finetuning processes."
+      },
+      {
+        "id": "databricks_provider",
+        "label": "DatabricksProvider",
+        "type": "component",
+        "link": null,
+        "title": "Databricks Model Provider",
+        "description": "Handles finetuning and deployment of models on the Databricks platform, including managing serving endpoints and data uploads to Unity Catalog."
+      },
+      {
+        "id": "databricks_training_job",
+        "label": "TrainingJobDatabricks",
+        "type": "component",
+        "link": null,
+        "title": "Databricks Training Job",
+        "description": "Represents a finetuning job on Databricks, tracking its status and deployment details."
+      },
+      {
+        "id": "openai_training_job",
+        "label": "TrainingJobOpenAI",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Training Job",
+        "description": "Manages finetuning jobs with OpenAI, providing methods to cancel jobs and track their status."
+      },
+      {
+        "id": "lm_api_interaction",
+        "label": "LM API Interaction",
+        "type": "module",
+        "link": "lm_api_interaction",
+        "title": "LM API Interaction Module",
+        "description": "Handles the actual communication with various language model APIs, including LiteLLM for completions and streaming."
+      },
+      {
+        "id": "caching_and_utilities",
+        "label": "Caching and Utilities",
+        "type": "module",
+        "link": "caching_and_utilities",
+        "title": "Caching and Utilities Module",
+        "description": "Provides caching mechanisms and other utility functions for language model interactions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_lm",
+        "target": "lm_api_interaction",
+        "label": "uses for API calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "caching_and_utilities",
+        "label": "uses for caching",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "base_lm",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenize_function",
+        "target": "local_provider",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_provider",
+        "target": "base_lm",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_training_job",
+        "target": "databricks_provider",
+        "label": "managed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_training_job",
+        "target": "base_lm",
+        "label": "managed by",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_lm_interface",
+        "label": "Core LM Interface",
+        "nodes": [
+          "base_lm"
+        ],
+        "title": "Core Language Model Interface",
+        "description": "Defines the fundamental interface and behavior for all language models within DSPy.",
+        "role": "analytical"
+      },
+      {
+        "id": "local_lm_management",
+        "label": "Local LM Management",
+        "nodes": [
+          "local_provider",
+          "tokenize_function"
+        ],
+        "title": "Local Language Model Management",
+        "description": "Components responsible for launching, finetuning, and managing language models running locally.",
+        "role": "generative"
+      },
+      {
+        "id": "cloud_lm_providers",
+        "label": "Cloud LM Providers",
+        "nodes": [
+          "databricks_provider",
+          "databricks_training_job",
+          "openai_training_job"
+        ],
+        "title": "Cloud Language Model Providers",
+        "description": "Implementations for interacting with and managing language models hosted on cloud platforms like Databricks and OpenAI.",
+        "role": "generative"
+      }
+    ]
+  }
+}

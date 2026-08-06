@@ -1,0 +1,183 @@
+{
+  "title": "RAG System",
+  "summary": "The RAG System module provides tools and configurations for Retrieval-Augmented Generation (RAG), enabling integration with various vector databases like ChromaDB and Qdrant for efficient document retrieval and embedding.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "rag_module_wrapper",
+        "label": "RAG Module Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "RAG Module Wrapper",
+        "description": "Intercepts attribute setting for RAG configuration, ensuring proper initialization and preventing unauthorized modifications."
+      },
+      {
+        "id": "rag_client_factory",
+        "label": "RAG Client Factory",
+        "type": "component",
+        "link": null,
+        "title": "RAG Client Factory",
+        "description": "Dynamically creates RAG client instances based on the provided configuration, supporting different vector database providers."
+      },
+      {
+        "id": "chromadb_config",
+        "label": "ChromaDB Configuration",
+        "type": "component",
+        "link": null,
+        "title": "ChromaDB Configuration",
+        "description": "Defines default settings for ChromaDB, including persistence directory and reset options, to ensure consistent behavior."
+      },
+      {
+        "id": "chromadb_client_creation",
+        "label": "ChromaDB Client Creation",
+        "type": "component",
+        "link": null,
+        "title": "ChromaDB Client Creation",
+        "description": "Handles the creation of a ChromaDB client instance, managing persistence and settings based on the provided configuration."
+      },
+      {
+        "id": "qdrant_config",
+        "label": "Qdrant Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Configuration",
+        "description": "Provides default options for Qdrant client parameters, primarily focusing on file-based storage for vector data."
+      },
+      {
+        "id": "qdrant_types",
+        "label": "Qdrant Types",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Types",
+        "description": "Defines Pydantic models for Qdrant-specific parameters, such as embedding function wrappers and collection creation parameters, ensuring type safety."
+      },
+      {
+        "id": "base_client_params",
+        "label": "Base Client Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Base Client Parameters",
+        "description": "Abstract base classes for defining parameters used in adding documents to and searching within RAG collections."
+      },
+      {
+        "id": "embedding_function",
+        "label": "Embedding Function Protocol",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Function Protocol",
+        "description": "Defines a protocol for functions that convert input data into vector embeddings, including validation and normalization of outputs."
+      },
+      {
+        "id": "tool_adapters",
+        "label": "Tool Adapters",
+        "type": "module",
+        "link": "tool_adapters",
+        "title": "Tool Adapters",
+        "description": "Provides interfaces for integrating various external tools and services, including RAG systems, into the CrewAI framework."
+      }
+    ],
+    "edges": [
+      {
+        "source": "rag_module_wrapper",
+        "target": "rag_client_factory",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_client_factory",
+        "target": "chromadb_client_creation",
+        "label": "uses config for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_client_factory",
+        "target": "chromadb_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_client_factory",
+        "target": "qdrant_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_client_factory",
+        "target": "qdrant_types",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chromadb_client_creation",
+        "target": "base_client_params",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chromadb_client_creation",
+        "target": "embedding_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_types",
+        "target": "embedding_function",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_adapters",
+        "target": "rag_client_factory",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "rag_core",
+        "label": "RAG Core",
+        "nodes": [
+          "rag_module_wrapper",
+          "rag_client_factory",
+          "base_client_params",
+          "embedding_function"
+        ],
+        "title": "RAG Core Logic",
+        "description": "Central components for managing RAG configurations, client creation, and embedding functions.",
+        "role": "analytical"
+      },
+      {
+        "id": "chromadb_integration",
+        "label": "ChromaDB Integration",
+        "nodes": [
+          "chromadb_config",
+          "chromadb_client_creation"
+        ],
+        "title": "ChromaDB Integration",
+        "description": "Components specific to configuring and interacting with ChromaDB as a vector store.",
+        "role": "data"
+      },
+      {
+        "id": "qdrant_integration",
+        "label": "Qdrant Integration",
+        "nodes": [
+          "qdrant_config",
+          "qdrant_types"
+        ],
+        "title": "Qdrant Integration",
+        "description": "Components specific to configuring and interacting with Qdrant as a vector store.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+    "title": "Model Conversion",
+    "summary": "This module provides functions to convert various machine learning models from their original frameworks and formats into the Hugging Face Transformers library structure. It handles weight mapping, configuration adjustments, and verification steps.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "conversion_utilities",
+                "label": "Conversion Utilities",
+                "type": "module",
+                "link": "conversion_utilities",
+                "title": "Core Conversion Utilities",
+                "description": "Provides helper functions to extract and manage weight conversion mappings for models."
+            },
+            {
+                "id": "vision_converters",
+                "label": "Vision Model Converters",
+                "type": "module",
+                "link": "vision_model_converters",
+                "title": "Convert Vision Models",
+                "description": "Handles the conversion process for various computer vision models, adapting their weights and configurations to the Hugging Face format."
+            },
+            {
+                "id": "text_converters",
+                "label": "Text Model Converters",
+                "type": "module",
+                "link": "text_model_converters",
+                "title": "Convert Text Models",
+                "description": "Manages the conversion of natural language processing models, including their tokenizer and model weights, to be compatible with Transformers."
+            },
+            {
+                "id": "audio_converters",
+                "label": "Audio Model Converters",
+                "type": "module",
+                "link": "audio_model_converters",
+                "title": "Convert Audio Models",
+                "description": "Facilitates the conversion of speech and audio processing models, including their feature extractors and weights, for use in the Hugging Face ecosystem."
+            },
+            {
+                "id": "multimodal_converters",
+                "label": "Multimodal Model Converters",
+                "type": "module",
+                "link": "multimodal_model_converters",
+                "title": "Convert Multimodal Models",
+                "description": "Manages the conversion of models that integrate multiple modalities (e.g., vision-language), ensuring their components are correctly adapted."
+            }
+        ],
+        "edges": [
+            {"source": "conversion_utilities", "target": "vision_converters", "label": "uses mappings"},
+            {"source": "conversion_utilities", "target": "text_converters", "label": "uses mappings"},
+            {"source": "conversion_utilities", "target": "audio_converters", "label": "uses mappings"},
+            {"source": "conversion_utilities", "target": "multimodal_converters", "label": "uses mappings"}
+        ],
+        "groups": [
+            {
+                "id": "core_conversion_logic",
+                "label": "Core Logic",
+                "title": "Core Conversion Logic",
+                "description": "Central utilities for extracting and applying model-specific conversion rules.",
+                "role": "analytical",
+                "nodes": ["conversion_utilities"]
+            },
+            {
+                "id": "model_specific_converters",
+                "label": "Model Converters",
+                "title": "Model-Specific Converters",
+                "description": "Collection of specialized functions for converting different types of models (vision, text, audio, multimodal) into the Hugging Face format.",
+                "role": "generative",
+                "nodes": ["vision_converters", "text_converters", "audio_converters", "multimodal_converters"]
+            }
+        ]
+    }
+}

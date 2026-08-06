@@ -291,6 +291,39 @@ def _is_gemini_model(model_name: str) -> bool:
     return 'gemini' in model_name.lower()
 
 
+def _is_claude_model(model_name: str) -> bool:
+    """Check if model name indicates Anthropic Claude."""
+    return "claude" in (model_name or "").lower()
+
+
+def _use_claude_provider(config: Config) -> bool:
+    """
+    True when documentation should call Anthropic Claude.
+
+    Selected via CODEWIKI_LLM_PROVIDER=claude, config.llm_provider=claude,
+    or a Claude model name. Gemini Vertex ADC remains available when provider=gemini.
+    """
+    env = (os.getenv("CODEWIKI_LLM_PROVIDER") or "").strip().lower()
+    if env in ("claude", "anthropic"):
+        return True
+    if env in ("gemini", "google", "vertex"):
+        return False
+    provider = (getattr(config, "llm_provider", None) or "").strip().lower()
+    if provider in ("claude", "anthropic"):
+        return True
+    if provider in ("gemini", "google", "vertex"):
+        return False
+    return _is_claude_model(getattr(config, "main_model", "") or "")
+
+
+def _resolve_anthropic_api_key(config: Config) -> str:
+    """Prefer ANTHROPIC_API_KEY env, then config.anthropic_api_key."""
+    env_key = (os.getenv("ANTHROPIC_API_KEY") or "").strip()
+    if env_key:
+        return env_key
+    return (getattr(config, "anthropic_api_key", None) or "").strip()
+
+
 def _resolve_gemini_api_key(config: Config) -> str:
     """Prefer GEMINI_API_KEY env; do not overwrite it with LLM_API_KEY defaults (e.g. sk-1234)."""
     env_key = (os.getenv("GEMINI_API_KEY") or "").strip()
@@ -300,10 +333,18 @@ def _resolve_gemini_api_key(config: Config) -> str:
 
 
 def _use_adc_mode(config: Config) -> bool:
-    """Return True when Vertex AI + ADC should be used instead of a static API key."""
+    """Return True when Vertex AI + ADC should be used instead of a static API key.
+
+    If ``use_vertex_ai`` is enabled (or GOOGLE_USE_ADC=1), stay on Vertex+ADC.
+    Do not bypass a missing ADC by flipping use_vertex_ai=False or injecting
+    GEMINI_API_KEY — that hits free-tier Gemini 429s and masks ADC setup bugs.
+    Fix credentials: ``gcloud auth application-default login``.
+    """
+    if bool(getattr(config, "use_vertex_ai", False)):
+        return True
     if os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes"):
         return True
-    return bool(getattr(config, "use_vertex_ai", False))
+    return False
 
 
 def _get_adc_credentials():
@@ -335,6 +376,23 @@ def _get_adc_bearer_token(config: Config) -> str:
 
 def create_main_model(config: Config) -> Model:
     """Create the main LLM model from configuration."""
+
+    if _use_claude_provider(config) or _is_claude_model(config.main_model):
+        try:
+            from pydantic_ai.models.anthropic import AnthropicModel
+        except ImportError as e:
+            raise RuntimeError(
+                "Claude provider requires pydantic-ai Anthropic support. "
+                "Install with: pip install 'pydantic-ai[anthropic]'"
+            ) from e
+        key = _resolve_anthropic_api_key(config)
+        if not key:
+            raise RuntimeError(
+                "Claude provider selected but ANTHROPIC_API_KEY / anthropic_api_key is missing."
+            )
+        os.environ["ANTHROPIC_API_KEY"] = key
+        logger.info(f"[LLM] Using Anthropic Claude for {config.main_model}")
+        return AnthropicModel(model_name=config.main_model)
     
     # Native Gemini support - use CodeWikiGoogleModel (VALIDATED tool config) when available
     if _is_gemini_model(config.main_model) and GEMINI_AVAILABLE:
@@ -375,6 +433,22 @@ def create_main_model(config: Config) -> Model:
 
 def create_fallback_model(config: Config) -> Model:
     """Create the fallback LLM model from configuration."""
+
+    if _use_claude_provider(config) or _is_claude_model(config.fallback_model):
+        try:
+            from pydantic_ai.models.anthropic import AnthropicModel
+        except ImportError as e:
+            raise RuntimeError(
+                "Claude provider requires pydantic-ai Anthropic support."
+            ) from e
+        key = _resolve_anthropic_api_key(config)
+        if not key:
+            raise RuntimeError(
+                "Claude provider selected but ANTHROPIC_API_KEY / anthropic_api_key is missing."
+            )
+        os.environ["ANTHROPIC_API_KEY"] = key
+        logger.info(f"[LLM] Fallback Anthropic Claude for {config.fallback_model}")
+        return AnthropicModel(model_name=config.fallback_model)
     
     # Native Gemini support
     if _is_gemini_model(config.fallback_model) and GEMINI_AVAILABLE:
@@ -462,7 +536,7 @@ def _call_gemini_rest(
         prompt_tokens_estimated += count_tokens(system_instruction)
 
     gen_config: dict = {"temperature": temperature, "maxOutputTokens": 65536}
-    if thinking_budget and thinking_budget > 0:
+    if thinking_budget is not None:
         gen_config["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     if json_mode:
         gen_config["responseMimeType"] = "application/json"
@@ -710,6 +784,130 @@ def _call_gemini_native(
         raise
 
 
+def _call_anthropic_rest(
+    prompt: str,
+    config: Config,
+    model: str,
+    temperature: float,
+    system_instruction: Optional[str] = None,
+    json_mode: bool = False,
+) -> str:
+    """Call Anthropic Messages API (Claude)."""
+    import random
+    import requests
+    from codewiki.src.be.utils import count_tokens
+
+    api_key = _resolve_anthropic_api_key(config)
+    if not api_key:
+        raise RuntimeError(
+            "Claude provider selected but ANTHROPIC_API_KEY / anthropic_api_key is missing."
+        )
+
+    tracker = get_token_tracker()
+    prompt_tokens_estimated = count_tokens(prompt)
+    if system_instruction:
+        prompt_tokens_estimated += count_tokens(system_instruction)
+
+    # Haiku 4.5 supports large outputs; clustering needs >>8k or GROUPED_COMPONENTS truncates.
+    from codewiki.src.config import MODEL_OUTPUT_LIMITS, DEFAULT_OUTPUT_LIMIT
+    max_tokens = int(MODEL_OUTPUT_LIMITS.get(model, DEFAULT_OUTPUT_LIMIT) or DEFAULT_OUTPUT_LIMIT)
+    max_tokens = max(max_tokens, 16384)
+    # Anthropic hard ceiling for most Claude models
+    max_tokens = min(max_tokens, 64000)
+    body: dict = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    if system_instruction:
+        sys_text = system_instruction
+        if json_mode:
+            sys_text = (
+                f"{sys_text.rstrip()}\n\nRespond with valid JSON only (no markdown fences)."
+            )
+        body["system"] = sys_text
+    elif json_mode:
+        body["system"] = "Respond with valid JSON only (no markdown fences)."
+
+    url = "https://api.anthropic.com/v1/messages"
+    headers = {
+        "content-type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "x-api-key": api_key,
+    }
+
+    max_retries = 3
+    llm_start = time.time()
+    data = {}
+    for _retry in range(max_retries + 1):
+        try:
+            r = requests.post(url, json=body, headers=headers, timeout=600)
+        except requests.exceptions.ConnectionError as ce:
+            if _retry < max_retries:
+                delay = (2 ** _retry) + random.uniform(0, 1)
+                logger.warning(
+                    f"[LLM] Anthropic connection error, retry {_retry+1}/{max_retries} in {delay:.1f}s: {ce}"
+                )
+                time.sleep(delay)
+                continue
+            raise
+
+        llm_duration = time.time() - llm_start
+        try:
+            data = r.json()
+        except Exception:
+            data = {"error": {"message": r.text[:500]}}
+        if r.status_code != 200:
+            err = (data.get("error") or {}).get("message") or r.text
+            is_retryable = r.status_code in (429, 500, 502, 503, 529)
+            if is_retryable and _retry < max_retries:
+                delay = (2 ** _retry) + random.uniform(0, 1)
+                logger.warning(
+                    f"[LLM] Anthropic {r.status_code}, retry {_retry+1}/{max_retries} in {delay:.1f}s: {str(err)[:100]}"
+                )
+                time.sleep(delay)
+                llm_start = time.time()
+                continue
+            logger.error(f"[LLM] Anthropic error {r.status_code}: {err}")
+            stats = LLMCallStats(
+                model=model,
+                prompt_tokens=prompt_tokens_estimated,
+                completion_tokens=0,
+                duration_seconds=llm_duration,
+                success=False,
+                error=str(err)[:200],
+            )
+            tracker.add_call(stats)
+            raise RuntimeError(f"Anthropic error {r.status_code}: {err}")
+        break
+
+    parts = data.get("content") or []
+    response_text = "".join(
+        p.get("text", "") for p in parts if isinstance(p, dict) and p.get("type") == "text"
+    )
+    if not response_text.strip():
+        raise RuntimeError(f"Anthropic: empty response: {data}")
+
+    usage = data.get("usage") or {}
+    actual_prompt = usage.get("input_tokens", prompt_tokens_estimated)
+    actual_completion = usage.get("output_tokens", count_tokens(response_text))
+    stats = LLMCallStats(
+        model=model,
+        prompt_tokens=actual_prompt,
+        completion_tokens=actual_completion,
+        duration_seconds=time.time() - llm_start,
+        success=True,
+    )
+    tracker.add_call(stats)
+    _append_call_to_metrics(stats)
+    logger.info(
+        f"[LLM] Anthropic done in {stats.duration_seconds:.1f}s "
+        f"(in={actual_prompt}, out={actual_completion})"
+    )
+    return response_text
+
+
 def call_llm(
     prompt: str,
     config: Config,
@@ -739,18 +937,25 @@ def call_llm(
     
     if model is None:
         model = config.main_model
+
+    # Claude / Anthropic (selectable alongside Gemini Vertex ADC via llm_provider)
+    if _use_claude_provider(config) or _is_claude_model(model):
+        return _call_anthropic_rest(
+            prompt,
+            config,
+            model,
+            temperature,
+            system_instruction=system_prompt,
+            json_mode=json_mode,
+        )
     
-    # Use native Gemini if available
+    # Use Gemini REST API for all Gemini calls (gives explicit thinking control)
     if _is_gemini_model(model) and GENAI_AVAILABLE:
-        if json_mode or thinking_budget is not None:
-            return _call_gemini_rest(
-                prompt, config, model, temperature,
-                thinking_budget if thinking_budget is not None else 0,
-                system_instruction=system_prompt,
-                json_mode=json_mode,
-            )
-        return _call_gemini_native(
-            prompt, config, model, temperature, system_instruction=system_prompt
+        return _call_gemini_rest(
+            prompt, config, model, temperature,
+            thinking_budget if thinking_budget is not None else 0,
+            system_instruction=system_prompt,
+            json_mode=json_mode,
         )
 
     # Calculate prompt token count

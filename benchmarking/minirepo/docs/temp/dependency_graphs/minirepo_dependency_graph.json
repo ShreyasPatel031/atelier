@@ -365,8 +365,8 @@
     "file_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo/processing/pipeline.py",
     "relative_path": "processing/pipeline.py",
     "depends_on": [
-      "core.models.PipelineResult",
-      "processing.pipeline.PipelineStage"
+      "processing.pipeline.PipelineStage",
+      "core.models.PipelineResult"
     ],
     "source_code": "class Pipeline:\n    def __init__(self, config: Config, stages: Optional[List[PipelineStage]] = None):\n        self.config = config\n        self.stages = stages or [\n            PipelineStage(\"normalize\", normalize),\n            PipelineStage(\"mark_done\", mark_done),\n        ]\n\n    def run(self, records: List[Record]) -> PipelineResult:\n        start = time.time()\n        processed = 0\n        failed = 0\n        errors: List[str] = []\n\n        for record in records:\n            try:\n                for stage in self.stages:\n                    if stage.enabled:\n                        record = stage.handler(record)\n                processed += 1\n            except Exception as exc:\n                failed += 1\n                record.status = Status.FAILED\n                errors.append(f\"{record.id}: {exc}\")\n                logger.error(\"Record %s failed: %s\", record.id, exc)\n\n        duration = time.time() - start\n        return PipelineResult(\n            success=failed == 0,\n            records_processed=processed,\n            records_failed=failed,\n            duration_seconds=duration,\n            errors=errors,\n        )\n\n    def run_batch(self, batch: Batch) -> PipelineResult:\n        return self.run(batch.records)",
     "start_line": 22,
@@ -494,8 +494,8 @@
     "file_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo/run_core.py",
     "relative_path": "run_core.py",
     "depends_on": [
-      "core.models.Record",
-      "core.models.Batch"
+      "core.models.Batch",
+      "core.models.Record"
     ],
     "source_code": "def run_core() -> int:\n    cfg = Config.from_env()\n    errors = cfg.validate()\n    if errors:\n        return 1\n    batch = Batch(batch_id=\"core-demo\")\n    batch.add(Record(id=\"c1\", payload={\"source\": \"run_core\"}))\n    return 0",
     "start_line": 7,
@@ -518,8 +518,8 @@
     "depends_on": [
       "io.writers.JsonWriter",
       "io.readers.JsonReader",
-      "io.readers.CsvReader",
-      "io.writers.CsvWriter"
+      "io.writers.CsvWriter",
+      "io.readers.CsvReader"
     ],
     "source_code": "def run_io() -> int:\n    with tempfile.TemporaryDirectory() as tmp:\n        base = Path(tmp)\n        jpath = base / \"out.json\"\n        JsonWriter(jpath).write({\"ok\": True})\n        data = JsonReader(jpath).read()\n        cpath = base / \"out.csv\"\n        CsvWriter(cpath, [\"a\", \"b\"]).write_rows([{\"a\": \"1\", \"b\": \"2\"}])\n        rows = CsvReader(cpath).read_rows()\n        return 0 if data.get(\"ok\") and len(rows) == 1 else 1",
     "start_line": 10,
@@ -540,9 +540,9 @@
     "file_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo/run_metrics.py",
     "relative_path": "run_metrics.py",
     "depends_on": [
-      "utils.logging_utils.get_logger",
       "utils.metrics.MetricsCollector",
-      "utils.logging_utils.setup_logging"
+      "utils.logging_utils.setup_logging",
+      "utils.logging_utils.get_logger"
     ],
     "source_code": "def run_metrics() -> int:\n    setup_logging(\"INFO\", \"minipipe.metrics\")\n    log = get_logger(\"minipipe.metrics\")\n    m = MetricsCollector()\n    m.counter(\"events\").inc(3)\n    m.gauge(\"queue_depth\").set(7.5)\n    snap = m.snapshot()\n    log.info(\"metrics snapshot: %s\", snap)\n    return 0 if m.counters[\"events\"].value == 3 else 1",
     "start_line": 7,
@@ -563,9 +563,9 @@
     "file_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo/run_processing.py",
     "relative_path": "run_processing.py",
     "depends_on": [
-      "core.models.Record",
+      "processing.pipeline.Pipeline",
       "core.models.Batch",
-      "processing.pipeline.Pipeline"
+      "core.models.Record"
     ],
     "source_code": "def run_processing() -> int:\n    cfg = Config.from_env()\n    pipeline = Pipeline(cfg)\n    batch = Batch(batch_id=\"proc-demo\")\n    for i in range(5):\n        batch.add(Record(id=f\"p{i}\", payload={\"name\": f\"Item{i}\"}))\n    result = pipeline.run_batch(batch)\n    return 0 if result.success else 1",
     "start_line": 8,
@@ -667,8 +667,8 @@
     "file_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo/utils/metrics.py",
     "relative_path": "utils/metrics.py",
     "depends_on": [
-      "utils.metrics.Counter",
-      "utils.metrics.Gauge"
+      "utils.metrics.Gauge",
+      "utils.metrics.Counter"
     ],
     "source_code": "class MetricsCollector:\n    counters: Dict[str, Counter] = field(default_factory=dict)\n    gauges: Dict[str, Gauge] = field(default_factory=dict)\n    _start: float = field(default_factory=time.time)\n\n    def counter(self, name: str) -> Counter:\n        if name not in self.counters:\n            self.counters[name] = Counter(name)\n        return self.counters[name]\n\n    def gauge(self, name: str) -> Gauge:\n        if name not in self.gauges:\n            self.gauges[name] = Gauge(name)\n        return self.gauges[name]\n\n    def snapshot(self) -> Dict[str, object]:\n        return {\n            \"uptime_seconds\": time.time() - self._start,\n            \"counters\": {k: v.value for k, v in self.counters.items()},\n            \"gauges\": {k: v.value for k, v in self.gauges.items()},\n        }",
     "start_line": 27,

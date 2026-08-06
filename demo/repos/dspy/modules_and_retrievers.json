@@ -1,0 +1,143 @@
+{
+    "title": "Modules and Retrievers",
+    "summary": "This module encompasses the core prediction strategies and retrieval mechanisms within DSPy, enabling advanced language model interactions and efficient information fetching.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "prediction_modules",
+                "label": "Prediction Modules",
+                "type": "module",
+                "link": "prediction_modules",
+                "title": "Prediction Modules",
+                "description": "Provides various advanced prediction strategies and techniques, including aggregation methods, multi-turn reasoning agents (ReAct, Avatar, RLM), and program-of-thought execution, to enhance the reliability and performance of language model outputs."
+            },
+            {
+                "id": "retrieval_modules",
+                "label": "Retrieval Modules",
+                "type": "module",
+                "link": "retrieval_modules",
+                "title": "Retrieval Modules",
+                "description": "Provides various retrieval mechanisms, including local and remote ColBERTv2 implementations, Databricks Vector Search, and Weaviate, to fetch relevant passages for a given query."
+            },
+            {
+                "id": "signature_management",
+                "label": "Signature Management",
+                "type": "module",
+                "link": "signature_management",
+                "title": "Signature Management",
+                "description": "Defines and manages the structure of DSPy signatures, handling field definitions, type conversions, and metadata for language model interactions."
+            },
+            {
+                "id": "program_execution_and_primitives",
+                "label": "Program Execution & Primitives",
+                "type": "module",
+                "link": "program_execution_and_primitives",
+                "title": "Program Execution and Primitives",
+                "description": "Defines the foundational classes for building DSPy programs, including the base module for parameter management and the core module for program logic and execution."
+            },
+            {
+                "id": "language_model_integration",
+                "label": "Language Model Integration",
+                "type": "module",
+                "link": "language_model_integration",
+                "title": "Language Model Integration",
+                "description": "Manages interactions with various language models, including client configurations, API calls, and caching mechanisms."
+            },
+            {
+                "id": "tool_and_adapter_integration",
+                "label": "Tool and Adapter Integration",
+                "type": "module",
+                "link": "tool_and_adapter_integration",
+                "title": "Tool and Adapter Integration",
+                "description": "Provides mechanisms for integrating external tools and defining custom adapters to interface with Language Models (LMs)."
+            }
+        ],
+        "edges": [
+            {
+                "source": "prediction_modules",
+                "target": "signature_management",
+                "label": "uses signatures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "retrieval_modules",
+                "label": "uses retrieved info",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "program_execution_and_primitives",
+                "label": "builds on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "language_model_integration",
+                "label": "interacts with LMs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "tool_and_adapter_integration",
+                "label": "integrates tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_modules",
+                "target": "program_execution_and_primitives",
+                "label": "uses base modules",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_modules",
+                "target": "language_model_integration",
+                "label": "uses LMs for embeddings",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_functionality",
+                "label": "Core Functionality",
+                "nodes": [
+                    "prediction_modules",
+                    "retrieval_modules"
+                ],
+                "title": "Core Functionality",
+                "description": "The primary components for generating predictions and retrieving relevant information within DSPy programs.",
+                "role": null
+            },
+            {
+                "id": "foundational_dependencies",
+                "label": "Foundational Dependencies",
+                "nodes": [
+                    "program_execution_and_primitives",
+                    "signature_management"
+                ],
+                "title": "Foundational Dependencies",
+                "description": "Modules providing the basic building blocks and structural definitions for DSPy programs and their components.",
+                "role": null
+            },
+            {
+                "id": "external_integrations",
+                "label": "External Integrations",
+                "nodes": [
+                    "language_model_integration",
+                    "tool_and_adapter_integration"
+                ],
+                "title": "External Integrations",
+                "description": "Modules responsible for connecting DSPy with external language models and various tools/adapters.",
+                "role": null
+            }
+        ]
+    }
+}

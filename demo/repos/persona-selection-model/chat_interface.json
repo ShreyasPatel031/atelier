@@ -1,0 +1,201 @@
+{
+  "title": "Chat Interface Endpoints",
+  "summary": "This module provides various API endpoints for interacting with the chat system, including basic chat, gate-controlled chat, and persona-steered chat, with both synchronous and streaming options.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "gate_chat_request",
+        "label": "Gate Chat Request",
+        "type": "component",
+        "link": null,
+        "title": "Gate Chat Request",
+        "description": "Handles incoming requests for gate-controlled chat interactions, applying gate logic before generating a response."
+      },
+      {
+        "id": "gate_chat_stream_request",
+        "label": "Gate Chat Stream Request",
+        "type": "component",
+        "link": null,
+        "title": "Gate Chat Stream Request",
+        "description": "Manages streaming responses for gate-controlled chat, sending events as they are generated."
+      },
+      {
+        "id": "gate_chat_test_rotating_request",
+        "label": "Rotating Gate Test Request",
+        "type": "component",
+        "link": null,
+        "title": "Rotating Gate Test Request",
+        "description": "Provides a streaming endpoint for testing rotating gate configurations within the chat system."
+      },
+      {
+        "id": "chat_persona_steer_request",
+        "label": "Persona Steered Chat Request",
+        "type": "component",
+        "link": null,
+        "title": "Persona Steered Chat Request",
+        "description": "Processes chat requests that involve steering the persona's response based on specified parameters."
+      },
+      {
+        "id": "chat_persona_steer_stream_request",
+        "label": "Persona Steered Chat Stream Request",
+        "type": "component",
+        "link": null,
+        "title": "Persona Steered Chat Stream Request",
+        "description": "Handles streaming responses for persona-steered chat, delivering real-time updates."
+      },
+      {
+        "id": "chat_request",
+        "label": "Basic Chat Request",
+        "type": "component",
+        "link": null,
+        "title": "Basic Chat Request",
+        "description": "Manages standard chat requests without advanced gate or persona steering logic."
+      },
+      {
+        "id": "chat_stream_request",
+        "label": "Basic Chat Stream Request",
+        "type": "component",
+        "link": null,
+        "title": "Basic Chat Stream Request",
+        "description": "Provides a streaming interface for basic chat interactions, sending token-by-token responses."
+      },
+      {
+        "id": "run_gate_agent_turn",
+        "label": "Run Gate Agent Turn",
+        "type": "module",
+        "link": "steering_mechanisms",
+        "title": "Run Gate Agent Turn",
+        "description": "Executes a single turn of the gate agent, applying gate logic and generating a response based on current state and messages."
+      },
+      {
+        "id": "generate_steered",
+        "label": "Generate Steered Response",
+        "type": "component",
+        "link": null,
+        "title": "Generate Steered Response",
+        "description": "Generates a chat response that is influenced by a specific persona vector and steering alpha."
+      },
+      {
+        "id": "language_model_pipeline",
+        "label": "Language Model Pipeline",
+        "type": "external",
+        "link": null,
+        "title": "Language Model Pipeline",
+        "description": "Represents the underlying language model and tokenizer used for generating chat responses."
+      }
+    ],
+    "edges": [
+      {
+        "source": "gate_chat_request",
+        "target": "run_gate_agent_turn",
+        "label": "chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_stream_request",
+        "target": "run_gate_agent_turn",
+        "label": "streamed chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_test_rotating_request",
+        "target": "language_model_pipeline",
+        "label": "test request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_request",
+        "target": "generate_steered",
+        "label": "steered chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_stream_request",
+        "target": "generate_steered",
+        "label": "streamed steered chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_request",
+        "target": "language_model_pipeline",
+        "label": "basic chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_stream_request",
+        "target": "language_model_pipeline",
+        "label": "streamed basic chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn",
+        "target": "language_model_pipeline",
+        "label": "model inference",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_steered",
+        "target": "language_model_pipeline",
+        "label": "steered model inference",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "gate_chat_endpoints",
+        "label": "Gate Chat Endpoints",
+        "nodes": [
+          "gate_chat_request",
+          "gate_chat_stream_request",
+          "gate_chat_test_rotating_request"
+        ],
+        "title": "Gate Chat Endpoints",
+        "description": "API endpoints for chat interactions controlled by gate logic, including both synchronous and streaming responses.",
+        "role": "surface"
+      },
+      {
+        "id": "persona_steer_endpoints",
+        "label": "Persona Steered Endpoints",
+        "nodes": [
+          "chat_persona_steer_request",
+          "chat_persona_steer_stream_request"
+        ],
+        "title": "Persona Steered Endpoints",
+        "description": "API endpoints for chat interactions where the persona's response is steered by specific parameters, supporting both synchronous and streaming modes.",
+        "role": "surface"
+      },
+      {
+        "id": "basic_chat_endpoints",
+        "label": "Basic Chat Endpoints",
+        "nodes": [
+          "chat_request",
+          "chat_stream_request"
+        ],
+        "title": "Basic Chat Endpoints",
+        "description": "Standard API endpoints for general chat interactions, offering both immediate and streaming responses.",
+        "role": "surface"
+      },
+      {
+        "id": "chat_logic",
+        "label": "Chat Logic",
+        "nodes": [
+          "run_gate_agent_turn",
+          "generate_steered"
+        ],
+        "title": "Chat Logic",
+        "description": "Core components responsible for processing chat requests, applying steering, and interacting with the language model.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

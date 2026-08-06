@@ -1,0 +1,120 @@
+{
+  "title": "Audio Models",
+  "summary": "This module provides a comprehensive suite of models for audio processing, including speech recognition, translation, speaker verification, and protein structure prediction.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "speech_recognition",
+        "label": "Speech Recognition",
+        "type": "module",
+        "link": null,
+        "title": "Speech Recognition Models",
+        "description": "Models designed for converting spoken language into text, including CTC-based approaches and pre-training."
+      },
+      {
+        "id": "speech_translation",
+        "label": "Speech Translation",
+        "type": "module",
+        "link": null,
+        "title": "Speech Translation Models",
+        "description": "Models handling various speech and text translation tasks, such as speech-to-speech, speech-to-text, and text-to-speech."
+      },
+      {
+        "id": "speaker_verification",
+        "label": "Speaker Verification",
+        "type": "module",
+        "link": null,
+        "title": "Speaker Verification Models",
+        "description": "Models for extracting X-vectors from audio, used to identify or verify speakers based on their voice characteristics."
+      },
+      {
+        "id": "protein_modeling",
+        "label": "Protein Modeling",
+        "type": "module",
+        "link": null,
+        "title": "Protein Structure and Text Models",
+        "description": "Models for predicting protein 3D structures from sequences and processing protein-related text."
+      },
+      {
+        "id": "audio_frame_classification",
+        "label": "Audio Frame Classification",
+        "type": "module",
+        "link": null,
+        "title": "Audio Frame Classification Models",
+        "description": "Models for classifying individual audio frames, useful for tasks like sound event detection."
+      },
+      {
+        "id": "conditional_generation",
+        "label": "Conditional Generation",
+        "type": "module",
+        "link": null,
+        "title": "Conditional Generation Models",
+        "description": "Models for real-time conditional generation, supporting streaming audio input and efficient caching."
+      }
+    ],
+    "edges": [
+      {
+        "source": "speech_recognition",
+        "target": "speech_translation",
+        "label": "transcribed speech",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "speech_translation",
+        "target": "speech_recognition",
+        "label": "translated speech",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "speech_recognition",
+        "target": "speaker_verification",
+        "label": "audio features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_frame_classification",
+        "target": "speech_recognition",
+        "label": "classified frames",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conditional_generation",
+        "target": "speech_translation",
+        "label": "generated audio/text",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "speech_processing",
+        "label": "Speech Processing",
+        "nodes": [
+          "speech_recognition",
+          "speech_translation",
+          "speaker_verification",
+          "audio_frame_classification",
+          "conditional_generation"
+        ],
+        "title": "Core Speech Processing",
+        "description": "Models focused on understanding, translating, and generating human speech.",
+        "role": "analytical"
+      },
+      {
+        "id": "bio_modeling",
+        "label": "Biological Modeling",
+        "nodes": [
+          "protein_modeling"
+        ],
+        "title": "Biological Sequence Modeling",
+        "description": "Models dedicated to understanding and predicting biological structures and related text.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

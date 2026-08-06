@@ -1,0 +1,247 @@
+{
+  "title": "Model Checkpoint Conversion Tools",
+  "summary": "This module provides a comprehensive suite of utilities for converting various machine learning model checkpoints from their original frameworks (e.g., TensorFlow, Fairseq, native PyTorch) into the Hugging Face Transformers format, ensuring compatibility and seamless integration within the HF ecosystem.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "original_model_weights",
+        "label": "Original Model Weights",
+        "type": "component",
+        "link": null,
+        "title": "Original Model Weights",
+        "description": "Model weights and checkpoints in their native formats (e.g., PyTorch, TensorFlow, Nari Labs, Orbax) from various sources like model hubs or local paths."
+      },
+      {
+        "id": "original_model_configs",
+        "label": "Original Model Configurations",
+        "type": "component",
+        "link": null,
+        "title": "Original Model Configurations",
+        "description": "Configuration files defining the architecture and hyperparameters of the original models."
+      },
+      {
+        "id": "hf_model_config",
+        "label": "HF Model Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Model Configuration",
+        "description": "Configuration objects that define the architecture and parameters of Hugging Face Transformer models."
+      },
+      {
+        "id": "hf_processor_config",
+        "label": "HF Processor Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Processor Configuration",
+        "description": "Configuration objects for tokenizers, image processors, or feature extractors."
+      },
+      {
+        "id": "weight_extraction_and_mapping",
+        "label": "Weight Extraction and Mapping",
+        "type": "component",
+        "link": null,
+        "title": "Weight Extraction and Mapping",
+        "description": "Processes original model weights, extracts relevant parameters, and maps them to the Hugging Face model's expected structure, often involving renaming and restructuring."
+      },
+      {
+        "id": "processor_conversion",
+        "label": "Processor Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Processor Conversion",
+        "description": "Converts original tokenizers, image processors, or feature extractors into their Hugging Face equivalents, ensuring proper data preprocessing."
+      },
+      {
+        "id": "hf_model_instance",
+        "label": "Hugging Face Model Instance",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Model Instance",
+        "description": "An instantiated Hugging Face Transformer model, ready to load converted weights."
+      },
+      {
+        "id": "hf_processor_instance",
+        "label": "Hugging Face Processor Instance",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Processor Instance",
+        "description": "An instantiated Hugging Face processor (tokenizer, image processor, feature extractor), configured for a specific model."
+      },
+      {
+        "id": "output_verification",
+        "label": "Output Verification",
+        "type": "component",
+        "link": null,
+        "title": "Output Verification",
+        "description": "Compares outputs of the original and converted models using sample data to ensure conversion fidelity and correctness."
+      },
+      {
+        "id": "hugging_face_hub",
+        "label": "Hugging Face Hub",
+        "type": "external",
+        "link": null,
+        "title": "Hugging Face Hub",
+        "description": "The central platform for sharing and discovering models, datasets, and demos. Converted models can be pushed here."
+      },
+      {
+        "id": "converted_hf_model",
+        "label": "Converted HF Model",
+        "type": "component",
+        "link": null,
+        "title": "Converted Hugging Face Model",
+        "description": "The final converted model in Hugging Face Transformers format, ready for use."
+      },
+      {
+        "id": "converted_hf_processor",
+        "label": "Converted HF Processor",
+        "type": "component",
+        "link": null,
+        "title": "Converted Hugging Face Processor",
+        "description": "The final converted processor (tokenizer, image processor, feature extractor) in Hugging Face Transformers format."
+      }
+    ],
+    "edges": [
+      {
+        "source": "original_model_weights",
+        "target": "weight_extraction_and_mapping",
+        "label": "raw weights",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "original_model_configs",
+        "target": "hf_model_config",
+        "label": "architecture details",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "original_model_configs",
+        "target": "hf_processor_config",
+        "label": "preprocessing details",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_model_config",
+        "target": "hf_model_instance",
+        "label": "model definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_processor_config",
+        "target": "hf_processor_instance",
+        "label": "processor definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "weight_extraction_and_mapping",
+        "target": "hf_model_instance",
+        "label": "mapped weights",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "processor_conversion",
+        "target": "hf_processor_instance",
+        "label": "converted processor",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_model_instance",
+        "target": "output_verification",
+        "label": "model for testing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_processor_instance",
+        "target": "output_verification",
+        "label": "processor for testing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_verification",
+        "target": "converted_hf_model",
+        "label": "verified model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_verification",
+        "target": "converted_hf_processor",
+        "label": "verified processor",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "converted_hf_model",
+        "target": "hugging_face_hub",
+        "label": "push to hub",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "converted_hf_processor",
+        "target": "hugging_face_hub",
+        "label": "push to hub",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "input_sources",
+        "label": "Input Sources",
+        "nodes": [
+          "original_model_weights",
+          "original_model_configs"
+        ],
+        "title": "Input Sources",
+        "description": "Represents the various original formats and sources from which model weights and configurations are obtained for conversion.",
+        "role": "data"
+      },
+      {
+        "id": "conversion_logic",
+        "label": "Conversion Logic",
+        "nodes": [
+          "weight_extraction_and_mapping",
+          "processor_conversion"
+        ],
+        "title": "Core Conversion Logic",
+        "description": "Encapsulates the primary processes of extracting, mapping, and transforming model weights and processors to align with Hugging Face formats.",
+        "role": "analytical"
+      },
+      {
+        "id": "hf_representation",
+        "label": "Hugging Face Representation",
+        "nodes": [
+          "hf_model_config",
+          "hf_processor_config",
+          "hf_model_instance",
+          "hf_processor_instance"
+        ],
+        "title": "Hugging Face Model Representation",
+        "description": "Components representing the intermediate and final Hugging Face model and processor structures during and after conversion.",
+        "role": "generative"
+      },
+      {
+        "id": "output_and_distribution",
+        "label": "Output & Distribution",
+        "nodes": [
+          "output_verification",
+          "converted_hf_model",
+          "converted_hf_processor"
+        ],
+        "title": "Output and Distribution",
+        "description": "Handles the final verification of converted models and their potential distribution to platforms like the Hugging Face Hub.",
+        "role": "surface"
+      }
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "title": "Text Processing",
+  "summary": "The text_processing module provides the foundational `PreTrainedTokenizerBase` class for handling text tokenization, including encoding, decoding, and managing special tokens for various natural language processing models.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "pretrained_tokenizer_base",
+        "label": "PreTrainedTokenizerBase",
+        "type": "component",
+        "link": null,
+        "title": "PreTrainedTokenizerBase",
+        "description": "The base class for all tokenizer backends, providing core functionalities for text tokenization, special token management, and conversion between text and token IDs."
+      },
+      {
+        "id": "from_pretrained",
+        "label": "Load Pretrained Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "from_pretrained",
+        "description": "Instantiates a tokenizer from a predefined model, handling file loading, caching, and configuration."
+      },
+      {
+        "id": "save_pretrained",
+        "label": "Save Tokenizer State",
+        "type": "component",
+        "link": null,
+        "title": "save_pretrained",
+        "description": "Saves the full tokenizer state, including configuration and vocabulary, to a specified directory for later reloading."
+      },
+      {
+        "id": "tokenize_text",
+        "label": "Tokenize Text",
+        "type": "component",
+        "link": null,
+        "title": "tokenize",
+        "description": "Converts a string into a sequence of tokens, replacing unknown tokens with a designated unknown token."
+      },
+      {
+        "id": "encode_text",
+        "label": "Encode Text to IDs",
+        "type": "component",
+        "link": null,
+        "title": "encode",
+        "description": "Converts text into a sequence of integer IDs, applying padding and truncation strategies as needed."
+      },
+      {
+        "id": "decode_ids",
+        "label": "Decode IDs to Text",
+        "type": "component",
+        "link": null,
+        "title": "decode",
+        "description": "Converts a sequence of token IDs back into a human-readable string, with options to skip special tokens and clean up spaces."
+      },
+      {
+        "id": "apply_chat_template",
+        "label": "Apply Chat Template",
+        "type": "component",
+        "link": null,
+        "title": "apply_chat_template",
+        "description": "Formats a conversation history into a tokenized sequence using a Jinja chat template, suitable for chat models."
+      },
+      {
+        "id": "pad_sequences",
+        "label": "Pad Sequences",
+        "type": "component",
+        "link": null,
+        "title": "pad",
+        "description": "Pads a single encoded input or a batch of encoded inputs to a uniform length, according to specified padding strategies."
+      }
+    ],
+    "edges": [
+      {
+        "source": "from_pretrained",
+        "target": "pretrained_tokenizer_base",
+        "label": "instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "save_pretrained",
+        "target": "pretrained_tokenizer_base",
+        "label": "persists state of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "tokenize_text",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenize_text",
+        "target": "encode_text",
+        "label": "produces tokens for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "encode_text",
+        "target": "pad_sequences",
+        "label": "generates inputs for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "decode_ids",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "apply_chat_template",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_tokenizer_api",
+        "label": "Core Tokenizer API",
+        "nodes": [
+          "pretrained_tokenizer_base",
+          "from_pretrained",
+          "save_pretrained"
+        ],
+        "title": "Core Tokenizer API",
+        "description": "This group encompasses the fundamental methods for initializing, saving, and performing basic tokenization operations.",
+        "role": "analytical"
+      },
+      {
+        "id": "text_to_ids_conversion",
+        "label": "Text to ID Conversion",
+        "nodes": [
+          "tokenize_text",
+          "encode_text",
+          "pad_sequences"
+        ],
+        "title": "Text to ID Conversion",
+        "description": "This group handles the process of converting raw text into numerical token IDs, including tokenization, encoding, and padding.",
+        "role": "generative"
+      },
+      {
+        "id": "id_to_text_conversion",
+        "label": "ID to Text Conversion",
+        "nodes": [
+          "decode_ids"
+        ],
+        "title": "ID to Text Conversion",
+        "description": "This group manages the process of converting numerical token IDs back into human-readable text.",
+        "role": "generative"
+      },
+      {
+        "id": "chat_templating",
+        "label": "Chat Templating",
+        "nodes": [
+          "apply_chat_template"
+        ],
+        "title": "Chat Templating",
+        "description": "This group provides functionality for formatting conversational inputs using predefined chat templates, essential for chat-based models.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

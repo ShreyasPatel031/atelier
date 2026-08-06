@@ -1,0 +1,136 @@
+{
+    "title": "A2A & Events",
+    "summary": "This module manages inter-agent communication (A2A), including authentication, extensions, and the core event system for tracking and reacting to system activities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "a2a_core",
+                "label": "A2A Core",
+                "type": "module",
+                "link": "a2a_core",
+                "title": "A2A Core Module",
+                "description": "Provides the fundamental mechanisms for Agent-to-Agent communication, including configuration, task execution wrappers, and agent card management."
+            },
+            {
+                "id": "a2a_authentication",
+                "label": "A2A Authentication",
+                "type": "module",
+                "link": "a2a_authentication",
+                "title": "A2A Authentication Module",
+                "description": "Manages various client and server-side authentication schemes for secure Agent-to-Agent communication."
+            },
+            {
+                "id": "a2a_extensions_and_updates",
+                "label": "A2A Extensions & Updates",
+                "type": "module",
+                "link": "a2a_extensions_and_updates",
+                "title": "A2A Extensions and Updates Module",
+                "description": "Handles client and server-side extensions for A2A communication, including UI extensions and various update mechanisms like polling and push notifications."
+            },
+            {
+                "id": "event_system",
+                "label": "Event System",
+                "type": "module",
+                "link": "event_system",
+                "title": "Event System Module",
+                "description": "Provides a robust event bus for CrewAI, enabling event-driven architecture with synchronous and asynchronous handler management, and event recording."
+            },
+            {
+                "id": "agent_management",
+                "label": "Agent Management",
+                "type": "module",
+                "link": "agent_management",
+                "title": "Agent Management Module",
+                "description": "Manages the lifecycle and execution of agents, including their interactions with LLMs and tools, often leveraging A2A capabilities."
+            },
+            {
+                "id": "task_and_flow_execution",
+                "label": "Task & Flow Execution",
+                "type": "module",
+                "link": "task_and_flow_execution",
+                "title": "Task and Flow Execution Module",
+                "description": "Orchestrates the execution of tasks and complex flows, managing conditional logic, human feedback, persistence, and visualization of workflows, and can emit events."
+            }
+        ],
+        "edges": [
+            {
+                "source": "a2a_core",
+                "target": "a2a_authentication",
+                "label": "uses for secure communication",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "a2a_core",
+                "target": "a2a_extensions_and_updates",
+                "label": "integrates extensions and updates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "a2a_core",
+                "target": "event_system",
+                "label": "emits A2A events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_management",
+                "target": "a2a_core",
+                "label": "delegates tasks via A2A",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "task_and_flow_execution",
+                "target": "event_system",
+                "label": "emits flow/task events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "event_system",
+                "target": "agent_management",
+                "label": "notifies agents of events",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "a2a_communication",
+                "label": "Agent-to-Agent Communication",
+                "nodes": [
+                    "a2a_core",
+                    "a2a_authentication",
+                    "a2a_extensions_and_updates"
+                ],
+                "title": "Agent-to-Agent Communication",
+                "description": "This group encompasses all components responsible for enabling secure, extensible, and efficient communication between AI agents.",
+                "role": null
+            },
+            {
+                "id": "event_management",
+                "label": "Event Management",
+                "nodes": [
+                    "event_system"
+                ],
+                "title": "Event Management",
+                "description": "The central hub for all event-driven interactions, allowing components to publish and subscribe to system-wide events for observability and reactivity.",
+                "role": null
+            },
+            {
+                "id": "core_integrations",
+                "label": "Core Integrations",
+                "nodes": [
+                    "agent_management",
+                    "task_and_flow_execution"
+                ],
+                "title": "Core Framework Integrations",
+                "description": "These modules represent the primary consumers and producers of A2A and event system functionalities within the CrewAI framework.",
+                "role": null
+            }
+        ]
+    }
+}

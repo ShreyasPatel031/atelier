@@ -1,0 +1,120 @@
+{
+  "title": "Documentation Generation",
+  "summary": "This module provides utilities for generating and managing documentation, including dynamic snippet injection and content rendering for various formats.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "on_page_markdown",
+        "label": "Process Markdown Page",
+        "type": "component",
+        "link": null,
+        "title": "Process Markdown Page",
+        "description": "This function is a MkDocs hook that processes each Markdown page after it's read and before conversion to HTML. It orchestrates various content transformations."
+      },
+      {
+        "id": "inject_snippets",
+        "label": "Inject Code Snippets",
+        "type": "component",
+        "link": null,
+        "title": "Inject Code Snippets",
+        "description": "Scans Markdown content for snippet directives and replaces them with formatted code blocks extracted from specified files and sections."
+      },
+      {
+        "id": "replace_snippet",
+        "label": "Replace Single Snippet",
+        "type": "component",
+        "link": null,
+        "title": "Replace Single Snippet",
+        "description": "Handles the logic for replacing a single snippet directive with its corresponding code block, including path resolution, fragment extraction, and highlighting."
+      },
+      {
+        "id": "parse_snippet_directive",
+        "label": "Parse Snippet Directive",
+        "type": "component",
+        "link": null,
+        "title": "Parse Snippet Directive",
+        "description": "Parses a Markdown line to extract attributes like path, title, fragment, and highlight from a snippet directive."
+      },
+      {
+        "id": "parse_file_sections",
+        "label": "Parse File Sections",
+        "type": "component",
+        "link": null,
+        "title": "Parse File Sections",
+        "description": "Analyzes a source file to identify and map named sections and their line ranges, supporting both single and multiple ranges for a section."
+      },
+      {
+        "id": "format_highlight_lines",
+        "label": "Format Highlight Lines",
+        "type": "component",
+        "link": null,
+        "title": "Format Highlight Lines",
+        "description": "Converts a list of line ranges into a string format suitable for syntax highlighting directives (e.g., '1 3-5 7')."
+      }
+    ],
+    "edges": [
+      {
+        "source": "on_page_markdown",
+        "target": "inject_snippets",
+        "label": "processed markdown",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "inject_snippets",
+        "target": "replace_snippet",
+        "label": "snippet match",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "replace_snippet",
+        "target": "parse_snippet_directive",
+        "label": "snippet line",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "replace_snippet",
+        "target": "parse_file_sections",
+        "label": "file path",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "replace_snippet",
+        "target": "format_highlight_lines",
+        "label": "highlight ranges",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "mkdocs_hooks",
+        "label": "MkDocs Hooks",
+        "nodes": [
+          "on_page_markdown"
+        ],
+        "title": "MkDocs Hooks Integration",
+        "description": "Entry points and functions that integrate with the MkDocs build process to modify content.",
+        "role": "surface"
+      },
+      {
+        "id": "snippet_processing",
+        "label": "Snippet Processing Logic",
+        "nodes": [
+          "inject_snippets",
+          "replace_snippet",
+          "parse_snippet_directive",
+          "parse_file_sections",
+          "format_highlight_lines"
+        ],
+        "title": "Snippet Processing Logic",
+        "description": "Core functions responsible for parsing, extracting, and formatting code snippets for documentation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

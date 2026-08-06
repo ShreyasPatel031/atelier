@@ -1,0 +1,240 @@
+{
+  "title": "Model Scheduling and Caching",
+  "summary": "This module manages the loading, unloading, and caching of AI models to optimize resource utilization and response times. It handles model lifecycle, memory management, and request scheduling.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "scheduler_load",
+        "label": "Load Model into Scheduler",
+        "type": "component",
+        "link": null,
+        "title": "Load Model into Scheduler",
+        "description": "Handles the core logic for loading a model, including resource allocation, GPU selection, and OOM retry mechanisms. It ensures models are loaded efficiently and gracefully handles resource constraints."
+      },
+      {
+        "id": "scheduler_get_runner",
+        "label": "Get Model Runner",
+        "type": "component",
+        "link": null,
+        "title": "Get Model Runner",
+        "description": "Retrieves an available model runner for a given request, managing pending requests and ensuring proper model loading or reuse."
+      },
+      {
+        "id": "scheduler_reload_same_model",
+        "label": "Reload Same Model",
+        "type": "component",
+        "link": null,
+        "title": "Reload Same Model",
+        "description": "Manages scenarios where the same model needs to be reloaded, potentially with updated configurations or adapters, ensuring efficient transitions."
+      },
+      {
+        "id": "scheduler_multiple_models",
+        "label": "Handle Multiple Loaded Models",
+        "type": "component",
+        "link": null,
+        "title": "Handle Multiple Loaded Models",
+        "description": "Orchestrates the loading and unloading of multiple models, considering resource availability and eviction policies to maximize concurrency and throughput."
+      },
+      {
+        "id": "scheduler_oom_retry",
+        "label": "OOM Retry with Context Reduction",
+        "type": "component",
+        "link": null,
+        "title": "OOM Retry with Context Reduction",
+        "description": "Implements a retry mechanism for out-of-memory (OOM) errors during model loading, automatically reducing context size to attempt successful loading."
+      },
+      {
+        "id": "scheduler_cancel_request",
+        "label": "Handle Canceled Requests",
+        "type": "component",
+        "link": null,
+        "title": "Handle Canceled Requests",
+        "description": "Ensures that already canceled requests are gracefully handled, preventing unnecessary resource allocation or processing."
+      },
+      {
+        "id": "scheduler_vision_context_floor",
+        "label": "Apply Vision Context Floor",
+        "type": "component",
+        "link": null,
+        "title": "Apply Vision Context Floor",
+        "description": "Enforces a minimum context size for vision models, ensuring they have sufficient context for processing, even if a smaller size is requested."
+      },
+      {
+        "id": "blob_cache_manifest_reuse",
+        "label": "Manifest Name Reuse",
+        "type": "component",
+        "link": null,
+        "title": "Manifest Name Reuse",
+        "description": "Tests the caching mechanism's ability to handle manifest name reuse, including case-insensitivity, ensuring consistent behavior across file systems."
+      },
+      {
+        "id": "blob_cache_commit",
+        "label": "Commit Blob to Cache",
+        "type": "component",
+        "link": null,
+        "title": "Commit Blob to Cache",
+        "description": "Verifies the atomic commitment of blobs to the cache, including updates and timestamp management, ensuring data integrity."
+      },
+      {
+        "id": "blob_cache_import",
+        "label": "Import Blob to Cache",
+        "type": "component",
+        "link": null,
+        "title": "Import Blob to Cache",
+        "description": "Tests the import functionality for blobs, ensuring data is correctly stored and retrieved, and handles duplicate imports efficiently."
+      },
+      {
+        "id": "blob_cache_basic_ops",
+        "label": "Basic Blob Cache Operations",
+        "type": "component",
+        "link": null,
+        "title": "Basic Blob Cache Operations",
+        "description": "Covers fundamental cache operations like resolving, getting, and putting blobs, including error handling for non-existent or invalid entries."
+      },
+      {
+        "id": "blob_cache_put_validation",
+        "label": "Put Blob with Validation",
+        "type": "component",
+        "link": null,
+        "title": "Put Blob with Validation",
+        "description": "Validates the 'put' operation for blobs, ensuring content integrity, size matching, and proper error handling for corrupted or mismatched data."
+      },
+      {
+        "id": "blob_cache_put_get_zero",
+        "label": "Put and Get Zero-Length Blob",
+        "type": "component",
+        "link": null,
+        "title": "Put and Get Zero-Length Blob",
+        "description": "Tests the cache's behavior with zero-length blobs, ensuring proper handling and error reporting when a blob's content is unexpectedly truncated."
+      },
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "type": "module",
+        "link": "api_endpoints",
+        "title": "API Endpoints",
+        "description": "Handles incoming requests for model interactions like chat, generation, and embedding."
+      }
+    ],
+    "edges": [
+      {
+        "source": "api_endpoints",
+        "target": "scheduler_get_runner",
+        "label": "model request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_get_runner",
+        "target": "scheduler_load",
+        "label": "load request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_load",
+        "target": "scheduler_oom_retry",
+        "label": "OOM error",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_get_runner",
+        "target": "scheduler_reload_same_model",
+        "label": "reload request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_get_runner",
+        "target": "scheduler_multiple_models",
+        "label": "concurrent load",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_get_runner",
+        "target": "scheduler_cancel_request",
+        "label": "canceled request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_get_runner",
+        "target": "scheduler_vision_context_floor",
+        "label": "vision model request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scheduler_load",
+        "target": "blob_cache_basic_ops",
+        "label": "model data access",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blob_cache_manifest_reuse",
+        "target": "blob_cache_commit",
+        "label": "manifest update",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blob_cache_import",
+        "target": "blob_cache_commit",
+        "label": "new blob data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blob_cache_put_validation",
+        "target": "blob_cache_commit",
+        "label": "validated blob",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blob_cache_put_get_zero",
+        "target": "blob_cache_commit",
+        "label": "zero-length blob",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "model_scheduling",
+        "label": "Model Scheduling",
+        "nodes": [
+          "scheduler_load",
+          "scheduler_get_runner",
+          "scheduler_reload_same_model",
+          "scheduler_multiple_models",
+          "scheduler_oom_retry",
+          "scheduler_cancel_request",
+          "scheduler_vision_context_floor"
+        ],
+        "title": "Model Scheduling",
+        "description": "Manages the lifecycle of AI models, including loading, unloading, and optimizing their placement and execution based on resource availability and request patterns.",
+        "role": "analytical"
+      },
+      {
+        "id": "blob_caching",
+        "label": "Blob Caching",
+        "nodes": [
+          "blob_cache_manifest_reuse",
+          "blob_cache_commit",
+          "blob_cache_import",
+          "blob_cache_basic_ops",
+          "blob_cache_put_validation",
+          "blob_cache_put_get_zero"
+        ],
+        "title": "Blob Caching",
+        "description": "Provides a robust caching mechanism for model binaries and associated data, ensuring data integrity, efficient storage, and retrieval.",
+        "role": "data"
+      }
+    ]
+  }
+}

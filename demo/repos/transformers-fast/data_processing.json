@@ -1,0 +1,148 @@
+{
+    "title": "Data Processing Overview",
+    "summary": "This module centralizes all functionalities for preparing raw data (text, images, audio) into model-ready formats. It includes tokenization, image preprocessing, and general multimodal data orchestration.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "raw_data_input",
+                "label": "Raw Input Data",
+                "type": "external",
+                "link": null,
+                "title": "Unprocessed Data Sources",
+                "description": "Initial, unprocessed data including text, images, and audio from various user or system inputs, awaiting transformation."
+            },
+            {
+                "id": "tokenization_module",
+                "label": "Text & Audio Tokenization",
+                "type": "module",
+                "link": "tokenization",
+                "title": "Text and Audio Tokenizer",
+                "description": "Converts raw textual and audio inputs into numerical token IDs, handling vocabulary mapping, special tokens, and audio codebook generation for models."
+            },
+            {
+                "id": "image_processing_module",
+                "label": "Image Preprocessing",
+                "type": "module",
+                "link": "image_processing",
+                "title": "Image Feature Processor",
+                "description": "Performs essential image transformations such as resizing, cropping, normalization, and feature extraction, preparing visual data for model consumption."
+            },
+            {
+                "id": "general_processors_module",
+                "label": "Multimodal Data Orchestration",
+                "type": "module",
+                "link": "general_processors",
+                "title": "Multimodal Data Processor",
+                "description": "Coordinates and combines processed data from different modalities (text, image, audio) into a unified, model-ready input format, often for complex tasks."
+            },
+            {
+                "id": "model_ready_output",
+                "label": "Model-Ready Data Batch",
+                "type": "external",
+                "link": null,
+                "title": "Prepared Model Input",
+                "description": "The final, structured batch of numerical data (e.g., token IDs, pixel values, attention masks) ready for direct ingestion by machine learning models."
+            },
+            {
+                "id": "model_architectures",
+                "label": "Pretrained Models",
+                "type": "external",
+                "link": "model_architectures",
+                "title": "ML Model Architectures",
+                "description": "Represents the various machine learning models that consume the prepared data batches to perform specific tasks like generation, classification, or detection."
+            }
+        ],
+        "edges": [
+            {
+                "source": "raw_data_input",
+                "target": "tokenization_module",
+                "label": "Provides text/audio",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "raw_data_input",
+                "target": "image_processing_module",
+                "label": "Provides images",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "raw_data_input",
+                "target": "general_processors_module",
+                "label": "Provides multimodal data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tokenization_module",
+                "target": "general_processors_module",
+                "label": "Supplies tokenized text/audio",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_processing_module",
+                "target": "general_processors_module",
+                "label": "Supplies processed images",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_processors_module",
+                "target": "model_ready_output",
+                "label": "Generates unified input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tokenization_module",
+                "target": "model_ready_output",
+                "label": "Generates text/audio input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_processing_module",
+                "target": "model_ready_output",
+                "label": "Generates image input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_ready_output",
+                "target": "model_architectures",
+                "label": "Consumed by",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_flow_endpoints",
+                "label": "Data Flow Endpoints",
+                "nodes": [
+                    "raw_data_input",
+                    "model_ready_output",
+                    "model_architectures"
+                ],
+                "title": "Data Flow Endpoints",
+                "description": "Defines the entry points for raw data, the final processed output, and the ultimate consumers of the prepared information.",
+                "role": null
+            },
+            {
+                "id": "core_processing_components",
+                "label": "Core Processing Components",
+                "nodes": [
+                    "tokenization_module",
+                    "image_processing_module",
+                    "general_processors_module"
+                ],
+                "title": "Core Data Preparation",
+                "description": "Encapsulates the primary sub-modules responsible for transforming raw, heterogeneous data into a standardized, model-compatible format.",
+                "role": null
+            }
+        ]
+    }
+}

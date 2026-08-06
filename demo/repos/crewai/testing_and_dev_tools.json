@@ -1,0 +1,161 @@
+{
+  "title": "Testing and Development Tools",
+  "summary": "This module provides utilities for testing, development, and telemetry within the CrewAI ecosystem, including version bumping, documentation checks, and usage tracking.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "conftest_utilities",
+        "label": "Conftest Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Conftest Utilities",
+        "description": "Provides test-specific configurations and helper functions, such as mocking client responses and resetting event states for isolated testing."
+      },
+      {
+        "id": "cli_dev_tools",
+        "label": "CLI Development Tools",
+        "type": "component",
+        "link": null,
+        "title": "CLI Development Tools",
+        "description": "Command-line interface tools for managing development workflows, including version bumping and creating release tags."
+      },
+      {
+        "id": "docs_check",
+        "label": "Documentation Checker",
+        "type": "component",
+        "link": null,
+        "title": "Documentation Checker",
+        "description": "Analyzes code changes to determine documentation needs, generates new documentation, and translates existing docs."
+      },
+      {
+        "id": "async_executor_context",
+        "label": "Async Executor Context",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Executor Context",
+        "description": "Defines an extended context for executors that support asynchronous invocation, crucial for non-blocking operations."
+      },
+      {
+        "id": "telemetry_service",
+        "label": "Telemetry Service",
+        "type": "component",
+        "link": null,
+        "title": "Telemetry Service",
+        "description": "Handles anonymous usage tracking and event logging for the CrewAI package, providing insights into feature adoption and system behavior."
+      },
+      {
+        "id": "file_input_runner",
+        "label": "File Input Runner",
+        "type": "component",
+        "link": null,
+        "title": "File Input Runner",
+        "description": "A script for running various operations on file inputs, such as inspecting PDF paths or initiating crew workflows with specific models and prompts."
+      },
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "module",
+        "link": "cli_commands",
+        "title": "CLI Commands",
+        "description": "Manages all command-line interface operations for interacting with the CrewAI system."
+      },
+      {
+        "id": "event_system",
+        "label": "Event System",
+        "type": "module",
+        "link": "event_system",
+        "title": "Event System",
+        "description": "Manages the dispatching and handling of various events within the CrewAI framework."
+      }
+    ],
+    "edges": [
+      {
+        "source": "conftest_utilities",
+        "target": "event_system",
+        "label": "resets event state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_dev_tools",
+        "target": "docs_check",
+        "label": "triggers doc updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_dev_tools",
+        "target": "cli_commands",
+        "label": "provides CLI functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "docs_check",
+        "target": "cli_commands",
+        "label": "integrates with CLI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "telemetry_service",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_input_runner",
+        "target": "cli_commands",
+        "label": "uses CLI for execution",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "testing_helpers",
+        "label": "Testing Helpers",
+        "nodes": [
+          "conftest_utilities"
+        ],
+        "title": "Testing Helpers",
+        "description": "Components that facilitate testing and ensure isolated, reproducible test environments.",
+        "role": "analytical"
+      },
+      {
+        "id": "development_workflow",
+        "label": "Development Workflow",
+        "nodes": [
+          "cli_dev_tools",
+          "docs_check"
+        ],
+        "title": "Development Workflow Tools",
+        "description": "Tools designed to streamline the development process, including version control and documentation generation.",
+        "role": "generative"
+      },
+      {
+        "id": "core_utilities",
+        "label": "Core Utilities",
+        "nodes": [
+          "async_executor_context",
+          "telemetry_service"
+        ],
+        "title": "Core Utilities",
+        "description": "Fundamental utilities supporting asynchronous operations and system-wide telemetry.",
+        "role": "analytical"
+      },
+      {
+        "id": "scripting_and_automation",
+        "label": "Scripting and Automation",
+        "nodes": [
+          "file_input_runner"
+        ],
+        "title": "Scripting and Automation",
+        "description": "Scripts and components for automating tasks and running specific workflows.",
+        "role": "generative"
+      }
+    ]
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "title": "Documentation and Hooks",
+  "summary": "This module manages the generation of API documentation and integrates various hooks to fetch and display live statistics on the website.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "hero_interactive_init",
+        "label": "Initialize Hero Interactive",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Hero Interactive",
+        "description": "Initializes interactive elements on the hero section of the documentation website, handling user interactions with buttons and tabs."
+      },
+      {
+        "id": "fetch_stats_on_config",
+        "label": "Fetch Stats on Config",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Stats on Config",
+        "description": "A MkDocs hook that fetches and injects live statistics (e.g., GitHub stars, PyPI downloads) into the site configuration during build time."
+      },
+      {
+        "id": "fetch_contributors",
+        "label": "Fetch GitHub Contributors",
+        "type": "component",
+        "link": null,
+        "title": "Fetch GitHub Contributors",
+        "description": "Retrieves the total number of contributors for the GitHub repository."
+      },
+      {
+        "id": "fetch_release",
+        "label": "Fetch Latest Release Info",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Latest Release Information",
+        "description": "Fetches details about the latest stable release from GitHub, including version and publication date."
+      },
+      {
+        "id": "fetch_pypi_downloads",
+        "label": "Fetch PyPI Downloads",
+        "type": "component",
+        "link": null,
+        "title": "Fetch PyPI Downloads",
+        "description": "Retrieves the monthly download count for the package from PyPI."
+      },
+      {
+        "id": "fetch_stars",
+        "label": "Fetch GitHub Stars",
+        "type": "component",
+        "link": null,
+        "title": "Fetch GitHub Stars",
+        "description": "Obtains the number of stargazers for the GitHub repository."
+      },
+      {
+        "id": "fetch_discord",
+        "label": "Fetch Discord Members",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Discord Members",
+        "description": "Retrieves the approximate member count for the Discord server."
+      },
+      {
+        "id": "fetch_merged_prs",
+        "label": "Fetch Merged PRs",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Merged Pull Requests",
+        "description": "Counts the number of merged pull requests in the last year on GitHub."
+      },
+      {
+        "id": "generate_md_docs",
+        "label": "Generate Markdown Docs",
+        "type": "component",
+        "link": null,
+        "title": "Generate Markdown Documentation",
+        "description": "Generates Markdown documentation files for public classes and functions within the DSPy package, organizing them by category."
+      },
+      {
+        "id": "generate_category_index",
+        "label": "Generate Category Index",
+        "type": "component",
+        "link": null,
+        "title": "Generate Category Index",
+        "description": "Creates or updates an 'index.md' landing page for each API category directory, listing links to its child documentation pages."
+      }
+    ],
+    "edges": [
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_contributors",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_release",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_pypi_downloads",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_stars",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_discord",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_stats_on_config",
+        "target": "fetch_merged_prs",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_md_docs",
+        "target": "generate_category_index",
+        "label": "creates/updates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "documentation_generation",
+        "label": "Documentation Generation",
+        "nodes": [
+          "generate_md_docs",
+          "generate_category_index"
+        ],
+        "title": "Documentation Generation",
+        "description": "Handles the automated creation and structuring of API documentation in Markdown format.",
+        "role": "generative"
+      },
+      {
+        "id": "website_hooks",
+        "label": "Website Hooks",
+        "nodes": [
+          "fetch_stats_on_config",
+          "hero_interactive_init"
+        ],
+        "title": "Website Hooks",
+        "description": "Integrates custom functionality into the documentation website build process and interactive elements.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_data_fetching",
+        "label": "External Data Fetching",
+        "nodes": [
+          "fetch_contributors",
+          "fetch_release",
+          "fetch_pypi_downloads",
+          "fetch_stars",
+          "fetch_discord",
+          "fetch_merged_prs"
+        ],
+        "title": "External Data Fetching",
+        "description": "Components responsible for retrieving various statistics from external APIs like GitHub and PyPI.",
+        "role": "data"
+      }
+    ]
+  }
+}

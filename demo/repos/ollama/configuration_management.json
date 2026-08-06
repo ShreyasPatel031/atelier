@@ -1,0 +1,101 @@
+{
+  "title": "Configuration Management",
+  "summary": "This module handles the storage, retrieval, and migration of application configurations, particularly for integration settings and model preferences.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "load_config",
+        "label": "Load Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Load Configuration",
+        "description": "Retrieves the current application configuration from storage, including integration and model settings."
+      },
+      {
+        "id": "save_config",
+        "label": "Save Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Save Configuration",
+        "description": "Persists the current application configuration, including any changes to integration or model settings, to storage."
+      },
+      {
+        "id": "list_integrations",
+        "label": "List Integrations",
+        "type": "component",
+        "link": null,
+        "title": "List Integrations",
+        "description": "Provides a list of all configured integrations and their associated settings."
+      },
+      {
+        "id": "migrate_config",
+        "label": "Migrate Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Migrate Configuration",
+        "description": "Handles the migration of configuration files from legacy locations or formats to the current standard, ensuring data continuity."
+      },
+      {
+        "id": "file_system",
+        "label": "File System Storage",
+        "type": "external",
+        "link": null,
+        "title": "File System Storage",
+        "description": "The underlying file system used for persistent storage of configuration files."
+      }
+    ],
+    "edges": [
+      {
+        "source": "load_config",
+        "target": "file_system",
+        "label": "reads config file",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "save_config",
+        "target": "file_system",
+        "label": "writes config file",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_integrations",
+        "target": "load_config",
+        "label": "requests config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "migrate_config",
+        "target": "file_system",
+        "label": "reads/writes legacy & new config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "migrate_config",
+        "target": "load_config",
+        "label": "triggers load after migration",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "config_operations",
+        "label": "Configuration Operations",
+        "nodes": [
+          "load_config",
+          "save_config",
+          "list_integrations",
+          "migrate_config"
+        ],
+        "title": "Configuration Operations",
+        "description": "Core functions for managing application configuration data.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

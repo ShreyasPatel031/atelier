@@ -40,8 +40,26 @@ def module_doc_path(docs_dir: os.PathLike | str, stem: str) -> Path:
 # current_depth >= MAX_DEPTH. Default 2 = one parent→sub-agent round (set MAX_DEPTH=1 for no delegation).
 MAX_DEPTH = int(os.getenv("MAX_DEPTH", "2"))
 MIN_DEPTH = int(os.getenv("MIN_DEPTH", "1"))   # Minimum depth - force sub-agents until this depth
-CLUSTERING_THINKING_BUDGET = int(os.getenv("CLUSTERING_THINKING_BUDGET", "2048"))  # Gemini thinking tokens for one-shot clustering (REST API)
+CLUSTERING_THINKING_BUDGET = int(os.getenv("CLUSTERING_THINKING_BUDGET", "0"))  # Gemini thinking tokens for clustering; 0 = disabled
 MAX_TOKEN_PER_LEAF_MODULE = 16_000      # Threshold for sub-module delegation in Stage 4
+
+# Auto-split threshold (Stage 4): if prompt tokens exceed this, split into parallel sub-modules
+# instead of a single large call. Modules below this go straight to 4-FAST (single JSON call).
+# Set to 100K because:
+#   - Single 4-FAST calls up to ~80K tokens finish in ~40s which is fast enough
+#   - Splitting adds overhead: tree I/O (lock-serialized), parent overview, recursive process_module
+#   - Only truly huge modules (100K+, e.g. pytorch_conversions at 226K) benefit from parallel split
+#   - The old problem (sequence_to_sequence_models 102s) was the agent path, not call size —
+#     now fixed by using token-based routing instead of component-count gating
+AUTO_SPLIT_TOKEN_THRESHOLD = int(os.getenv("AUTO_SPLIT_TOKEN_THRESHOLD", "100000"))
+
+# Max number of LLM calls in flight at once across the WHOLE doc-gen tree.
+# This bounds total concurrency including auto-split sub-tasks (which bypass the
+# per-batch module semaphore). The asyncio default thread pool is only min(32, cpu+4)
+# (≈14 on a 10-core machine), so without an explicit pool + this semaphore, 40+ leaf
+# calls get funnelled ~14-at-a-time through the executor queue — making "parallel"
+# tasks actually serialize and their measured durations balloon with queue wait.
+MAX_CONCURRENT_LLM_CALLS = int(os.getenv("MAX_CONCURRENT_LLM_CALLS", "32"))
 MIN_COMPONENTS_FOR_CLUSTERING = 3       # Don't try to cluster fewer than this many components
                                         # Fixes infinite nesting bug when 2 components have large files
 MAX_ENTRY_POINTS = 300                  # Max entry points for clustering (top N by reachability)
@@ -58,6 +76,10 @@ MODEL_CONTEXT_WINDOWS = {
     'claude-3-opus': 200_000,
     'claude-3-sonnet': 200_000,
     'claude-3-haiku': 200_000,
+    'claude-haiku-4-5': 200_000,
+    'claude-haiku-4-5-20251001': 200_000,
+    'claude-sonnet-4': 200_000,
+    'claude-sonnet-4-5': 200_000,
     'glm-4p5': 128_000,
 }
 DEFAULT_CONTEXT_WINDOW = 128_000  # Fallback for unknown models
@@ -75,6 +97,10 @@ MODEL_OUTPUT_LIMITS = {
     'claude-3-opus': 4_000,
     'claude-3-sonnet': 4_000,
     'claude-3-haiku': 4_000,
+    'claude-haiku-4-5': 16_000,
+    'claude-haiku-4-5-20251001': 16_000,
+    'claude-sonnet-4': 16_000,
+    'claude-sonnet-4-5': 16_000,
     'glm-4p5': 4_000,
 }
 DEFAULT_OUTPUT_LIMIT = 8_000
@@ -146,6 +172,9 @@ class Config:
     # Google Cloud / Vertex AI ADC mode (no expiring API key)
     use_vertex_ai: bool = False
     gcp_project: str = ""
+    # Provider: "gemini" (Vertex ADC / Gemini API) or "claude" (Anthropic API).
+    llm_provider: str = "gemini"
+    anthropic_api_key: str = ""
     
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> 'Config':
@@ -178,6 +207,8 @@ class Config:
         fallback_model: str = FALLBACK_MODEL_1,
         use_vertex_ai: bool = False,
         gcp_project: str = "",
+        llm_provider: str = "gemini",
+        anthropic_api_key: str = "",
     ) -> 'Config':
         """
         Create configuration for CLI context.
@@ -210,4 +241,6 @@ class Config:
             fallback_model=fallback_model,
             use_vertex_ai=use_vertex_ai,
             gcp_project=gcp_project,
+            llm_provider=llm_provider or "gemini",
+            anthropic_api_key=anthropic_api_key or "",
         )

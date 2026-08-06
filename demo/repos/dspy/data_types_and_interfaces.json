@@ -1,0 +1,163 @@
+{
+  "title": "Data Types and Interfaces",
+  "summary": "This module defines core data structures and interfaces for interacting with Language Models (LMs), including request/response formats, streaming events, and configuration options.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "lm_request",
+        "label": "LMRequest",
+        "type": "component",
+        "link": null,
+        "title": "LMRequest",
+        "description": "A normalized request object passed to a Language Model, encapsulating model, messages, tools, and configuration."
+      },
+      {
+        "id": "lm_message_constructors",
+        "label": "LM Message Constructors",
+        "type": "component",
+        "link": null,
+        "title": "LM Message Constructors",
+        "description": "Functions like System, Developer, User, Assistant, and ToolResult that create standardized LMMessage objects for different roles in a conversation."
+      },
+      {
+        "id": "lm_stream",
+        "label": "LMStream",
+        "type": "component",
+        "link": null,
+        "title": "LMStream",
+        "description": "A synchronous stream for processing Language Model events, building a final LMResponse from a sequence of delta events."
+      },
+      {
+        "id": "async_lm_stream",
+        "label": "AsyncLMStream",
+        "type": "component",
+        "link": null,
+        "title": "AsyncLMStream",
+        "description": "An asynchronous stream for processing Language Model events, building a final LMResponse from a sequence of delta events."
+      },
+      {
+        "id": "lm_config_options",
+        "label": "LM Configuration Options",
+        "type": "component",
+        "link": null,
+        "title": "LM Configuration Options",
+        "description": "Classes like LMToolChoice, LMReasoningConfig, LMCacheConfig, and LMPromptCacheConfig that define various configuration settings for LM requests."
+      },
+      {
+        "id": "lm_delta_events",
+        "label": "LM Delta Events",
+        "type": "component",
+        "link": null,
+        "title": "LM Delta Events",
+        "description": "Classes representing incremental changes during an LM stream, such as text, thinking, tool calls, citations, images, and audio deltas."
+      },
+      {
+        "id": "lm_stream_events",
+        "label": "LM Stream Events",
+        "type": "component",
+        "link": null,
+        "title": "LM Stream Events",
+        "description": "Classes representing different stages of an LM stream, including start, delta, output end, and end events."
+      },
+      {
+        "id": "repl_variable",
+        "label": "REPLVariable",
+        "type": "component",
+        "link": null,
+        "title": "REPLVariable",
+        "description": "Metadata about a variable available in the REPL environment, including its name, type, description, constraints, and a preview."
+      },
+      {
+        "id": "sandbox_serializable",
+        "label": "SandboxSerializable",
+        "type": "component",
+        "link": null,
+        "title": "SandboxSerializable",
+        "description": "An abstract base class for types that can be serialized and injected into an RLM sandbox environment, enabling custom data handling."
+      }
+    ],
+    "edges": [
+      {
+        "source": "lm_message_constructors",
+        "target": "lm_request",
+        "label": "creates messages for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_config_options",
+        "target": "lm_request",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_delta_events",
+        "target": "lm_stream_events",
+        "label": "part of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_stream_events",
+        "target": "lm_stream",
+        "label": "consumed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_stream_events",
+        "target": "async_lm_stream",
+        "label": "consumed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sandbox_serializable",
+        "target": "repl_variable",
+        "label": "converts to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "lm_interaction_primitives",
+        "label": "LM Interaction Primitives",
+        "nodes": [
+          "lm_request",
+          "lm_message_constructors",
+          "lm_config_options"
+        ],
+        "title": "LM Interaction Primitives",
+        "description": "Core data types for constructing and managing interactions with Language Models, including requests, messages, and configuration.",
+        "role": "analytical"
+      },
+      {
+        "id": "lm_streaming_interfaces",
+        "label": "LM Streaming Interfaces",
+        "nodes": [
+          "lm_stream",
+          "async_lm_stream",
+          "lm_delta_events",
+          "lm_stream_events"
+        ],
+        "title": "LM Streaming Interfaces",
+        "description": "Interfaces and event types for handling real-time streaming responses from Language Models, both synchronously and asynchronously.",
+        "role": "analytical"
+      },
+      {
+        "id": "sandbox_integration",
+        "label": "Sandbox Integration",
+        "nodes": [
+          "repl_variable",
+          "sandbox_serializable"
+        ],
+        "title": "Sandbox Integration",
+        "description": "Data types and interfaces for integrating custom objects into a sandbox environment, facilitating their use in REPL and RLM contexts.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

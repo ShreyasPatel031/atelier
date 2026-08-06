@@ -1,0 +1,62 @@
+{
+  "title": "Graph Persistence",
+  "summary": "This module provides mechanisms for persisting the state and execution history of graph runs, supporting both file-based and in-memory storage solutions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "file_state_persistence",
+        "label": "File State Persistence",
+        "type": "component",
+        "link": null,
+        "title": "File State Persistence",
+        "description": "Manages the persistence of graph run states and snapshots to a JSON file, ensuring durability and recoverability across sessions."
+      },
+      {
+        "id": "full_state_persistence",
+        "label": "In-Memory State Persistence",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory State Persistence",
+        "description": "Stores graph run states and snapshots in memory, offering fast access for transient or short-lived graph executions."
+      },
+      {
+        "id": "base_state_persistence",
+        "label": "Base State Persistence",
+        "type": "component",
+        "link": null,
+        "title": "Base State Persistence",
+        "description": "An abstract base class defining the common interface for all state persistence implementations, including methods for snapshotting and loading."
+      }
+    ],
+    "edges": [
+      {
+        "source": "file_state_persistence",
+        "target": "base_state_persistence",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "full_state_persistence",
+        "target": "base_state_persistence",
+        "label": "implements",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "persistence_implementations",
+        "label": "Persistence Implementations",
+        "nodes": [
+          "file_state_persistence",
+          "full_state_persistence"
+        ],
+        "title": "Persistence Implementations",
+        "description": "Concrete implementations for storing and retrieving graph execution states.",
+        "role": "data"
+      }
+    ]
+  }
+}

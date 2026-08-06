@@ -1,0 +1,67 @@
+{
+  "repo_name": "dspy",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/dspy",
+  "repo_size_mb": 448941.30859375,
+  "total_files": 0,
+  "total_code_files": 258,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 1.8373839855194092,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 18.90634274482727,
+      "tokens_used": 7638,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 39.977771043777466,
+      "tokens_used": 511755,
+      "files_created": 27,
+      "files_created_list": [
+        "signature_management.json",
+        "program_proposal.json",
+        "prediction_modules.json",
+        "modules_and_retrievers.json",
+        "teleprompters.json",
+        "data_types_and_interfaces.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "evaluation_metrics.json",
+        "program_execution_and_primitives.json",
+        "documentation_and_hooks.json",
+        "module_tree.json",
+        "datasets.json",
+        "overview.json",
+        "core_modules.json",
+        "data_and_utilities.json",
+        "general_utilities.json",
+        "optimization_utilities.json",
+        "retrieval_modules.json",
+        "program_optimization_and_evaluation.json",
+        "sync_issues.json",
+        "lm_api_interaction.json",
+        "streaming_and_async.json",
+        "tool_and_adapter_integration.json",
+        "caching_and_utilities.json",
+        "base_lm_clients.json",
+        "language_model_integration.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 60.91150689125061,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/dspy/docs/overview.json",
+  "total_duration": 60.91155409812927,
+  "total_tokens": 519393,
+  "estimated_cost_usd": 0.0943,
+  "total_llm_calls": 24,
+  "total_files_created": 27,
+  "start_time": 1781381545.639977,
+  "end_time": 1781381606.551531
+}

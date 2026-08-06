@@ -1,0 +1,48 @@
+{
+    "generation_info": {
+        "timestamp": "2026-05-25T06:05:35.774872",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/transformers",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 18287,
+        "leaf_nodes": 360,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "overview.json",
+        "module_tree.json",
+        "first_module_tree.json",
+        "generation_utilities.json",
+        "multimodal_models.json",
+        "audio_feature_models.json",
+        "miscellaneous_models.json",
+        "model_conversion.json",
+        "general_processors.json",
+        "model_architectures.json",
+        "model_management_and_optimization.json",
+        "object_detection_models.json",
+        "conditional_generation_models.json",
+        "tokenization.json",
+        "pipelines.json",
+        "integrations.json",
+        "core_pipelines.json",
+        "modular_implementations.json",
+        "segmentation_models.json",
+        "submodule_md_failures.json",
+        "core_implementations.json",
+        "token_classification_mlm.json",
+        "model_quantization.json",
+        "document_understanding_models.json",
+        "sequence_classification_qa.json",
+        "image_processing.json",
+        "data_processing.json",
+        "cli_tools.json",
+        "training_and_inference_tools.json",
+        "model_fusion.json",
+        "causal_language_models.json",
+        "time_series_prediction.json"
+    ]
+}

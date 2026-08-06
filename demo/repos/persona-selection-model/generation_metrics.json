@@ -1,0 +1,67 @@
+{
+  "repo_name": "persona-selection-model",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model",
+  "repo_size_mb": 448954.70703125,
+  "total_files": 0,
+  "total_code_files": 42,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 1.005530834197998,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 8.058433055877686,
+      "tokens_used": 2941,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 30.469313144683838,
+      "tokens_used": 272883,
+      "files_created": 27,
+      "files_created_list": [
+        "sae_experimentation_and_analysis.json",
+        "dnd_playground_endpoints.json",
+        "sae_experiment_runner.json",
+        "persona_schemas.json",
+        "ssv_analysis_scripts.json",
+        "grid_generation_and_dnd.json",
+        "persona_steering_and_generation.json",
+        "sae_optimization_scripts.json",
+        "coherence_sweeps.json",
+        "evaluation_steps.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "system_utilities_and_orchestration.json",
+        "vector_composition_tools.json",
+        "module_tree.json",
+        "overview.json",
+        "sae_causality_analysis.json",
+        "benchmarking_scripts.json",
+        "api_endpoints.json",
+        "persona_evaluation_and_testing.json",
+        "sync_issues.json",
+        "scripted_analysis_and_benchmarking.json",
+        "steering_mechanisms.json",
+        "sae_endpoints.json",
+        "chat_interface.json",
+        "gpu_management.json",
+        "system_endpoints.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 39.55578303337097,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model/docs/overview.json",
+  "total_duration": 39.55581784248352,
+  "total_tokens": 275824,
+  "estimated_cost_usd": 0.0529,
+  "total_llm_calls": 24,
+  "total_files_created": 27,
+  "start_time": 1781381609.129201,
+  "end_time": 1781381648.6850188
+}

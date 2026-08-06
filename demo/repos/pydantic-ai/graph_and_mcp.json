@@ -1,0 +1,106 @@
+{
+    "title": "Graph and MCP",
+    "summary": "This module provides core functionalities for building and executing directed graphs, along with tools for interacting with Model Context Protocol (MCP) servers.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "graph_core",
+                "label": "Graph Core",
+                "type": "module",
+                "link": "graph_core",
+                "title": "Graph Core Module",
+                "description": "Defines the fundamental components for creating, running, and managing directed graphs, including nodes, graph definitions, and execution instances."
+            },
+            {
+                "id": "mcp_server",
+                "label": "MCP Server",
+                "type": "module",
+                "link": "mcp_server",
+                "title": "MCP Server Module",
+                "description": "Provides functionalities for interacting with Model Context Protocol (MCP) servers, handling HTTP/SSE transport, and loading MCP toolsets and server configurations."
+            },
+            {
+                "id": "persistence",
+                "label": "Graph Persistence",
+                "type": "module",
+                "link": "persistence",
+                "title": "Graph Persistence Module",
+                "description": "Offers mechanisms for persisting the state and execution history of graph runs, supporting both file-based and in-memory storage solutions."
+            },
+            {
+                "id": "model_integration",
+                "label": "Model Integration",
+                "type": "module",
+                "link": "model_integration",
+                "title": "Model Integration Module",
+                "description": "Handles the integration with various AI models, providing a unified interface for making model requests and managing streamed responses."
+            },
+            {
+                "id": "capabilities_and_tools",
+                "label": "Capabilities and Tools",
+                "type": "module",
+                "link": "capabilities_and_tools",
+                "title": "Capabilities and Tools Module",
+                "description": "Manages the definition, registration, and execution of various capabilities and tools that agents can use to perform actions and interact with external systems."
+            }
+        ],
+        "edges": [
+            {
+                "source": "graph_core",
+                "target": "persistence",
+                "label": "uses for state management",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_server",
+                "target": "model_integration",
+                "label": "sends model requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_server",
+                "target": "capabilities_and_tools",
+                "label": "provides toolsets to",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "graph_management",
+                "label": "Graph Management",
+                "nodes": [
+                    "graph_core",
+                    "persistence"
+                ],
+                "title": "Graph Management",
+                "description": "Components responsible for defining, executing, and persisting the state of directed graphs.",
+                "role": null
+            },
+            {
+                "id": "mcp_interaction",
+                "label": "MCP Interaction",
+                "nodes": [
+                    "mcp_server"
+                ],
+                "title": "Model Context Protocol Interaction",
+                "description": "Components facilitating communication with and management of Model Context Protocol (MCP) servers.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "model_integration",
+                    "capabilities_and_tools"
+                ],
+                "title": "External Dependencies",
+                "description": "Other modules that this module interacts with to provide its full functionality, such as AI model integration and agent capabilities.",
+                "role": null
+            }
+        ]
+    }
+}

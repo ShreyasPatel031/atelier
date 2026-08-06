@@ -1,0 +1,325 @@
+{
+  "title": "Retrievers Module",
+  "summary": "The retrievers module provides tools for efficient document retrieval, offering various strategies to fetch relevant information from diverse sources based on a given query. It includes components for semantic similarity, maximal marginal relevance, multi-query generation, and document compression.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_retriever",
+        "label": "BaseRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Base Retriever",
+        "description": "Abstract base class for all retrieval systems, defining the core interface for fetching relevant documents based on a query. It supports both synchronous and asynchronous operations."
+      },
+      {
+        "id": "semantic_similarity_example_selector",
+        "label": "SemanticSimilarityExampleSelector",
+        "type": "component",
+        "link": null,
+        "title": "Semantic Similarity Example Selector",
+        "description": "Selects examples based on their semantic similarity to a given input, leveraging vector stores for efficient nearest-neighbor search."
+      },
+      {
+        "id": "max_marginal_relevance_example_selector",
+        "label": "MaxMarginalRelevanceExampleSelector",
+        "type": "component",
+        "link": null,
+        "title": "Max Marginal Relevance Example Selector",
+        "description": "Selects examples using Max Marginal Relevance (MMR) to ensure diversity among the retrieved examples while maintaining relevance to the query."
+      },
+      {
+        "id": "llm_chain_extractor",
+        "label": "LLMChainExtractor",
+        "type": "component",
+        "link": null,
+        "title": "LLM Chain Extractor",
+        "description": "Compresses documents by using an LLM chain to extract only the most relevant parts of the document content based on a query."
+      },
+      {
+        "id": "llm_chain_filter",
+        "label": "LLMChainFilter",
+        "type": "component",
+        "link": null,
+        "title": "LLM Chain Filter",
+        "description": "Filters documents by using an LLM chain to determine their relevance to a query, dropping irrelevant documents from the result set."
+      },
+      {
+        "id": "cohere_rerank",
+        "label": "CohereRerank",
+        "type": "component",
+        "link": null,
+        "title": "Cohere Rerank",
+        "description": "Utilizes the Cohere Rerank API to reorder documents based on their relevance to a query, improving the quality of retrieved results."
+      },
+      {
+        "id": "ensemble_retriever",
+        "label": "EnsembleRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Ensemble Retriever",
+        "description": "Combines multiple retrievers and applies a rank fusion algorithm (e.g., Reciprocal Rank Fusion) to aggregate and re-rank their results, enhancing overall retrieval performance."
+      },
+      {
+        "id": "multi_query_retriever",
+        "label": "MultiQueryRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Query Retriever",
+        "description": "Generates multiple variations of a single query using an LLM, then retrieves documents for each variation and combines the unique results."
+      },
+      {
+        "id": "multi_vector_retriever",
+        "label": "MultiVectorRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Vector Retriever",
+        "description": "Retrieves parent documents by searching over smaller, embedded child chunks, ensuring that full document context is returned even when searching granular data."
+      },
+      {
+        "id": "self_query_retriever",
+        "label": "SelfQueryRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Self-Query Retriever",
+        "description": "Uses an LLM to construct structured queries for a vector store, allowing for more complex and nuanced retrieval based on natural language inputs."
+      },
+      {
+        "id": "exa_search_retriever",
+        "label": "ExaSearchRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Retriever",
+        "description": "Integrates with the Exa Search API to perform web searches and retrieve relevant documents, supporting various filtering and content options."
+      },
+      {
+        "id": "perplexity_search_retriever",
+        "label": "PerplexitySearchRetriever",
+        "type": "component",
+        "link": null,
+        "title": "Perplexity Search Retriever",
+        "description": "Leverages the Perplexity Search API to fetch web search results, offering parameters for result count, token limits, and domain/date filtering."
+      },
+      {
+        "id": "vector_store",
+        "label": "VectorStore",
+        "type": "external",
+        "link": null,
+        "title": "Vector Store",
+        "description": "An external component representing a vector database used for storing and querying embeddings, crucial for semantic search operations."
+      },
+      {
+        "id": "llm",
+        "label": "LLM",
+        "type": "external",
+        "link": null,
+        "title": "Large Language Model",
+        "description": "An external component representing a Large Language Model, used for generating queries, extracting information, or filtering documents."
+      },
+      {
+        "id": "embeddings",
+        "label": "Embeddings",
+        "type": "external",
+        "link": null,
+        "title": "Embeddings",
+        "description": "An external component responsible for generating vector representations of text, used by vector stores for similarity calculations."
+      },
+      {
+        "id": "byte_store",
+        "label": "ByteStore",
+        "type": "external",
+        "link": null,
+        "title": "Byte Store",
+        "description": "An external component for low-level storage of bytes, used by MultiVectorRetriever to store parent documents."
+      },
+      {
+        "id": "cohere_api",
+        "label": "Cohere API",
+        "type": "external",
+        "link": null,
+        "title": "Cohere API",
+        "description": "An external API service provided by Cohere, used for advanced text processing tasks like re-ranking documents based on relevance."
+      },
+      {
+        "id": "exa_api",
+        "label": "Exa API",
+        "type": "external",
+        "link": null,
+        "title": "Exa API",
+        "description": "An external API service provided by Exa, used for web search and content retrieval."
+      },
+      {
+        "id": "perplexity_api",
+        "label": "Perplexity API",
+        "type": "external",
+        "link": null,
+        "title": "Perplexity API",
+        "description": "An external API service provided by Perplexity, used for web search and content retrieval with various filtering options."
+      }
+    ],
+    "edges": [
+      {
+        "source": "semantic_similarity_example_selector",
+        "target": "vector_store",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "semantic_similarity_example_selector",
+        "target": "embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "max_marginal_relevance_example_selector",
+        "target": "vector_store",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "max_marginal_relevance_example_selector",
+        "target": "embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain_extractor",
+        "target": "llm",
+        "label": "extracts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain_filter",
+        "target": "llm",
+        "label": "filters with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_rerank",
+        "target": "cohere_api",
+        "label": "reranks via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ensemble_retriever",
+        "target": "base_retriever",
+        "label": "combines multiple",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_query_retriever",
+        "target": "llm",
+        "label": "generates queries with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_query_retriever",
+        "target": "base_retriever",
+        "label": "retrieves with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_vector_retriever",
+        "target": "vector_store",
+        "label": "searches chunks in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_vector_retriever",
+        "target": "byte_store",
+        "label": "stores documents in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "self_query_retriever",
+        "target": "llm",
+        "label": "constructs queries with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "self_query_retriever",
+        "target": "vector_store",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "exa_search_retriever",
+        "target": "exa_api",
+        "label": "searches via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perplexity_search_retriever",
+        "target": "perplexity_api",
+        "label": "searches via",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_retrieval_mechanisms",
+        "label": "Core Retrieval Mechanisms",
+        "nodes": [
+          "base_retriever",
+          "ensemble_retriever",
+          "multi_query_retriever",
+          "multi_vector_retriever",
+          "self_query_retriever"
+        ],
+        "title": "Core Retrieval Mechanisms",
+        "description": "Fundamental components for defining and executing document retrieval strategies, including base classes and common retrieval patterns.",
+        "role": "analytical"
+      },
+      {
+        "id": "document_processing_and_optimization",
+        "label": "Document Processing & Optimization",
+        "nodes": [
+          "llm_chain_extractor",
+          "llm_chain_filter",
+          "cohere_rerank"
+        ],
+        "title": "Document Processing and Optimization",
+        "description": "Components focused on refining and optimizing retrieved documents, including extraction, filtering, and re-ranking techniques.",
+        "role": "analytical"
+      },
+      {
+        "id": "example_selection_strategies",
+        "label": "Example Selection Strategies",
+        "nodes": [
+          "semantic_similarity_example_selector",
+          "max_marginal_relevance_example_selector"
+        ],
+        "title": "Example Selection Strategies",
+        "description": "Components for dynamically selecting relevant examples based on semantic similarity or maximal marginal relevance to improve prompt engineering.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_search_integrations",
+        "label": "External Search Integrations",
+        "nodes": [
+          "exa_search_retriever",
+          "perplexity_search_retriever"
+        ],
+        "title": "External Search Integrations",
+        "description": "Components that integrate with third-party search APIs to expand retrieval capabilities beyond internal data sources.",
+        "role": "surface"
+      }
+    ]
+  }
+}

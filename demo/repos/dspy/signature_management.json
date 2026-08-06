@@ -1,0 +1,88 @@
+{
+  "title": "Signature Management",
+  "summary": "This module defines and manages the structure of DSPy signatures, handling field definitions, type conversions, and metadata for language model interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "signature_meta",
+        "label": "SignatureMeta",
+        "type": "component",
+        "link": null,
+        "title": "Signature Metadata Class",
+        "description": "Metaclass for DSPy Signatures, responsible for dynamically creating signature classes, validating fields, and managing instructions and field properties."
+      },
+      {
+        "id": "old_input_field",
+        "label": "OldInputField",
+        "type": "component",
+        "link": null,
+        "title": "Legacy Input Field",
+        "description": "Represents a legacy input field within a DSPy Signature, used for compatibility with older field definitions."
+      },
+      {
+        "id": "old_output_field",
+        "label": "OldOutputField",
+        "type": "component",
+        "link": null,
+        "title": "Legacy Output Field",
+        "description": "Represents a legacy output field within a DSPy Signature, used for compatibility with older field definitions."
+      },
+      {
+        "id": "new_to_old_field_converter",
+        "label": "Convert New to Old Field",
+        "type": "component",
+        "link": null,
+        "title": "Field Conversion Utility",
+        "description": "A utility function that converts a new-style field definition into its corresponding legacy OldInputField or OldOutputField representation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "signature_meta",
+        "target": "new_to_old_field_converter",
+        "label": "uses for field conversion",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "new_to_old_field_converter",
+        "target": "old_input_field",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "new_to_old_field_converter",
+        "target": "old_output_field",
+        "label": "creates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "signature_definition",
+        "label": "Signature Definition",
+        "nodes": [
+          "signature_meta"
+        ],
+        "title": "Signature Definition and Management",
+        "description": "Handles the core logic for defining and managing DSPy Signatures, including field validation and instruction handling.",
+        "role": "analytical"
+      },
+      {
+        "id": "field_conversion",
+        "label": "Field Conversion",
+        "nodes": [
+          "new_to_old_field_converter",
+          "old_input_field",
+          "old_output_field"
+        ],
+        "title": "Field Type Conversion",
+        "description": "Manages the conversion between different versions of field definitions within DSPy Signatures.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

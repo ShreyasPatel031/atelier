@@ -1,0 +1,154 @@
+{
+  "title": "Data Handling Module",
+  "summary": "This module provides core functionalities for loading, indexing, and storing documents and vectors, including in-memory implementations and integration with LangSmith datasets.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_loader",
+        "label": "Base Document Loader",
+        "type": "component",
+        "link": null,
+        "title": "Base Document Loader",
+        "description": "Abstract base class for loading documents, providing methods for synchronous and asynchronous loading, and splitting documents into chunks."
+      },
+      {
+        "id": "langsmith_loader",
+        "label": "LangSmith Dataset Loader",
+        "type": "component",
+        "link": null,
+        "title": "LangSmith Dataset Loader",
+        "description": "Loads examples from LangSmith datasets as Document objects, using example inputs as page content and the full example in metadata."
+      },
+      {
+        "id": "document_indexing_api",
+        "label": "Document Indexing API",
+        "type": "component",
+        "link": null,
+        "title": "Document Indexing API",
+        "description": "Provides asynchronous indexing capabilities for documents into vector stores, managing updates, deletions, and deduplication based on document hashes."
+      },
+      {
+        "id": "document_index_base",
+        "label": "Base Document Index",
+        "type": "component",
+        "link": null,
+        "title": "Base Document Index",
+        "description": "Abstract interface for document indexing systems, supporting upsert, delete, and retrieval operations for documents by ID."
+      },
+      {
+        "id": "in_memory_document_index",
+        "label": "In-Memory Document Index",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Document Index",
+        "description": "An in-memory implementation of DocumentIndex, storing documents in a dictionary and providing simple search based on query counts."
+      },
+      {
+        "id": "vector_store_base",
+        "label": "Base Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Base Vector Store",
+        "description": "Abstract interface for vector stores, defining methods for adding texts/documents, deleting, and performing similarity searches with various algorithms."
+      },
+      {
+        "id": "in_memory_vector_store",
+        "label": "In-Memory Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Vector Store",
+        "description": "An in-memory implementation of VectorStore, using a dictionary to store vectors and computing cosine similarity for search operations."
+      },
+      {
+        "id": "in_memory_cache",
+        "label": "In-Memory Cache",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Cache",
+        "description": "A simple cache that stores key-value pairs in memory, useful for caching LLM responses based on prompt and LLM configuration."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_loader",
+        "target": "langsmith_loader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langsmith_loader",
+        "target": "document_indexing_api",
+        "label": "provides documents to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_index_base",
+        "target": "in_memory_document_index",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store_base",
+        "target": "in_memory_vector_store",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_indexing_api",
+        "target": "vector_store_base",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_indexing_api",
+        "target": "document_index_base",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "document_loading",
+        "label": "Document Loading",
+        "nodes": [
+          "base_loader",
+          "langsmith_loader"
+        ],
+        "title": "Document Loading",
+        "description": "Components responsible for loading raw data into structured Document objects.",
+        "role": "generative"
+      },
+      {
+        "id": "indexing_and_storage",
+        "label": "Indexing and Storage",
+        "nodes": [
+          "document_indexing_api",
+          "document_index_base",
+          "in_memory_document_index",
+          "vector_store_base",
+          "in_memory_vector_store"
+        ],
+        "title": "Indexing and Storage",
+        "description": "Components for managing and storing documents and their vector representations, enabling efficient retrieval.",
+        "role": "data"
+      },
+      {
+        "id": "caching",
+        "label": "Caching",
+        "nodes": [
+          "in_memory_cache"
+        ],
+        "title": "Caching",
+        "description": "Provides in-memory caching mechanisms for frequently accessed data or LLM responses.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "title": "Model Capabilities Tests",
+  "summary": "This module contains integration tests for various model capabilities, including audio transcription, image generation, embedding, quantization, thinking mode, tool calling, and multi-modal vision tasks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "audio_tests",
+        "label": "Audio Processing Tests",
+        "type": "component",
+        "link": null,
+        "title": "Audio Processing Tests",
+        "description": "Tests models' ability to transcribe audio and respond to audio input, including OpenAI API compatibility."
+      },
+      {
+        "id": "image_generation_tests",
+        "label": "Image Generation Tests",
+        "type": "component",
+        "link": null,
+        "title": "Image Generation Tests",
+        "description": "Verifies the creation and functionality of image generation models, including image output validation."
+      },
+      {
+        "id": "embedding_tests",
+        "label": "Embedding Functionality Tests",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Functionality Tests",
+        "description": "Evaluates model embedding capabilities, including cosine similarity, batch processing, truncation, and handling large inputs."
+      },
+      {
+        "id": "model_creation_tests",
+        "label": "Model Creation Tests",
+        "type": "component",
+        "link": null,
+        "title": "Model Creation Tests",
+        "description": "Tests the creation of models from Safetensors and GGUF formats, ensuring proper setup and basic functionality."
+      },
+      {
+        "id": "quantization_tests",
+        "label": "Quantization Tests",
+        "type": "component",
+        "link": null,
+        "title": "Quantization Tests",
+        "description": "Validates the quantization process for models, checking different quantization levels and their impact on model output."
+      },
+      {
+        "id": "thinking_mode_tests",
+        "label": "Thinking Mode Tests",
+        "type": "component",
+        "link": null,
+        "title": "Thinking Mode Tests",
+        "description": "Examines models' 'thinking' capabilities, verifying structured thought processes and proper suppression when not requested."
+      },
+      {
+        "id": "tool_calling_tests",
+        "label": "Tool Calling Tests",
+        "type": "component",
+        "link": null,
+        "title": "Tool Calling Tests",
+        "description": "Assesses models' ability to use external tools, including stress tests for complex multi-tool scenarios."
+      },
+      {
+        "id": "vision_tests",
+        "label": "Vision Capabilities Tests",
+        "type": "component",
+        "link": null,
+        "title": "Vision Capabilities Tests",
+        "description": "Tests multi-modal vision models for tasks like multi-turn conversations, object counting, scene understanding, spatial reasoning, detail recognition, and multi-image input."
+      },
+      {
+        "id": "model_architecture_tests",
+        "label": "Model Architecture Tests",
+        "type": "component",
+        "link": null,
+        "title": "Model Architecture Tests",
+        "description": "Verifies chat and embedding functionality across various model architectures, considering VRAM constraints and GPU loading."
+      },
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "type": "module",
+        "link": "api_endpoints",
+        "title": "API Endpoints",
+        "description": "Provides the HTTP API for interacting with the model serving and management system."
+      },
+      {
+        "id": "model_creation_and_conversion",
+        "label": "Model Creation and Conversion",
+        "type": "module",
+        "link": "model_creation_and_conversion",
+        "title": "Model Creation and Conversion",
+        "description": "Handles the creation and conversion of models from various formats into the system's internal representation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "audio_tests",
+        "target": "api_endpoints",
+        "label": "uses chat/audio API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_generation_tests",
+        "target": "api_endpoints",
+        "label": "uses generate API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_generation_tests",
+        "target": "model_creation_and_conversion",
+        "label": "creates imagegen models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_tests",
+        "target": "api_endpoints",
+        "label": "uses embedding API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_creation_tests",
+        "target": "model_creation_and_conversion",
+        "label": "creates models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quantization_tests",
+        "target": "model_creation_and_conversion",
+        "label": "creates quantized models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "thinking_mode_tests",
+        "target": "api_endpoints",
+        "label": "uses chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_calling_tests",
+        "target": "api_endpoints",
+        "label": "uses chat API with tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vision_tests",
+        "target": "api_endpoints",
+        "label": "uses chat API with images",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architecture_tests",
+        "target": "api_endpoints",
+        "label": "uses chat/embedding API",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "functional_validation",
+        "label": "Functional Validation",
+        "nodes": [
+          "audio_tests",
+          "image_generation_tests",
+          "embedding_tests",
+          "model_creation_tests",
+          "quantization_tests",
+          "thinking_mode_tests",
+          "tool_calling_tests",
+          "vision_tests",
+          "model_architecture_tests"
+        ],
+        "title": "Functional Validation",
+        "description": "Tests verifying specific capabilities and features of the models.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

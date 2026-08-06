@@ -1,0 +1,159 @@
+{
+  "title": "SAE SSV Optimization Scripts",
+  "summary": "This module provides scripts for optimizing Sparse Autoencoder (SAE) Sparse Steering Vectors (SSV) and evaluating their performance in steering language models. It supports both optimization-only runs and full generation/judging workflows.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "sae_ssv_optimize_main",
+        "label": "Main Optimization Workflow",
+        "type": "component",
+        "link": null,
+        "title": "Main Optimization Workflow",
+        "description": "Orchestrates the entire SAE SSV optimization process, including argument parsing, configuration loading, latent collection, F-statistic computation, vector optimization, and result saving."
+      },
+      {
+        "id": "sae_ssv_optimize_run_condition",
+        "label": "Run Steering Condition",
+        "type": "component",
+        "link": null,
+        "title": "Run Steering Condition",
+        "description": "Executes a steering condition by generating text with a given steering vector and alpha, then judging the generated replies against a rubric."
+      },
+      {
+        "id": "load_model_and_tokenizer",
+        "label": "Load Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Load Language Model and Tokenizer",
+        "description": "Loads the pre-trained language model and its corresponding tokenizer for text generation and latent collection."
+      },
+      {
+        "id": "load_sae_for_layer",
+        "label": "Load SAE",
+        "type": "external",
+        "link": null,
+        "title": "Load Sparse Autoencoder (SAE)",
+        "description": "Loads a specific Sparse Autoencoder (SAE) for a given layer, which is used to extract and manipulate sparse representations."
+      },
+      {
+        "id": "collect_latents",
+        "label": "Collect Latent Representations",
+        "type": "external",
+        "link": null,
+        "title": "Collect Latent Representations",
+        "description": "Gathers latent representations from the language model for a set of input pairs, which are then used for F-statistic computation and optimization."
+      },
+      {
+        "id": "optimize_v_steer",
+        "label": "Optimize Steering Vector",
+        "type": "external",
+        "link": null,
+        "title": "Optimize Sparse Steering Vector",
+        "description": "Performs the core optimization of the sparse steering vector based on collected latents, SAE decoder weights, and statistical measures."
+      },
+      {
+        "id": "judge_transcript",
+        "label": "Judge Generated Text",
+        "type": "external",
+        "link": null,
+        "title": "Judge Generated Text",
+        "description": "Evaluates the quality of generated text against a predefined rubric and system prompt, returning a score."
+      },
+      {
+        "id": "persona_trait_artifact",
+        "label": "Persona Trait Artifact",
+        "type": "module",
+        "link": "persona_schemas",
+        "title": "Persona Trait Artifact",
+        "description": "Represents a structured definition of a persona trait, including its rubric and evaluation questions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "load_model_and_tokenizer",
+        "label": "loads model if needed",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "load_sae_for_layer",
+        "label": "loads SAE",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "collect_latents",
+        "label": "collects latents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "optimize_v_steer",
+        "label": "calls optimization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "sae_ssv_optimize_run_condition",
+        "label": "invokes for evaluation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_main",
+        "target": "persona_trait_artifact",
+        "label": "validates bundle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_run_condition",
+        "target": "load_model_and_tokenizer",
+        "label": "uses model for generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_ssv_optimize_run_condition",
+        "target": "judge_transcript",
+        "label": "sends text for judging",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "optimization_process",
+        "label": "Optimization Process",
+        "nodes": [
+          "sae_ssv_optimize_main",
+          "sae_ssv_optimize_run_condition"
+        ],
+        "title": "SAE SSV Optimization Process",
+        "description": "Handles the core logic for optimizing Sparse Steering Vectors (SSV) based on SAE features and evaluating their impact.",
+        "role": "analytical"
+      },
+      {
+        "id": "dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "load_model_and_tokenizer",
+          "load_sae_for_layer",
+          "collect_latents",
+          "optimize_v_steer",
+          "judge_transcript",
+          "persona_trait_artifact"
+        ],
+        "title": "External System Dependencies",
+        "description": "Components and modules that this script relies on for its operations, such as model loading and judging services.",
+        "role": "data"
+      }
+    ]
+  }
+}

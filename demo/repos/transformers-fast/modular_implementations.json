@@ -1,0 +1,237 @@
+{
+  "title": "Modular Model Implementations",
+  "summary": "This module provides modular implementations of various transformer models, including causal language models, sequence classification models, and conditional generation models, often leveraging specialized architectures like MoE or multi-modal capabilities.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "AfmoeForCausalLM",
+        "label": "AFMOE Causal LM",
+        "type": "component",
+        "link": null,
+        "title": "AFMOE Causal Language Model",
+        "description": "A causal language model based on the AFMOE architecture, designed for text generation tasks. It incorporates Mixture-of-Experts (MoE) layers for efficient processing and supports various generation parameters."
+      },
+      {
+        "id": "BltForCausalLM",
+        "label": "BLT Causal LM",
+        "type": "component",
+        "link": null,
+        "title": "BLT Causal Language Model",
+        "description": "A causal language model that supports cross-attention mechanisms, enabling interaction with external features like image tiles for multi-modal generation. It processes text and visual inputs."
+      },
+      {
+        "id": "ColModernVBertProcessor",
+        "label": "ColModernVBert Processor",
+        "type": "component",
+        "link": null,
+        "title": "ColModernVBert Data Processor",
+        "description": "A multi-modal processor for ColModernVBert models, handling image preparation, text query processing, and computing late-interaction retrieval scores for document understanding and search."
+      },
+      {
+        "id": "DeepseekV4Model",
+        "label": "DeepseekV4 Core Model",
+        "type": "component",
+        "link": null,
+        "title": "DeepseekV4 Base Model",
+        "description": "The foundational model for DeepseekV4, featuring DeepseekV4DecoderLayer, DeepseekV4RotaryEmbedding, and DeepseekV4HyperHead. It provides the core architecture for advanced language processing tasks."
+      },
+      {
+        "id": "EvollaForProteinText2Text",
+        "label": "Evolla Protein Text2Text",
+        "type": "component",
+        "link": null,
+        "title": "Evolla Protein Text-to-Text Model",
+        "description": "A specialized model for protein-related text-to-text generation, capable of answering questions about protein sequences and structures. It integrates protein-specific inputs for contextual understanding."
+      },
+      {
+        "id": "FalconH1Model",
+        "label": "FalconH1 Core Model",
+        "type": "component",
+        "link": null,
+        "title": "FalconH1 Base Model",
+        "description": "The core FalconH1 model, incorporating FalconH1DecoderLayer and FalconH1RotaryEmbedding. Designed for efficient sequence processing with Mamba-like mechanisms, it forms the backbone for FalconH1-based tasks."
+      },
+      {
+        "id": "Gemma4TextModel",
+        "label": "Gemma4 Text Model",
+        "type": "component",
+        "link": null,
+        "title": "Gemma4 Core Text Model",
+        "description": "The base text model for Gemma4, featuring Per-Layer Embeddings (PLE) and specialized attention mechanisms. It enhances language understanding and generation by integrating context-aware and token-identity signals."
+      },
+      {
+        "id": "JetMoeForCausalLM",
+        "label": "JetMoe Causal LM",
+        "type": "component",
+        "link": null,
+        "title": "JetMoe Causal Language Model",
+        "description": "A causal language model utilizing a Mixture-of-Experts (MoE) architecture to improve performance and efficiency in text generation tasks. It includes mechanisms for load balancing across experts."
+      },
+      {
+        "id": "ModernBertDecoderForSequenceClassification",
+        "label": "ModernBertDecoder Sequence Classification",
+        "type": "component",
+        "link": null,
+        "title": "ModernBertDecoder for Sequence Classification",
+        "description": "A decoder-based model for sequence classification tasks, capable of handling various problem types like regression, single-label, and multi-label classification. It processes hidden states for final predictions."
+      },
+      {
+        "id": "Qwen2_5OmniForConditionalGeneration",
+        "label": "Qwen2.5 Omni Conditional Generation",
+        "type": "component",
+        "link": null,
+        "title": "Qwen2.5 Omni Multi-modal Generation",
+        "description": "A multi-modal model for conditional generation, capable of generating both text and audio responses. It integrates 'thinker' for text, 'talker' for speech tokens, and 'token2wav' for audio synthesis."
+      },
+      {
+        "id": "Qwen3NextModel",
+        "label": "Qwen3Next Core Model",
+        "type": "component",
+        "link": null,
+        "title": "Qwen3Next Base Model",
+        "description": "The foundational model for Qwen3Next, featuring Qwen3NextDecoderLayer, Qwen3NextRMSNorm, and Qwen3NextRotaryEmbedding. It supports both causal and linear attention mechanisms for diverse applications."
+      },
+      {
+        "id": "SwitchTransformersModel",
+        "label": "SwitchTransformers Encoder-Decoder",
+        "type": "component",
+        "link": null,
+        "title": "SwitchTransformers Encoder-Decoder Model",
+        "description": "An encoder-decoder model based on the Switch Transformers architecture, designed for sequence-to-sequence tasks. It leverages Mixture-of-Experts (MoE) for efficient and scalable processing across layers."
+      },
+      {
+        "id": "SwitchTransformersEncoderModel",
+        "label": "SwitchTransformers Encoder",
+        "type": "component",
+        "link": null,
+        "title": "SwitchTransformers Encoder-only Model",
+        "description": "An encoder-only model based on the Switch Transformers architecture, suitable for tasks requiring only encoding capabilities. It leverages Mixture-of-Experts (MoE) for efficient feature extraction."
+      },
+      {
+        "id": "T5GemmaForSequenceClassification",
+        "label": "T5Gemma Sequence Classification",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma for Sequence Classification",
+        "description": "A T5Gemma-based model for sequence classification, configurable to use either an encoder-decoder or encoder-only architecture. It applies a classification head to the final hidden states for predictions."
+      },
+      {
+        "id": "T5GemmaForTokenClassification",
+        "label": "T5Gemma Token Classification",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma for Token Classification",
+        "description": "A T5Gemma-based model for token classification, configurable to use either an encoder-decoder or encoder-only architecture. It predicts labels for each token based on the model's hidden states."
+      },
+      {
+        "id": "T5GemmaForConditionalGeneration",
+        "label": "T5Gemma Conditional Generation",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma for Conditional Generation",
+        "description": "A T5Gemma-based encoder-decoder model for conditional text generation, supporting masked language modeling loss and tied weights. It generates sequences based on input prompts and encoder outputs."
+      },
+      {
+        "id": "T5Gemma2ForSequenceClassification",
+        "label": "T5Gemma2 Sequence Classification",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma2 for Sequence Classification",
+        "description": "A T5Gemma2-based encoder-decoder model for sequence classification, supporting multi-modal inputs like pixel values. It processes combined text and image features for classification tasks."
+      },
+      {
+        "id": "T5Gemma2ForTokenClassification",
+        "label": "T5Gemma2 Token Classification",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma2 for Token Classification",
+        "description": "A T5Gemma2-based encoder-decoder model for token classification, supporting multi-modal inputs like pixel values. It assigns labels to individual tokens within multi-modal sequences."
+      },
+      {
+        "id": "T5Gemma2ForConditionalGeneration",
+        "label": "T5Gemma2 Conditional Generation",
+        "type": "component",
+        "link": null,
+        "title": "T5Gemma2 for Conditional Generation",
+        "description": "A T5Gemma2-based encoder-decoder model for multi-modal conditional generation, handling text and image inputs for diverse generation tasks. It supports advanced caching for efficient inference."
+      },
+      {
+        "id": "Zamba2ForSequenceClassification",
+        "label": "Zamba2 Sequence Classification",
+        "type": "component",
+        "link": null,
+        "title": "Zamba2 for Sequence Classification",
+        "description": "A Zamba2-based model for sequence classification tasks, extending the Zamba architecture with updated model components. It performs classification on pooled hidden states from the model."
+      },
+      {
+        "id": "Zamba2ForCausalLM",
+        "label": "Zamba2 Causal LM",
+        "type": "component",
+        "link": null,
+        "title": "Zamba2 Causal Language Model",
+        "description": "A Zamba2-based causal language model, extending the Zamba architecture for text generation tasks. It generates text sequentially based on previous tokens and model context."
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "generative_models",
+        "label": "Generative Models",
+        "nodes": [
+          "AfmoeForCausalLM",
+          "BltForCausalLM",
+          "EvollaForProteinText2Text",
+          "JetMoeForCausalLM",
+          "Qwen2_5OmniForConditionalGeneration",
+          "T5GemmaForConditionalGeneration",
+          "T5Gemma2ForConditionalGeneration",
+          "Zamba2ForCausalLM"
+        ],
+        "title": "Generative Models",
+        "description": "Components primarily designed for generating text, audio, or other sequences.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_models",
+        "label": "Analytical Models",
+        "nodes": [
+          "ModernBertDecoderForSequenceClassification",
+          "T5GemmaForSequenceClassification",
+          "T5GemmaForTokenClassification",
+          "T5Gemma2ForSequenceClassification",
+          "T5Gemma2ForTokenClassification",
+          "Zamba2ForSequenceClassification"
+        ],
+        "title": "Analytical Models",
+        "description": "Components primarily designed for classification, prediction, or other analytical tasks.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_processors",
+        "label": "Data Processors",
+        "nodes": [
+          "ColModernVBertProcessor"
+        ],
+        "title": "Data Processors",
+        "description": "Components for preparing input data or processing outputs, often handling multi-modal inputs.",
+        "role": "data"
+      },
+      {
+        "id": "core_model_architectures",
+        "label": "Core Model Architectures",
+        "nodes": [
+          "DeepseekV4Model",
+          "FalconH1Model",
+          "Gemma4TextModel",
+          "Qwen3NextModel",
+          "SwitchTransformersModel",
+          "SwitchTransformersEncoderModel"
+        ],
+        "title": "Core Model Architectures",
+        "description": "Foundational model components that provide the base architecture for various tasks, often wrapped by task-specific heads.",
+        "role": "surface"
+      }
+    ]
+  }
+}

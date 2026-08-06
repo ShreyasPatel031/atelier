@@ -1,0 +1,136 @@
+{
+    "title": "Utilities and Integrations",
+    "summary": "This module provides essential utilities and integrations for the Hugging Face Transformers library, covering model conversion, external tool integration, quantization techniques, and core mixins for advanced model functionalities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "conversion_tools",
+                "label": "Model Checkpoint Conversion",
+                "type": "module",
+                "link": "conversion_tools",
+                "title": "Model Checkpoint Conversion Tools",
+                "description": "Utilities for converting model checkpoints from various original frameworks (e.g., TensorFlow, PyTorch) into the Hugging Face Transformers format."
+            },
+            {
+                "id": "integrations",
+                "label": "External Integrations",
+                "type": "module",
+                "link": "integrations",
+                "title": "External Integrations Module",
+                "description": "Interfaces and utilities for integrating with external libraries and tools, such as hyperparameter search platforms and PEFT methods."
+            },
+            {
+                "id": "quantization",
+                "label": "Model Quantization",
+                "type": "module",
+                "link": "quantization",
+                "title": "Model Quantization Module",
+                "description": "Provides various quantization methods to reduce model size and improve inference speed, supporting different bit-widths and hardware."
+            },
+            {
+                "id": "core_mixins",
+                "label": "Core Mixins",
+                "type": "module",
+                "link": "core_mixins",
+                "title": "Core Mixins Module",
+                "description": "Foundational mixin classes for model generation and fusion, enabling advanced functionalities like continuous batching and optimized model operations."
+            },
+            {
+                "id": "model_architectures",
+                "label": "Model Architectures",
+                "type": "external",
+                "link": "model_architectures",
+                "title": "Model Architectures",
+                "description": "The core module defining various neural network architectures, which are often the target of conversion, quantization, or enhanced by mixins."
+            },
+            {
+                "id": "data_processing",
+                "label": "Data Processing",
+                "type": "external",
+                "link": "data_processing",
+                "title": "Data Processing",
+                "description": "Module responsible for preprocessing and postprocessing data, often used in conjunction with converted or integrated models."
+            }
+        ],
+        "edges": [
+            {
+                "source": "conversion_tools",
+                "target": "model_architectures",
+                "label": "outputs HF models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integrations",
+                "target": "model_architectures",
+                "label": "enhances/monitors models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "quantization",
+                "target": "model_architectures",
+                "label": "optimizes models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_mixins",
+                "target": "model_architectures",
+                "label": "adds functionality to models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_processing",
+                "target": "conversion_tools",
+                "label": "supports processor conversion",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_processing",
+                "target": "integrations",
+                "label": "provides data for logging",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_utilities",
+                "label": "Core Utilities",
+                "nodes": [
+                    "conversion_tools",
+                    "quantization",
+                    "core_mixins"
+                ],
+                "title": "Core Utilities",
+                "description": "Fundamental tools and components that enhance model compatibility, performance, and functionality within the Hugging Face ecosystem.",
+                "role": "analytical"
+            },
+            {
+                "id": "external_connectivity",
+                "label": "External Connectivity",
+                "nodes": [
+                    "integrations"
+                ],
+                "title": "External Connectivity",
+                "description": "Components facilitating seamless interaction and data exchange with third-party libraries and platforms.",
+                "role": "surface"
+            },
+            {
+                "id": "dependencies",
+                "label": "Dependencies",
+                "nodes": [
+                    "model_architectures",
+                    "data_processing"
+                ],
+                "title": "Module Dependencies",
+                "description": "Other key modules that provide foundational models and data handling capabilities, which are utilized or influenced by these utilities and integrations.",
+                "role": "data"
+            }
+        ]
+    }
+}

@@ -1,111 +1,125 @@
 {
     "title": "Observability Module Overview",
-    "summary": "This module provides comprehensive tools for monitoring the application's internal state, collecting key metrics and logs. It ensures system health, performance, and facilitates rapid debugging by centralizing and routing critical operational data.",
+    "summary": "This module provides comprehensive observability for the system by collecting and logging critical system-level metrics. It ensures that operational data, such as event counters and queue depths, is captured and made available for monitoring and analysis.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "observability_orchestrator",
-                "label": "Orchestrate Monitoring & Logging",
+                "id": "run_metrics_node",
+                "label": "Collect & Log System Metrics",
                 "type": "component",
-                "link": null,
-                "title": "Observability Orchestrator",
-                "description": "Coordinates the collection, processing, and routing of all observability data, including metrics and logs, to their respective destinations for analysis and alerting."
-            },
-            {
-                "id": "system_metrics_collector",
-                "label": "Collect System Metrics",
-                "type": "module",
                 "link": "system_metrics",
-                "title": "System Metrics Sub-module",
-                "description": "Gathers performance and health metrics from various parts of the system, such as event counts and resource utilization, for analysis by the observability core."
+                "title": "System Metrics Runner",
+                "description": "Orchestrates the entire metrics collection process, including logging setup, metric value updates, snapshot generation, and logging the final metrics data for system monitoring."
             },
             {
-                "id": "application_logs",
-                "label": "Generate Application Logs",
+                "id": "logging_setup_node",
+                "label": "Configure Logging",
                 "type": "external",
                 "link": null,
-                "title": "Application Log Sources",
-                "description": "Represents the various components within the application that generate log messages, providing detailed event information for debugging and monitoring."
+                "title": "Logging Configuration",
+                "description": "Sets up the logging environment, defining parameters such as the logging level and the destination for log messages, ensuring proper observability."
             },
             {
-                "id": "external_monitoring_platform",
-                "label": "External Monitoring Platform",
-                "type": "external",
-                "link": null,
-                "title": "External Monitoring Platform",
-                "description": "An external system or service responsible for long-term storage, visualization, and advanced analysis of collected metrics and logs, often including dashboards and alerting."
+                "id": "metrics_collector_node",
+                "label": "Manage Metrics Data",
+                "type": "component",
+                "link": "system_metrics",
+                "title": "Metrics Collector",
+                "description": "An internal component that manages the lifecycle of various metrics, allowing for their creation, incremental updates, and the generation of a comprehensive snapshot."
             },
             {
-                "id": "alert_notification_service",
-                "label": "Alert & Notification Service",
+                "id": "metrics_snapshot_node",
+                "label": "Metrics Snapshot Data",
+                "type": "data",
+                "link": null,
+                "title": "Collected Metrics Snapshot",
+                "description": "A structured, immutable data object containing the current values of all collected system metrics, such as event counters and gauge readings, at a specific moment."
+            },
+            {
+                "id": "log_output_node",
+                "label": "Output Metrics Log",
                 "type": "external",
                 "link": null,
-                "title": "Alert Notification Service",
-                "description": "A dedicated service that receives alert triggers and dispatches notifications to relevant personnel or systems via various channels like email, SMS, or incident management tools."
+                "title": "Metrics Log Destination",
+                "description": "Represents the external interface or destination where the processed metrics snapshot is written, typically for persistent storage, real-time dashboards, or debugging."
             }
         ],
         "edges": [
             {
-                "source": "system_metrics_collector",
-                "target": "observability_orchestrator",
-                "label": "Forwards collected metrics",
+                "source": "run_metrics_node",
+                "target": "logging_setup_node",
+                "label": "configures",
                 "title": null,
                 "description": null
             },
             {
-                "source": "application_logs",
-                "target": "observability_orchestrator",
-                "label": "Sends raw log events",
+                "source": "run_metrics_node",
+                "target": "metrics_collector_node",
+                "label": "uses to update",
                 "title": null,
                 "description": null
             },
             {
-                "source": "observability_orchestrator",
-                "target": "external_monitoring_platform",
-                "label": "Routes processed data",
+                "source": "metrics_collector_node",
+                "target": "metrics_snapshot_node",
+                "label": "generates",
                 "title": null,
                 "description": null
             },
             {
-                "source": "observability_orchestrator",
-                "target": "alert_notification_service",
-                "label": "Triggers alerts",
+                "source": "run_metrics_node",
+                "target": "metrics_snapshot_node",
+                "label": "receives",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_metrics_node",
+                "target": "log_output_node",
+                "label": "sends data to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "metrics_snapshot_node",
+                "target": "log_output_node",
+                "label": "is logged",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "core_processing_group",
-                "label": "Core Processing",
+                "id": "orchestration_group",
+                "label": "Orchestration & Logging",
                 "nodes": [
-                    "observability_orchestrator"
+                    "run_metrics_node",
+                    "logging_setup_node"
                 ],
-                "title": "Observability Core Processing",
-                "description": "The central component responsible for processing, transforming, and routing all incoming observability data to ensure it reaches the correct destinations.",
+                "title": "Metrics Orchestration & Setup",
+                "description": "Components responsible for initiating the metrics collection process, configuring the logging environment, and coordinating the flow of metric data.",
                 "role": null
             },
             {
-                "id": "data_sources_group",
-                "label": "Data Sources",
+                "id": "data_management_group",
+                "label": "Metrics Data Management",
                 "nodes": [
-                    "system_metrics_collector",
-                    "application_logs"
+                    "metrics_collector_node",
+                    "metrics_snapshot_node"
                 ],
-                "title": "Observability Data Sources",
-                "description": "Components and modules that generate or collect raw observability data, such as system performance metrics and application-specific log events.",
+                "title": "Metric Data Handling",
+                "description": "Manages the creation, updates, and snapshot generation of system metrics, ensuring data integrity and consistency for reporting.",
                 "role": null
             },
             {
-                "id": "external_destinations_group",
-                "label": "External Destinations",
+                "id": "output_interface_group",
+                "label": "External Output",
                 "nodes": [
-                    "external_monitoring_platform",
-                    "alert_notification_service"
+                    "log_output_node"
                 ],
-                "title": "External Observability Destinations",
-                "description": "External systems and services that consume processed observability data for storage, visualization, analysis, and dispatching alerts.",
+                "title": "Metrics Output Destination",
+                "description": "Represents the external system or interface where the collected and processed metrics are finally delivered for storage, visualization, or further analysis.",
                 "role": null
             }
         ]

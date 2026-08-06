@@ -1,0 +1,196 @@
+{
+  "title": "A2A Extensions and Updates",
+  "summary": "This module provides mechanisms for extending Agent-to-Agent (A2A) communication with custom functionalities like A2UI, and handles various update strategies such as polling, streaming, and push notifications.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "a2ui_client_extension",
+        "label": "A2UI Client Extension",
+        "type": "component",
+        "link": null,
+        "title": "A2UI Client Extension",
+        "description": "Injects A2UI prompt instructions, tracks UI state, and validates A2UI messages in agent responses for client-side A2A interactions."
+      },
+      {
+        "id": "a2ui_server_extension",
+        "label": "A2UI Server Extension",
+        "type": "component",
+        "link": null,
+        "title": "A2UI Server Extension",
+        "description": "Enables A2UI declarative UI generation on the server side, negotiating catalog preferences and wrapping A2UI messages as A2A DataParts."
+      },
+      {
+        "id": "validate_a2ui_event",
+        "label": "Validate A2UI Event",
+        "type": "component",
+        "link": null,
+        "title": "Validate A2UI Event",
+        "description": "Parses and validates A2UI client-to-server events against defined schemas for both v0.8 and v0.9 of the protocol."
+      },
+      {
+        "id": "get_extensions_from_config",
+        "label": "Get Extensions From Config",
+        "type": "component",
+        "link": null,
+        "title": "Get Extensions From Config",
+        "description": "Extracts and deduplicates extension URIs from A2A client configurations to identify active extensions."
+      },
+      {
+        "id": "polling_handler",
+        "label": "Polling Update Handler",
+        "type": "component",
+        "link": null,
+        "title": "Polling Update Handler",
+        "description": "Manages A2A delegation updates using a polling mechanism, repeatedly checking the task status until completion or timeout."
+      },
+      {
+        "id": "streaming_handler",
+        "label": "Streaming Update Handler",
+        "type": "component",
+        "link": null,
+        "title": "Streaming Update Handler",
+        "description": "Handles A2A delegation updates via Server-Sent Events (SSE) streaming, processing real-time task status and artifact updates."
+      },
+      {
+        "id": "push_notification_handler",
+        "label": "Push Notification Handler",
+        "type": "component",
+        "link": null,
+        "title": "Push Notification Handler",
+        "description": "Processes A2A delegation updates using push notifications (webhooks), waiting for external callbacks to signal task completion."
+      },
+      {
+        "id": "a2a_core",
+        "label": "A2A Core",
+        "type": "module",
+        "link": "a2a_core",
+        "title": "A2A Core Module",
+        "description": "The central module for Agent-to-Agent communication, handling configuration, message wrapping, and delegation utilities."
+      },
+      {
+        "id": "event_system",
+        "label": "Event System",
+        "type": "module",
+        "link": "event_system",
+        "title": "Event System Module",
+        "description": "Manages the event bus and defines various event types for tracking A2A interactions and system state changes."
+      }
+    ],
+    "edges": [
+      {
+        "source": "a2ui_client_extension",
+        "target": "a2a_core",
+        "label": "augments prompts and processes responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "a2ui_server_extension",
+        "target": "a2a_core",
+        "label": "negotiates and wraps A2UI messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_a2ui_event",
+        "target": "a2ui_client_extension",
+        "label": "validates client events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_a2ui_event",
+        "target": "a2ui_server_extension",
+        "label": "validates server messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_extensions_from_config",
+        "target": "a2a_core",
+        "label": "provides active extensions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "polling_handler",
+        "target": "a2a_core",
+        "label": "sends messages and polls status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streaming_handler",
+        "target": "a2a_core",
+        "label": "sends messages and streams updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "push_notification_handler",
+        "target": "a2a_core",
+        "label": "sends messages and awaits notifications",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "polling_handler",
+        "target": "event_system",
+        "label": "emits polling events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streaming_handler",
+        "target": "event_system",
+        "label": "emits streaming events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "push_notification_handler",
+        "target": "event_system",
+        "label": "emits push notification events",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "a2ui_extensions",
+        "label": "A2UI Extensions",
+        "nodes": [
+          "a2ui_client_extension",
+          "a2ui_server_extension",
+          "validate_a2ui_event"
+        ],
+        "title": "A2UI Extensions",
+        "description": "Components responsible for integrating A2UI (Agent-to-Agent User Interface) capabilities into the A2A communication flow, handling both client and server aspects.",
+        "role": "generative"
+      },
+      {
+        "id": "update_handlers",
+        "label": "Update Handlers",
+        "nodes": [
+          "polling_handler",
+          "streaming_handler",
+          "push_notification_handler"
+        ],
+        "title": "Update Handlers",
+        "description": "Different strategies for managing and receiving updates during A2A task execution, including polling, streaming, and push notifications.",
+        "role": "analytical"
+      },
+      {
+        "id": "configuration_and_registry",
+        "label": "Configuration and Registry",
+        "nodes": [
+          "get_extensions_from_config"
+        ],
+        "title": "Configuration and Registry",
+        "description": "Manages the registration and retrieval of A2A extensions based on configuration settings.",
+        "role": "data"
+      }
+    ]
+  }
+}

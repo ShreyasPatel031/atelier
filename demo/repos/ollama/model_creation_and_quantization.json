@@ -1,0 +1,143 @@
+{
+  "title": "Model Creation and Quantization",
+  "summary": "This module handles the creation and quantization of machine learning models, primarily focusing on Safetensors models. It includes functionalities for converting models, applying various quantization techniques, and managing model configurations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "create_model_validation",
+        "label": "Validate Model Inputs",
+        "type": "component",
+        "link": null,
+        "title": "Validate Model Inputs",
+        "description": "Ensures that the provided model directory and quantization options are valid before proceeding with model creation."
+      },
+      {
+        "id": "safetensors_model_creation",
+        "label": "Create Safetensors Model",
+        "type": "component",
+        "link": null,
+        "title": "Create Safetensors Model",
+        "description": "Core logic for processing Safetensors files, handling configuration, and preparing tensors for quantization or direct import."
+      },
+      {
+        "id": "quantization_logic",
+        "label": "Apply Quantization Techniques",
+        "type": "component",
+        "link": null,
+        "title": "Apply Quantization Techniques",
+        "description": "Manages various quantization methods (e.g., int4, int8, nvfp4, mxfp8) and applies them to model tensors based on configuration or explicit requests."
+      },
+      {
+        "id": "tensor_packing_and_transformation",
+        "label": "Pack & Transform Tensors",
+        "type": "component",
+        "link": null,
+        "title": "Pack and Transform Tensors",
+        "description": "Handles the packing of pre-quantized tensor triplets and performs transformations specific to certain model architectures like Qwen3.5."
+      },
+      {
+        "id": "manifest_and_layer_management",
+        "label": "Manage Model Manifest & Layers",
+        "type": "component",
+        "link": null,
+        "title": "Manage Model Manifest and Layers",
+        "description": "Orchestrates the creation of model layers and the final manifest, ensuring all components are correctly referenced."
+      },
+      {
+        "id": "laguna_specific_quantization",
+        "label": "Laguna Model Quantization",
+        "type": "component",
+        "link": null,
+        "title": "Laguna Model Quantization",
+        "description": "Applies specialized quantization rules for Laguna models, respecting source tensor precision and selectively quantizing routed experts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "create_model_validation",
+        "target": "safetensors_model_creation",
+        "label": "validated options",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "safetensors_model_creation",
+        "target": "quantization_logic",
+        "label": "model tensors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "safetensors_model_creation",
+        "target": "tensor_packing_and_transformation",
+        "label": "raw tensors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "safetensors_model_creation",
+        "target": "laguna_specific_quantization",
+        "label": "Laguna model tensors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quantization_logic",
+        "target": "manifest_and_layer_management",
+        "label": "quantized layers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tensor_packing_and_transformation",
+        "target": "manifest_and_layer_management",
+        "label": "packed layers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "laguna_specific_quantization",
+        "target": "manifest_and_layer_management",
+        "label": "quantized Laguna layers",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "model_input_handling",
+        "label": "Model Input Handling",
+        "nodes": [
+          "create_model_validation"
+        ],
+        "title": "Model Input Handling",
+        "description": "Handles initial validation and parsing of model files and configurations.",
+        "role": "surface"
+      },
+      {
+        "id": "core_model_processing",
+        "label": "Core Model Processing",
+        "nodes": [
+          "safetensors_model_creation",
+          "quantization_logic",
+          "tensor_packing_and_transformation",
+          "laguna_specific_quantization"
+        ],
+        "title": "Core Model Processing",
+        "description": "Contains the central logic for reading, transforming, and preparing model tensors.",
+        "role": "analytical"
+      },
+      {
+        "id": "output_generation",
+        "label": "Output Generation",
+        "nodes": [
+          "manifest_and_layer_management"
+        ],
+        "title": "Output Generation",
+        "description": "Responsible for assembling the final model manifest and layers.",
+        "role": "generative"
+      }
+    ]
+  }
+}

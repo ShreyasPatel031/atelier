@@ -1,0 +1,337 @@
+{
+  "title": "Core Pipelines Module",
+  "summary": "This module provides foundational and specialized pipeline classes for common NLP and multimodal tasks, including automatic speech recognition, document question answering, and image-text-to-text generation. It leverages a chunking mechanism for efficient processing of large inputs.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "audio_source",
+        "label": "Audio Input",
+        "type": "external",
+        "link": null,
+        "title": "Audio Input Source",
+        "description": "Raw audio data or audio file paths provided by the user for transcription."
+      },
+      {
+        "id": "document_source",
+        "label": "Document Image Input",
+        "type": "external",
+        "link": null,
+        "title": "Document Image Source",
+        "description": "Document images and optional pre-extracted text/bounding boxes for question answering."
+      },
+      {
+        "id": "multimodal_input",
+        "label": "Image & Text Input",
+        "type": "external",
+        "link": null,
+        "title": "Multimodal Image/Text Input",
+        "description": "Combined image and text data, potentially in conversational formats, for text generation."
+      },
+      {
+        "id": "chunk_pipeline_base",
+        "label": "Manage Chunked Data Processing",
+        "type": "component",
+        "link": null,
+        "title": "ChunkPipeline Base",
+        "description": "A base class providing core logic for pipelines that process large inputs in manageable chunks, optimizing memory and performance."
+      },
+      {
+        "id": "asr_pipeline",
+        "label": "Transcribe Speech",
+        "type": "component",
+        "link": null,
+        "title": "AutomaticSpeechRecognitionPipeline",
+        "description": "Orchestrates the process of converting audio input into transcribed text, handling various audio formats and model types (e.g., Whisper, CTC)."
+      },
+      {
+        "id": "dqa_pipeline",
+        "label": "Answer Questions from Documents",
+        "type": "component",
+        "link": null,
+        "title": "DocumentQuestionAnsweringPipeline",
+        "description": "Manages the workflow for answering questions based on visual documents, integrating OCR and model inference for LayoutLM-like or VisionEncoderDecoder models."
+      },
+      {
+        "id": "itt_pipeline",
+        "label": "Generate Text from Images & Text",
+        "type": "component",
+        "link": null,
+        "title": "ImageTextToTextPipeline",
+        "description": "Facilitates text generation from combined image and text inputs, supporting conversational and multimodal models."
+      },
+      {
+        "id": "pretrained_model",
+        "label": "Pretrained Model",
+        "type": "external",
+        "link": "model_architectures",
+        "title": "Pretrained Model",
+        "description": "A generic representation of a machine learning model used by the pipelines for inference across various tasks."
+      },
+      {
+        "id": "feature_extractor",
+        "label": "Feature Extractor",
+        "type": "external",
+        "link": "data_processing",
+        "title": "Feature Extractor",
+        "description": "Component responsible for preparing raw input data (e.g., audio, image) into model-compatible features."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Tokenizer",
+        "type": "external",
+        "link": "data_processing.tokenization",
+        "title": "Tokenizer",
+        "description": "Component for converting text into numerical tokens for model input and decoding model outputs."
+      },
+      {
+        "id": "processor",
+        "label": "Multimodal Processor",
+        "type": "external",
+        "link": "data_processing.general_processors",
+        "title": "Processor (Image/Text)",
+        "description": "A unified component for handling both image and text preprocessing for multimodal models."
+      },
+      {
+        "id": "external_lm",
+        "label": "External Language Model (pyctcdecode)",
+        "type": "external",
+        "link": null,
+        "title": "pyctcdecode BeamSearchDecoderCTC",
+        "description": "An external library used for boosting CTC decoding with a language model for improved transcription accuracy."
+      },
+      {
+        "id": "ocr_tool",
+        "label": "OCR Engine (Tesseract)",
+        "type": "external",
+        "link": null,
+        "title": "Tesseract OCR Engine",
+        "description": "An external tool used to extract text and bounding boxes from images when not provided explicitly."
+      },
+      {
+        "id": "transcription_output",
+        "label": "Transcribed Text Output",
+        "type": "external",
+        "link": null,
+        "title": "Transcribed Text Output",
+        "description": "The resulting text transcription from audio processing by the ASR pipeline."
+      },
+      {
+        "id": "qa_answer_output",
+        "label": "Document QA Answer Output",
+        "type": "external",
+        "link": null,
+        "title": "Document QA Answer Output",
+        "description": "The extracted answer to a question from a document, including score and location."
+      },
+      {
+        "id": "generated_text_output",
+        "label": "Generated Text Output",
+        "type": "external",
+        "link": null,
+        "title": "Generated Text Output",
+        "description": "The text generated by the multimodal model based on image and text inputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "chunk_pipeline_base",
+        "target": "asr_pipeline",
+        "label": "Inherits core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chunk_pipeline_base",
+        "target": "dqa_pipeline",
+        "label": "Inherits core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_source",
+        "target": "asr_pipeline",
+        "label": "Feeds audio data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_source",
+        "target": "dqa_pipeline",
+        "label": "Feeds document data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multimodal_input",
+        "target": "itt_pipeline",
+        "label": "Feeds multimodal data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "asr_pipeline",
+        "target": "transcription_output",
+        "label": "Produces transcription",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dqa_pipeline",
+        "target": "qa_answer_output",
+        "label": "Produces answer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "itt_pipeline",
+        "target": "generated_text_output",
+        "label": "Produces generated text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "asr_pipeline",
+        "target": "pretrained_model",
+        "label": "Uses ASR model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "asr_pipeline",
+        "target": "feature_extractor",
+        "label": "Uses audio feature extractor",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "asr_pipeline",
+        "target": "tokenizer",
+        "label": "Uses ASR tokenizer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "asr_pipeline",
+        "target": "external_lm",
+        "label": "Integrates for LM decoding",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dqa_pipeline",
+        "target": "pretrained_model",
+        "label": "Uses DQA model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dqa_pipeline",
+        "target": "feature_extractor",
+        "label": "Uses image feature extractor",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dqa_pipeline",
+        "target": "tokenizer",
+        "label": "Uses DQA tokenizer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dqa_pipeline",
+        "target": "ocr_tool",
+        "label": "Integrates for OCR",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "itt_pipeline",
+        "target": "pretrained_model",
+        "label": "Uses ITT model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "itt_pipeline",
+        "target": "processor",
+        "label": "Uses multimodal processor",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_pipelines",
+        "label": "Surface Pipelines",
+        "nodes": [
+          "asr_pipeline",
+          "dqa_pipeline",
+          "itt_pipeline"
+        ],
+        "title": "User-Facing Pipeline Implementations",
+        "description": "These are the concrete pipeline implementations that users interact with for specific tasks.",
+        "role": "surface"
+      },
+      {
+        "id": "core_pipeline_abstractions",
+        "label": "Core Pipeline Abstractions",
+        "nodes": [
+          "chunk_pipeline_base"
+        ],
+        "title": "Foundational Pipeline Logic",
+        "description": "Base classes and abstract components that provide common functionality and structure for specialized pipelines.",
+        "role": "generative"
+      },
+      {
+        "id": "input_sources",
+        "label": "Input Sources",
+        "nodes": [
+          "audio_source",
+          "document_source",
+          "multimodal_input"
+        ],
+        "title": "External Data Inputs",
+        "description": "Various types of external data that serve as input to the pipelines.",
+        "role": "data"
+      },
+      {
+        "id": "output_destinations",
+        "label": "Output Destinations",
+        "nodes": [
+          "transcription_output",
+          "qa_answer_output",
+          "generated_text_output"
+        ],
+        "title": "Pipeline Outputs",
+        "description": "The results produced by the execution of the pipelines.",
+        "role": "data"
+      },
+      {
+        "id": "data_processing_model_components",
+        "label": "Data Processing & Model Components",
+        "nodes": [
+          "pretrained_model",
+          "feature_extractor",
+          "tokenizer",
+          "processor"
+        ],
+        "title": "Shared Data & Model Components",
+        "description": "Components from other modules within the Transformers library that are utilized by these pipelines for data preparation and model inference.",
+        "role": "generative"
+      },
+      {
+        "id": "external_integrations",
+        "label": "External Integrations",
+        "nodes": [
+          "external_lm",
+          "ocr_tool"
+        ],
+        "title": "Third-Party Tool Integrations",
+        "description": "External libraries or tools integrated into the pipelines for specialized functionalities like language model boosting or OCR.",
+        "role": "generative"
+      }
+    ]
+  }
+}

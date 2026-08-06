@@ -1,0 +1,95 @@
+{
+    "title": "Model Adaptation",
+    "summary": "Enables flexible model input preparation through adapters and data augmentation. Transforms raw instances into model-ready prompts while applying perturbations for robustness testing.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "input_instances",
+                "label": "Receive Benchmark Instances",
+                "type": "module",
+                "link": "input_instances",
+                "title": "Instance intake",
+                "description": "Accepts benchmark instances containing input text, references, and metadata from scenarios."
+            },
+            {
+                "id": "adapter_selection",
+                "label": "Select Adaptation Strategy",
+                "type": "module",
+                "link": "adapter_selection",
+                "title": "Adapter factory",
+                "description": "Routes instances to appropriate adapter based on task type (generation, classification, multiple-choice) and model requirements."
+            },
+            {
+                "id": "prompt_construction",
+                "label": "Construct Model Prompts",
+                "type": "module",
+                "link": "prompt_construction",
+                "title": "Prompt building",
+                "description": "Formats instances into model-specific prompts, handling in-context examples, instructions, and token constraints."
+            },
+            {
+                "id": "augmentation_engine",
+                "label": "Apply Data Augmentations",
+                "type": "module",
+                "link": "augmentation_engine",
+                "title": "Perturbation system",
+                "description": "Applies text transformations (typos, contractions, dialect shifts, gender terms) to test model robustness across input variations."
+            },
+            {
+                "id": "output_prompts",
+                "label": "Emit Adapted Prompts",
+                "type": "module",
+                "link": "output_prompts",
+                "title": "Prompt output",
+                "description": "Returns model-ready prompts with optional augmented variants for inference and evaluation."
+            }
+        ],
+        "edges": [
+            {
+                "source": "input_instances",
+                "target": "adapter_selection",
+                "label": "raw instances",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_selection",
+                "target": "prompt_construction",
+                "label": "adapter type",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prompt_construction",
+                "target": "augmentation_engine",
+                "label": "formatted prompts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "augmentation_engine",
+                "target": "output_prompts",
+                "label": "augmented variants",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "adaptation_pipeline",
+                "label": "Adaptation Pipeline",
+                "nodes": [
+                    "input_instances",
+                    "adapter_selection",
+                    "prompt_construction",
+                    "augmentation_engine",
+                    "output_prompts"
+                ],
+                "title": "End-to-end adaptation",
+                "description": "Transforms benchmark instances into model-ready prompts with optional robustness augmentations.",
+                "role": null
+            }
+        ]
+    }
+}

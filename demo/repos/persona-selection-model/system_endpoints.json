@@ -1,0 +1,110 @@
+{
+  "title": "System Endpoints",
+  "summary": "This module provides core API endpoints for application lifecycle management, health checks, and metadata retrieval for the chat interface, ensuring the system is operational and correctly configured.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "lifespan",
+        "label": "Manage Application Lifespan",
+        "type": "component",
+        "link": null,
+        "title": "Application Lifespan Management",
+        "description": "Handles the startup and shutdown phases of the FastAPI application, including model loading and resource initialization based on environment variables like HF_TOKEN."
+      },
+      {
+        "id": "gate_chat_meta",
+        "label": "Retrieve Chat Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Chat Metadata Endpoint",
+        "description": "Provides metadata for the four-gate chat UI, including system prompts, default questions, configuration paths, and explanations for steering mechanisms, by loading data from the D&D playground bundle."
+      },
+      {
+        "id": "health",
+        "label": "Perform Health Check",
+        "type": "component",
+        "link": null,
+        "title": "System Health Check",
+        "description": "Reports the operational status of various system components, including model loading, SAE status, persona steering vector loading, and D&D playground bundle status."
+      },
+      {
+        "id": "dnd_playground_endpoints",
+        "label": "D&D Playground Endpoints",
+        "type": "module",
+        "link": "dnd_playground_endpoints",
+        "title": "D&D Playground Endpoints",
+        "description": "Provides API endpoints specifically for the Dungeons & Dragons playground functionality, allowing interaction with its features."
+      },
+      {
+        "id": "sae_endpoints",
+        "label": "SAE Endpoints",
+        "type": "module",
+        "link": "sae_endpoints",
+        "title": "SAE Endpoints",
+        "description": "Offers API endpoints for interacting with Sparse Autoencoder (SAE) functionalities, such as comparing and snapshotting SAE states."
+      },
+      {
+        "id": "chat_interface",
+        "label": "Chat Interface Endpoints",
+        "type": "module",
+        "link": "chat_interface",
+        "title": "Chat Interface Endpoints",
+        "description": "Exposes API endpoints for various chat functionalities, including streaming, persona steering, and different chat modes."
+      }
+    ],
+    "edges": [
+      {
+        "source": "lifespan",
+        "target": "health",
+        "label": "updates model status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_endpoints",
+        "target": "gate_chat_meta",
+        "label": "provides bundle data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_meta",
+        "target": "chat_interface",
+        "label": "configures chat UI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lifespan",
+        "target": "sae_endpoints",
+        "label": "initializes SAE",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "initialization_and_status",
+        "label": "Initialization & Status",
+        "nodes": [
+          "lifespan",
+          "health"
+        ],
+        "title": "Application Initialization and Status",
+        "description": "Components responsible for setting up the application environment, loading necessary models, and reporting the system's current health and configuration.",
+        "role": "analytical"
+      },
+      {
+        "id": "metadata_and_configuration",
+        "label": "Metadata & Configuration",
+        "nodes": [
+          "gate_chat_meta"
+        ],
+        "title": "Metadata and Configuration Services",
+        "description": "Endpoints that provide essential metadata and configuration details to other modules, particularly for the chat interface and its steering mechanisms.",
+        "role": "generative"
+      }
+    ]
+  }
+}

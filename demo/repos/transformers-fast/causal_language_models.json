@@ -1,0 +1,42 @@
+{
+    "title": "Causal Language Models",
+    "summary": "This module centralizes diverse causal language model architectures, including their core and modular implementations, for various text generation and sequence modeling tasks.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_implementations",
+                "label": "Core Implementations",
+                "type": "module",
+                "link": "core_implementations",
+                "title": "Core Causal LM Implementations",
+                "description": "Contains fundamental implementations of various causal language models and their forward passes."
+            },
+            {
+                "id": "modular_implementations",
+                "label": "Modular Implementations",
+                "type": "module",
+                "link": "modular_implementations",
+                "title": "Modular Causal LM Implementations",
+                "description": "Houses modularly designed causal language model components, enabling flexible integration and customization."
+            }
+        ],
+        "edges": [
+            {
+                "source": "core_implementations",
+                "target": "modular_implementations",
+                "label": "can inform"
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_architectures_group",
+                "label": "Model Architectures",
+                "title": "Model Architectures",
+                "description": "Groups different architectural approaches to causal language modeling.",
+                "role": "analytical",
+                "nodes": ["core_implementations", "modular_implementations"]
+            }
+        ]
+    }
+}

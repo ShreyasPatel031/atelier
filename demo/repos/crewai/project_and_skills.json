@@ -1,0 +1,106 @@
+{
+  "title": "Project and Skills Management",
+  "summary": "This module provides decorators for defining project components like agents, tasks, LLMs, and tools, along with utilities for managing and loading skills within a CrewAI project.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "project_annotations",
+        "label": "Project Annotations",
+        "type": "component",
+        "link": null,
+        "title": "Project Annotations",
+        "description": "Defines decorators for marking methods as agents, tasks, LLMs, tools, cache handlers, and kickoff hooks, as well as output formats."
+      },
+      {
+        "id": "crew_base_type",
+        "label": "Crew Base Type",
+        "type": "component",
+        "link": null,
+        "title": "Crew Base Type Metaclass",
+        "description": "A metaclass that transforms a decorated class into a CrewAI project, enabling the use of project annotations."
+      },
+      {
+        "id": "method_wrappers",
+        "label": "Decorated Method Wrappers",
+        "type": "component",
+        "link": null,
+        "title": "Decorated Method Wrappers",
+        "description": "Provides a base class for wrapping methods with decorator metadata, preserving callable signatures and attributes."
+      },
+      {
+        "id": "skill_loader",
+        "label": "Skill Resource Loader",
+        "type": "component",
+        "link": null,
+        "title": "Skill Resource Loader",
+        "description": "Handles the loading and promotion of skills to a higher disclosure level, making them accessible within the project."
+      },
+      {
+        "id": "project_utilities",
+        "label": "Project Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Project Utilities",
+        "description": "Contains utility functions, including a wrapper for memoizing method calls with caching."
+      }
+    ],
+    "edges": [
+      {
+        "source": "project_annotations",
+        "target": "method_wrappers",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_base_type",
+        "target": "project_annotations",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "project_utilities",
+        "target": "method_wrappers",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "project_definition",
+        "label": "Project Definition",
+        "nodes": [
+          "project_annotations",
+          "crew_base_type"
+        ],
+        "title": "Project Definition",
+        "description": "Components responsible for defining and structuring CrewAI projects using annotations and metaclasses.",
+        "role": "generative"
+      },
+      {
+        "id": "skill_management",
+        "label": "Skill Management",
+        "nodes": [
+          "skill_loader"
+        ],
+        "title": "Skill Management",
+        "description": "Handles the loading and integration of skills into the CrewAI project.",
+        "role": "data"
+      },
+      {
+        "id": "core_utilities",
+        "label": "Core Utilities",
+        "nodes": [
+          "method_wrappers",
+          "project_utilities"
+        ],
+        "title": "Core Utilities",
+        "description": "General utility components supporting project functionality, including method wrapping and caching.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

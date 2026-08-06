@@ -1,0 +1,231 @@
+{
+  "title": "Tool Utilities",
+  "summary": "This module provides utilities for managing and loading tools, including extracting tool specifications and loading various data formats for RAG (Retrieval Augmented Generation) purposes.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "tool_spec_extractor",
+        "label": "ToolSpecExtractor",
+        "type": "component",
+        "link": null,
+        "title": "Tool Specification Extractor",
+        "description": "Extracts detailed specifications, including parameters, environment variables, and package dependencies, from defined tools for documentation and validation."
+      },
+      {
+        "id": "base_agent_tool",
+        "label": "BaseAgentTool",
+        "type": "component",
+        "link": null,
+        "title": "Base Agent Tool",
+        "description": "Provides a foundational class for tools that interact with agents, including methods for sanitizing agent names and executing delegated tasks."
+      },
+      {
+        "id": "base_tool_utilities",
+        "label": "Base Tool Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Base Tool Utilities",
+        "description": "Offers core functionalities for tool management, such as converting tools to and from Langchain format, validating tool schemas, and handling asynchronous execution."
+      },
+      {
+        "id": "csv_loader",
+        "label": "CSVLoader",
+        "type": "component",
+        "link": null,
+        "title": "CSV Loader",
+        "description": "Loads and parses content from CSV files or URLs, extracting structured data and metadata for RAG."
+      },
+      {
+        "id": "directory_loader",
+        "label": "DirectoryLoader",
+        "type": "component",
+        "link": null,
+        "title": "Directory Loader",
+        "description": "Recursively loads and processes files from a specified directory, supporting filtering by extension and file limits for RAG."
+      },
+      {
+        "id": "json_loader",
+        "label": "JSONLoader",
+        "type": "component",
+        "link": null,
+        "title": "JSON Loader",
+        "description": "Loads and parses JSON content from files or URLs, converting it into a readable text format for RAG."
+      },
+      {
+        "id": "mdx_loader",
+        "label": "MDXLoader",
+        "type": "component",
+        "link": null,
+        "title": "MDX Loader",
+        "description": "Loads and cleans MDX (Markdown with JSX) content from files or URLs, removing JSX tags and formatting for RAG."
+      },
+      {
+        "id": "mysql_loader",
+        "label": "MySQLLoader",
+        "type": "component",
+        "link": null,
+        "title": "MySQL Loader",
+        "description": "Connects to a MySQL database and loads data based on a provided SQL query, formatting the results for RAG."
+      },
+      {
+        "id": "pdf_loader",
+        "label": "PDFLoader",
+        "type": "component",
+        "link": null,
+        "title": "PDF Loader",
+        "description": "Loads and extracts text content from PDF files or URLs, handling downloads and parsing for RAG."
+      },
+      {
+        "id": "postgres_loader",
+        "label": "PostgresLoader",
+        "type": "component",
+        "link": null,
+        "title": "PostgresLoader",
+        "description": "Connects to a PostgreSQL database and loads data based on a provided SQL query, formatting the results for RAG."
+      },
+      {
+        "id": "xml_loader",
+        "label": "XMLLoader",
+        "type": "component",
+        "link": null,
+        "title": "XML Loader",
+        "description": "Loads and parses XML content from files or URLs, extracting text and metadata for RAG."
+      },
+      {
+        "id": "tool_definitions",
+        "label": "Tool Definitions",
+        "type": "module",
+        "link": "tool_definitions",
+        "title": "Tool Definitions",
+        "description": "Defines a wide array of specialized tools for various tasks, including web scraping, data search, and interaction with external services."
+      },
+      {
+        "id": "rag_system",
+        "label": "RAG System",
+        "type": "module",
+        "link": "rag_system",
+        "title": "Retrieval Augmented Generation System",
+        "description": "Manages the core components for Retrieval Augmented Generation, including client factories, embedding functions, and collection management for vector databases."
+      },
+      {
+        "id": "agent_management",
+        "label": "Agent Management",
+        "type": "module",
+        "link": "agent_management",
+        "title": "Agent Management",
+        "description": "Handles the creation, configuration, and execution of agents, including their interaction with tools and other agents."
+      }
+    ],
+    "edges": [
+      {
+        "source": "tool_spec_extractor",
+        "target": "tool_definitions",
+        "label": "extracts specs from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_agent_tool",
+        "target": "agent_management",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_tool_utilities",
+        "target": "tool_definitions",
+        "label": "provides base functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "csv_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "directory_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mdx_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mysql_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pdf_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "postgres_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xml_loader",
+        "target": "rag_system",
+        "label": "provides data to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_management",
+        "label": "Tool Management",
+        "nodes": [
+          "tool_spec_extractor",
+          "base_agent_tool",
+          "base_tool_utilities"
+        ],
+        "title": "Tool Management",
+        "description": "Components responsible for defining, extracting specifications, and providing base functionalities for various tools.",
+        "role": "analytical"
+      },
+      {
+        "id": "rag_data_loaders",
+        "label": "RAG Data Loaders",
+        "nodes": [
+          "csv_loader",
+          "directory_loader",
+          "json_loader",
+          "mdx_loader",
+          "mysql_loader",
+          "pdf_loader",
+          "postgres_loader",
+          "xml_loader"
+        ],
+        "title": "RAG Data Loaders",
+        "description": "A collection of loaders designed to ingest and process data from diverse sources (files, databases, URLs) for Retrieval Augmented Generation.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "title": "Evaluation Metrics and Judges",
+  "summary": "This module provides various evaluators for assessing model outputs, including LLM-based judges, content containment checks, and statistical evaluators for report generation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "llm_judge",
+        "label": "LLM Judge",
+        "type": "component",
+        "link": null,
+        "title": "LLM Judge",
+        "description": "Evaluates model outputs against a rubric using a language model, providing a score and an assertion of pass/fail."
+      },
+      {
+        "id": "contains_evaluator",
+        "label": "Contains Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Contains Evaluator",
+        "description": "Checks if the model's output contains a specified value, supporting various data types and case sensitivity."
+      },
+      {
+        "id": "roc_auc_evaluator",
+        "label": "ROC AUC Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "ROC AUC Evaluator",
+        "description": "Computes the Receiver Operating Characteristic (ROC) curve and Area Under the Curve (AUC) for binary classification tasks from case data."
+      },
+      {
+        "id": "precision_recall_evaluator",
+        "label": "Precision-Recall Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Precision-Recall Evaluator",
+        "description": "Calculates and plots the Precision-Recall curve and its AUC, useful for evaluating binary classifiers, especially with imbalanced datasets."
+      },
+      {
+        "id": "kolmogorov_smirnov_evaluator",
+        "label": "Kolmogorov-Smirnov Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Kolmogorov-Smirnov Evaluator",
+        "description": "Generates a Kolmogorov-Smirnov plot and statistic, comparing the cumulative distribution functions of scores for positive and negative cases."
+      },
+      {
+        "id": "evaluator_context",
+        "label": "Evaluator Context",
+        "type": "component",
+        "link": null,
+        "title": "Evaluator Context",
+        "description": "Provides the necessary input, output, and expected output data for evaluators to perform their assessment."
+      },
+      {
+        "id": "report_evaluator_context",
+        "label": "Report Evaluator Context",
+        "type": "component",
+        "link": null,
+        "title": "Report Evaluator Context",
+        "description": "Supplies report-specific data, including cases and evaluation results, to evaluators that generate analytical reports."
+      },
+      {
+        "id": "model_integration",
+        "label": "Model Integration",
+        "type": "module",
+        "link": "model_integration",
+        "title": "Model Integration",
+        "description": "Handles interactions with various language models, providing a unified interface for model calls."
+      },
+      {
+        "id": "dataset_management",
+        "label": "Dataset Management",
+        "type": "module",
+        "link": "dataset_management",
+        "title": "Dataset Management",
+        "description": "Manages the creation and handling of evaluation datasets, providing structured inputs for evaluators."
+      }
+    ],
+    "edges": [
+      {
+        "source": "evaluator_context",
+        "target": "llm_judge",
+        "label": "input, output, expected",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluator_context",
+        "target": "contains_evaluator",
+        "label": "input, output, expected",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "report_evaluator_context",
+        "target": "roc_auc_evaluator",
+        "label": "report cases",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "report_evaluator_context",
+        "target": "precision_recall_evaluator",
+        "label": "report cases",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "report_evaluator_context",
+        "target": "kolmogorov_smirnov_evaluator",
+        "label": "report cases",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_integration",
+        "target": "llm_judge",
+        "label": "LLM for judging",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_management",
+        "target": "evaluator_context",
+        "label": "evaluation data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_management",
+        "target": "report_evaluator_context",
+        "label": "evaluation data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "common_evaluators",
+        "label": "Common Evaluators",
+        "nodes": [
+          "llm_judge",
+          "contains_evaluator"
+        ],
+        "title": "Common Evaluators",
+        "description": "General-purpose evaluators for direct assessment of model outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "report_evaluators",
+        "label": "Report Evaluators",
+        "nodes": [
+          "roc_auc_evaluator",
+          "precision_recall_evaluator",
+          "kolmogorov_smirnov_evaluator"
+        ],
+        "title": "Report Evaluators",
+        "description": "Evaluators designed to generate statistical reports and plots from aggregated evaluation data.",
+        "role": "analytical"
+      },
+      {
+        "id": "evaluation_contexts",
+        "label": "Evaluation Contexts",
+        "nodes": [
+          "evaluator_context",
+          "report_evaluator_context"
+        ],
+        "title": "Evaluation Contexts",
+        "description": "Data structures that provide the necessary information for evaluators to perform their tasks.",
+        "role": "data"
+      }
+    ]
+  }
+}

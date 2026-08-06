@@ -1,0 +1,147 @@
+{
+  "title": "External System Integrations",
+  "summary": "This module provides utilities for integrating with external tools and libraries, such as hyperparameter search platforms (WandB), experiment tracking (DVCLive), and efficient fine-tuning methods (PEFT). It enables seamless interaction between models and these external systems.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "wandb_backend",
+        "label": "WandB Backend",
+        "type": "component",
+        "link": null,
+        "title": "WandB Hyperparameter Search",
+        "description": "Manages integration with Weights & Biases for hyperparameter optimization, including running search and defining parameter spaces for model training."
+      },
+      {
+        "id": "dvclive_callback",
+        "label": "DVCLive Callback",
+        "type": "component",
+        "link": null,
+        "title": "DVCLive Experiment Tracking",
+        "description": "A TrainerCallback that logs training metrics, parameters, and model checkpoints to DVCLive for experiment tracking and data versioning."
+      },
+      {
+        "id": "peft_adapter_mixin",
+        "label": "PEFT Adapter Mixin",
+        "type": "component",
+        "link": null,
+        "title": "PEFT Adapter Management",
+        "description": "Provides functionalities for loading, adding, activating, and managing PEFT (Parameter-Efficient Fine-Tuning) adapters within models, supporting various PEFT methods like LoRA."
+      },
+      {
+        "id": "wandb_external",
+        "label": "Weights & Biases",
+        "type": "external",
+        "link": null,
+        "title": "Weights & Biases Platform",
+        "description": "An external platform for experiment tracking, visualization, and hyperparameter optimization, integrated via WandbBackend."
+      },
+      {
+        "id": "dvclive_external",
+        "label": "DVCLive",
+        "type": "external",
+        "link": null,
+        "title": "DVCLive Library",
+        "description": "An external library for experiment tracking and data versioning, used by DVCLiveCallback."
+      },
+      {
+        "id": "peft_library_external",
+        "label": "PEFT Library",
+        "type": "external",
+        "link": null,
+        "title": "PEFT Library",
+        "description": "An external library providing Parameter-Efficient Fine-Tuning methods, leveraged by PeftAdapterMixin for model adaptation."
+      },
+      {
+        "id": "trainer_module",
+        "label": "Trainer",
+        "type": "other_module",
+        "link": "training_and_inference_tools",
+        "title": "Model Training Utility",
+        "description": "The core utility that orchestrates the training and evaluation loops for models, interacting with callbacks and adapters."
+      },
+      {
+        "id": "model_architectures_module",
+        "label": "Model Architectures",
+        "type": "other_module",
+        "link": "model_architectures",
+        "title": "Pre-trained Model Architectures",
+        "description": "Various pre-trained model architectures that can be extended or fine-tuned using PEFT adapters."
+      }
+    ],
+    "edges": [
+      {
+        "source": "wandb_backend",
+        "target": "wandb_external",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wandb_backend",
+        "target": "trainer_module",
+        "label": "Used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dvclive_callback",
+        "target": "dvclive_external",
+        "label": "Logs metrics to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dvclive_callback",
+        "target": "trainer_module",
+        "label": "Registers as callback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "peft_adapter_mixin",
+        "target": "peft_library_external",
+        "label": "Leverages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "peft_adapter_mixin",
+        "target": "model_architectures_module",
+        "label": "Applies adapters to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trainer_module",
+        "target": "peft_adapter_mixin",
+        "label": "Manages adapters via",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "experiment_tracking_group",
+        "label": "Experiment Tracking & Hyperparameter Search",
+        "nodes": [
+          "wandb_backend",
+          "dvclive_callback"
+        ],
+        "title": "Experiment Tracking & Hyperparameter Search",
+        "description": "Components facilitating the tracking of experiments and optimization of hyperparameters using external platforms.",
+        "role": "analytical"
+      },
+      {
+        "id": "model_adaptation_group",
+        "label": "Model Adaptation",
+        "nodes": [
+          "peft_adapter_mixin"
+        ],
+        "title": "Model Adaptation with PEFT",
+        "description": "Utilities for efficiently adapting and fine-tuning large models using Parameter-Efficient Fine-Tuning (PEFT) methods.",
+        "role": "generative"
+      }
+    ]
+  }
+}

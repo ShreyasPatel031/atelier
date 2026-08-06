@@ -1,0 +1,137 @@
+{
+  "title": "Integrations Module",
+  "summary": "This module provides interfaces and utilities for integrating with external libraries and tools, such as hyperparameter search platforms and PEFT (Parameter-Efficient Fine-Tuning) methods.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "wandb_backend",
+        "label": "WandbBackend",
+        "type": "component",
+        "link": null,
+        "title": "Weights & Biases Backend",
+        "description": "Integrates with Weights & Biases for hyperparameter search, allowing tracking and management of experiment runs."
+      },
+      {
+        "id": "dvclive_callback",
+        "label": "DVCLiveCallback",
+        "type": "component",
+        "link": null,
+        "title": "DVCLive Callback",
+        "description": "A TrainerCallback for logging metrics and artifacts to DVCLive, enabling experiment versioning and reproducibility."
+      },
+      {
+        "id": "peft_adapter_mixin",
+        "label": "PeftAdapterMixin",
+        "type": "component",
+        "link": null,
+        "title": "PEFT Adapter Mixin",
+        "description": "Provides functionalities for loading, managing, and applying Parameter-Efficient Fine-Tuning (PEFT) adapters to models, including hotswapping and multi-adapter support."
+      },
+      {
+        "id": "hyperparameter_search",
+        "label": "Hyperparameter Search",
+        "type": "external",
+        "link": null,
+        "title": "External Hyperparameter Search",
+        "description": "External libraries or services used for optimizing model hyperparameters, such as Weights & Biases."
+      },
+      {
+        "id": "dvclive_library",
+        "label": "DVCLive Library",
+        "type": "external",
+        "link": null,
+        "title": "External DVCLive Library",
+        "description": "The DVCLive library for experiment tracking, metric logging, and artifact management."
+      },
+      {
+        "id": "peft_library",
+        "label": "PEFT Library",
+        "type": "external",
+        "link": null,
+        "title": "External PEFT Library",
+        "description": "The Parameter-Efficient Fine-Tuning (PEFT) library, providing methods for efficient adaptation of large pre-trained models."
+      },
+      {
+        "id": "trainer_callback",
+        "label": "TrainerCallback",
+        "type": "external",
+        "link": null,
+        "title": "Trainer Callback",
+        "description": "A base class from the Trainer module that allows custom actions during the training loop."
+      },
+      {
+        "id": "model_architectures",
+        "label": "Model Architectures",
+        "type": "module",
+        "link": "model_architectures",
+        "title": "Model Architectures",
+        "description": "Defines various neural network architectures for different modalities and tasks."
+      }
+    ],
+    "edges": [
+      {
+        "source": "wandb_backend",
+        "target": "hyperparameter_search",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dvclive_callback",
+        "target": "dvclive_library",
+        "label": "logs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dvclive_callback",
+        "target": "trainer_callback",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "peft_adapter_mixin",
+        "target": "peft_library",
+        "label": "utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "peft_adapter_mixin",
+        "target": "model_architectures",
+        "label": "applies adapters to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "external_integrations",
+        "label": "External Integrations",
+        "nodes": [
+          "wandb_backend",
+          "dvclive_callback",
+          "peft_adapter_mixin"
+        ],
+        "title": "External Integrations",
+        "description": "Components that facilitate interaction with third-party tools and libraries.",
+        "role": "surface"
+      },
+      {
+        "id": "dependencies",
+        "label": "Dependencies",
+        "nodes": [
+          "hyperparameter_search",
+          "dvclive_library",
+          "peft_library",
+          "trainer_callback"
+        ],
+        "title": "External Dependencies",
+        "description": "External libraries and frameworks that this module integrates with.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "title": "Coherence Sweeps",
+  "summary": "This module performs alpha sweeps to determine optimal scaling factors for persona traits based on a coherence floor, outputting recommended scales for sycophancy and chaos traits.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "main_entrypoint",
+        "label": "Run Coherence Alpha Sweep",
+        "type": "component",
+        "link": null,
+        "title": "Main Entrypoint for Coherence Alpha Sweep",
+        "description": "Initializes logging, parses command-line arguments, and orchestrates the coherence alpha sweep for specified persona traits (sycophancy, chaos, or both)."
+      },
+      {
+        "id": "load_trait_bundles",
+        "label": "Load Trait Bundles and Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Load Persona Trait Data",
+        "description": "Loads persona trait bundles (JSON) and corresponding persona vectors (PyTorch tensors) from specified file paths for sycophancy and chaos traits."
+      },
+      {
+        "id": "run_sweep_logic",
+        "label": "Execute Alpha Sweep Logic",
+        "type": "component",
+        "link": null,
+        "title": "Perform Coherence Alpha Sweep",
+        "description": "Executes the core logic for the coherence alpha sweep, iterating through alpha values to find the optimal scaling factor that meets the coherence floor."
+      },
+      {
+        "id": "output_results",
+        "label": "Output Results to JSON",
+        "type": "component",
+        "link": null,
+        "title": "Save and Display Sweep Results",
+        "description": "Formats the sweep results, including recommended scaling factors, into a JSON document and writes it to a specified output file, also printing to console."
+      },
+      {
+        "id": "persona_evaluation_and_testing",
+        "label": "Persona Evaluation and Testing",
+        "type": "module",
+        "link": "persona_evaluation_and_testing",
+        "title": "Persona Evaluation and Testing",
+        "description": "This module provides tools and scripts for validating, evaluating, and testing persona steering mechanisms and their effects on model behavior."
+      }
+    ],
+    "edges": [
+      {
+        "source": "main_entrypoint",
+        "target": "load_trait_bundles",
+        "label": "configures paths",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_trait_bundles",
+        "target": "run_sweep_logic",
+        "label": "provides trait data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_sweep_logic",
+        "target": "persona_evaluation_and_testing",
+        "label": "uses evaluation metrics",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_sweep_logic",
+        "target": "output_results",
+        "label": "generates sweep data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_entrypoint",
+        "target": "output_results",
+        "label": "orchestrates output",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "sweep_orchestration",
+        "label": "Sweep Orchestration",
+        "nodes": [
+          "main_entrypoint",
+          "load_trait_bundles",
+          "output_results"
+        ],
+        "title": "Coherence Sweep Orchestration",
+        "description": "Handles the overall flow of the coherence alpha sweep, from argument parsing to result output.",
+        "role": "analytical"
+      },
+      {
+        "id": "core_sweep_logic",
+        "label": "Core Sweep Logic",
+        "nodes": [
+          "run_sweep_logic"
+        ],
+        "title": "Core Alpha Sweep Computation",
+        "description": "Encapsulates the iterative process of adjusting alpha values and evaluating coherence to find optimal scaling factors.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

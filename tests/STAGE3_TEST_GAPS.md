@@ -1,5 +1,7 @@
 # Stage 3 output vs tests — coverage gaps
 
+See also **[Generation quality pipeline](../codewiki/docs/generation-quality-pipeline.md)** (Stage 3 → Stage 4 catch → prompt → tests).
+
 This document maps **what the LLM / agents are supposed to guarantee** to **what automated tests actually assert**, so you can close gaps systematically.
 
 ## What existing tests cover
@@ -20,6 +22,7 @@ This document maps **what the LLM / agents are supposed to guarantee** to **what
 | `DIAGRAM_JSON` node `id` set ⊆ `children` keys (or documented exceptions) | `validate_children` in `diagram_schema.py` **never called**; no test |
 | Non-empty `label` on diagram nodes | No test |
 | Edges reference existing node ids | No test (see `audit_docs_state`: `diagram_edges_unknown_endpoint`) |
+| `{module}.json` parseable for every tree module | `invalid_module_json_parse` in presync audit; `IssueType.JSON_PARSE_ERROR` in sync |
 | Stage 4.5 repair rate / `presync_audit` | **Now** measurable via `audit_docs_state` + `sync_issues.json` `metrics` |
 
 ## Recommended additions (pytest)

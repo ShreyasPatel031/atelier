@@ -1,0 +1,151 @@
+{
+  "title": "Utilities Module",
+  "summary": "This module provides a collection of general-purpose utilities, including concurrency management, direct model interaction, prompt formatting, and deprecated function handling.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "concurrency_limiter",
+        "label": "Concurrency Limiter",
+        "type": "component",
+        "link": null,
+        "title": "Concurrency Limiter",
+        "description": "Manages concurrent operations, tracking waiting tasks for observability and enforcing queue limits to prevent overload."
+      },
+      {
+        "id": "direct_model_requests",
+        "label": "Direct Model Requests",
+        "type": "component",
+        "link": null,
+        "title": "Direct Model Requests",
+        "description": "Provides synchronous and asynchronous methods for direct interaction with language models, including streaming responses."
+      },
+      {
+        "id": "format_prompt",
+        "label": "Format Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Format Prompt",
+        "description": "Formats Python objects into XML, useful for presenting structured data to LLMs in a readable format."
+      },
+      {
+        "id": "run_context",
+        "label": "Run Context",
+        "type": "component",
+        "link": null,
+        "title": "Run Context",
+        "description": "Encapsulates information about the current agent run, including messages, model settings, and tool management."
+      },
+      {
+        "id": "pending_message_queue",
+        "label": "Pending Message Queue",
+        "type": "component",
+        "link": null,
+        "title": "Pending Message Queue",
+        "description": "Manages messages queued for injection into the agent conversation, allowing for prioritized delivery."
+      },
+      {
+        "id": "deprecated_callable",
+        "label": "Deprecated Callable Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Callable Decorator",
+        "description": "A decorator for marking properties as deprecated, providing a mechanism for graceful API evolution."
+      },
+      {
+        "id": "model_integration",
+        "label": "Model Integration",
+        "type": "module",
+        "link": "model_integration",
+        "title": "Model Integration",
+        "description": "Handles interactions with various language models, including request and response processing."
+      },
+      {
+        "id": "agent_framework",
+        "label": "Agent Framework",
+        "type": "module",
+        "link": "agent_framework",
+        "title": "Agent Framework",
+        "description": "Provides the core components for building and managing AI agents, including prompt handling and tool execution."
+      },
+      {
+        "id": "capabilities_and_tools",
+        "label": "Capabilities and Tools",
+        "type": "module",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities and Tools",
+        "description": "Defines and manages the capabilities and tools that AI agents can utilize to perform tasks."
+      }
+    ],
+    "edges": [
+      {
+        "source": "direct_model_requests",
+        "target": "model_integration",
+        "label": "sends requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_context",
+        "target": "model_integration",
+        "label": "uses model from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_context",
+        "target": "pending_message_queue",
+        "label": "enqueues messages to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pending_message_queue",
+        "target": "agent_framework",
+        "label": "drains into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "model_integration",
+        "label": "limits model calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_context",
+        "target": "capabilities_and_tools",
+        "label": "manages tools via",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_utilities",
+        "label": "Core Utilities",
+        "nodes": [
+          "concurrency_limiter",
+          "direct_model_requests",
+          "format_prompt",
+          "deprecated_callable"
+        ],
+        "title": "Core Utilities",
+        "description": "Fundamental utility components supporting various aspects of the AI system.",
+        "role": "analytical"
+      },
+      {
+        "id": "agent_runtime",
+        "label": "Agent Runtime Context",
+        "nodes": [
+          "run_context",
+          "pending_message_queue"
+        ],
+        "title": "Agent Runtime Context",
+        "description": "Components related to managing the execution context and message flow within an AI agent's run.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

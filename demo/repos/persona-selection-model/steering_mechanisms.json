@@ -1,0 +1,134 @@
+{
+  "title": "Steering Mechanisms",
+  "summary": "This module implements core functionalities for steering large language models (LLMs) using persona vectors, including generating steered responses and evaluating the stability of these steering vectors.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_arm",
+        "label": "Compute Activation Residuals",
+        "type": "component",
+        "link": null,
+        "title": "Compute Activation Residuals",
+        "description": "Calculates the mean residual activations across multiple rollouts for a given system, question, and assistant response, providing insights into model behavior."
+      },
+      {
+        "id": "split_half_cosine",
+        "label": "Evaluate Vector Stability",
+        "type": "component",
+        "link": null,
+        "title": "Evaluate Vector Stability",
+        "description": "Assesses the stability and reliability of persona vector directions using a split-half cosine similarity method, indicating whether the direction is stable, partially converged, or noise-dominated."
+      },
+      {
+        "id": "along_persona_vector",
+        "label": "Measure Alignment with Persona Vector",
+        "type": "component",
+        "link": null,
+        "title": "Measure Alignment with Persona Vector",
+        "description": "Measures how well a model's hidden states align with a specified persona vector and an orthogonal 'unsteered' vector at a given steering layer."
+      },
+      {
+        "id": "generate_once",
+        "label": "Generate Steered Response",
+        "type": "component",
+        "link": null,
+        "title": "Generate Steered Response",
+        "description": "Generates a single model response, optionally applying steering via a forward hook to influence the model's output based on a persona vector."
+      },
+      {
+        "id": "run_gate_agent_turn_stream",
+        "label": "Stream Gated Agent Turn",
+        "type": "component",
+        "link": null,
+        "title": "Stream Gated Agent Turn",
+        "description": "Manages a multi-turn conversation with an agent, applying dynamic gating based on persona contributions and streaming token-by-token responses to the client."
+      },
+      {
+        "id": "persona_evaluation_and_testing",
+        "label": "Persona Evaluation and Testing",
+        "type": "module",
+        "link": "persona_evaluation_and_testing",
+        "title": "Persona Evaluation and Testing",
+        "description": "Handles the validation, sanity checks, and A/B testing of persona steering mechanisms, ensuring their effectiveness and reliability."
+      },
+      {
+        "id": "chat_interface",
+        "label": "Chat Interface",
+        "type": "module",
+        "link": "chat_interface",
+        "title": "Chat Interface",
+        "description": "Provides the user-facing endpoints for interacting with the chat system, including persona-steered chat functionalities."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_arm",
+        "target": "split_half_cosine",
+        "label": "activation residuals",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_arm",
+        "target": "along_persona_vector",
+        "label": "hidden states",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_once",
+        "target": "run_gate_agent_turn_stream",
+        "label": "steered generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "chat_interface",
+        "label": "streamed responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "split_half_cosine",
+        "target": "persona_evaluation_and_testing",
+        "label": "vector stability metrics",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "along_persona_vector",
+        "target": "persona_evaluation_and_testing",
+        "label": "alignment scores",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "activation_analysis",
+        "label": "Activation Analysis",
+        "nodes": [
+          "run_arm",
+          "split_half_cosine",
+          "along_persona_vector"
+        ],
+        "title": "Activation Analysis",
+        "description": "Components responsible for computing and analyzing model activations to understand and evaluate steering vectors.",
+        "role": "analytical"
+      },
+      {
+        "id": "steering_application",
+        "label": "Steering Application",
+        "nodes": [
+          "generate_once",
+          "run_gate_agent_turn_stream"
+        ],
+        "title": "Steering Application",
+        "description": "Components that apply steering mechanisms during text generation and manage multi-turn steered conversations.",
+        "role": "generative"
+      }
+    ]
+  }
+}

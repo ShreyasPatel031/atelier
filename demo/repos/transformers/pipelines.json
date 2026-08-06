@@ -1,0 +1,147 @@
+{
+  "title": "Pipelines Module",
+  "summary": "The pipelines module provides high-level, ready-to-use abstractions for various NLP, vision, and audio tasks, simplifying model inference and data processing for end-users.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "automatic_speech_recognition_pipeline",
+        "label": "Automatic Speech Recognition Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Automatic Speech Recognition Pipeline",
+        "description": "Transcribes spoken audio into text, supporting various audio formats and models like Whisper, CTC, and seq2seq."
+      },
+      {
+        "id": "document_question_answering_pipeline",
+        "label": "Document Question Answering Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Document Question Answering Pipeline",
+        "description": "Answers questions based on document images, optionally performing OCR to extract text and bounding boxes."
+      },
+      {
+        "id": "image_text_to_text_pipeline",
+        "label": "Image-Text-to-Text Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Image-Text-to-Text Pipeline",
+        "description": "Generates text from image and text inputs, supporting conversational models and various input formats."
+      },
+      {
+        "id": "chunk_pipeline",
+        "label": "Chunk Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Chunk Pipeline Base Class",
+        "description": "A base class for pipelines that process inputs in chunks, managing preprocessing, forwarding, and postprocessing steps."
+      },
+      {
+        "id": "cli_tools",
+        "label": "CLI Tools",
+        "type": "module",
+        "link": "cli_tools",
+        "title": "CLI Tools",
+        "description": "Provides command-line interface utilities for interacting with Hugging Face Transformers functionalities, such as serving models."
+      },
+      {
+        "id": "model_architectures",
+        "label": "Model Architectures",
+        "type": "module",
+        "link": "model_architectures",
+        "title": "Model Architectures",
+        "description": "Defines the various model architectures available in the library, including text, vision, and audio models."
+      },
+      {
+        "id": "data_processing",
+        "label": "Data Processing",
+        "type": "module",
+        "link": "data_processing",
+        "title": "Data Processing",
+        "description": "Handles the preprocessing and postprocessing of data for different modalities, including tokenization, feature extraction, and image manipulation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "automatic_speech_recognition_pipeline",
+        "target": "chunk_pipeline",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_question_answering_pipeline",
+        "target": "chunk_pipeline",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "automatic_speech_recognition_pipeline",
+        "target": "model_architectures",
+        "label": "uses models from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "automatic_speech_recognition_pipeline",
+        "target": "data_processing",
+        "label": "uses processors from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_question_answering_pipeline",
+        "target": "model_architectures",
+        "label": "uses models from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_question_answering_pipeline",
+        "target": "data_processing",
+        "label": "uses processors from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_text_to_text_pipeline",
+        "target": "model_architectures",
+        "label": "uses models from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_text_to_text_pipeline",
+        "target": "data_processing",
+        "label": "uses processors from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "pipeline_implementations",
+        "label": "Pipeline Implementations",
+        "nodes": [
+          "automatic_speech_recognition_pipeline",
+          "document_question_answering_pipeline",
+          "image_text_to_text_pipeline"
+        ],
+        "title": "Specific Pipeline Implementations",
+        "description": "Concrete pipeline classes for various tasks, built upon the base Pipeline and ChunkPipeline classes.",
+        "role": "generative"
+      },
+      {
+        "id": "pipeline_foundations",
+        "label": "Pipeline Foundations",
+        "nodes": [
+          "chunk_pipeline"
+        ],
+        "title": "Core Pipeline Infrastructure",
+        "description": "Base classes and utilities that provide the fundamental structure and common functionalities for all pipelines.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

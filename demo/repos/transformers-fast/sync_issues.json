@@ -1,0 +1,438 @@
+{
+  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/transformers/docs",
+  "timestamp": "2026-05-25T06:05:35.780183",
+  "summary": {
+    "total_modules": 17,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "total_issues": 22,
+    "errors": 0,
+    "warnings": 22,
+    "files_created": 0,
+    "metadata_added": 22,
+    "diagrams_added": 0
+  },
+  "metrics": {
+    "presync_audit": {
+      "modules_total": 17,
+      "missing_md": 0,
+      "missing_title": 11,
+      "missing_description": 11,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 12,
+      "parent_diagram_gaps_to_inject": 12,
+      "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
+      "placeholder_md_files": 0
+    },
+    "submodule_md_failures_from_generation": {
+      "count": 1,
+      "file": "submodule_md_failures.json",
+      "reason_histogram": {
+        "agent_exception": 1
+      }
+    },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 17,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "postsync_audit": {
+      "modules_total": 17,
+      "missing_md": 0,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
+      "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
+      "placeholder_md_files": 0
+    },
+    "delta_presync_minus_postsync": {
+      "mermaid_fence_blocks_total": 0.0,
+      "parent_diagram_gaps_to_inject": 12.0,
+      "invalid_module_json_parse": 0.0,
+      "placeholder_md_files": 0.0,
+      "missing_md": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "leaf_missing_diagram": 0.0,
+      "modules_total": 0.0,
+      "children_missing_from_diagram_nodes": 12.0,
+      "missing_description": 11.0,
+      "missing_title": 11.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0
+    },
+    "fixes_applied_counts": {
+      "metadata_field_updates": 22,
+      "placeholder_md_files_created": 0,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 12,
+      "overview_md_created": 0
+    },
+    "measurement_summary": {
+      "1_stage3_defects_before_stage45": {
+        "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+        "presync_audit": {
+          "modules_total": 17,
+          "missing_md": 0,
+          "missing_title": 11,
+          "missing_description": 11,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 12,
+          "parent_diagram_gaps_to_inject": 12,
+          "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1b_stage45_fixes_applied_counters": {
+        "metadata_field_updates": 22,
+        "placeholder_md_files_created": 0,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 12,
+        "overview_md_created": 0
+      },
+      "1c_residual_after_stage45": {
+        "postsync_audit": {
+          "modules_total": 17,
+          "missing_md": 0,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
+          "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1d_reduction_delta_presync_minus_postsync": {
+        "note": "Positive number = fewer problems after sync for that metric",
+        "delta": {
+          "mermaid_fence_blocks_total": 0.0,
+          "parent_diagram_gaps_to_inject": 12.0,
+          "invalid_module_json_parse": 0.0,
+          "placeholder_md_files": 0.0,
+          "missing_md": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "leaf_missing_diagram": 0.0,
+          "modules_total": 0.0,
+          "children_missing_from_diagram_nodes": 12.0,
+          "missing_description": 11.0,
+          "missing_title": 11.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0
+        }
+      },
+      "1e_issues_logged_this_run_by_type": {
+        "all": {
+          "missing_title": 11,
+          "missing_description": 11
+        }
+      },
+      "2_diagram_ir": {
+        "audit": {
+          "module_diagrams_total": 17,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code": {}
+      }
+    }
+  },
+  "issues_by_type": {
+    "missing_title": 11,
+    "missing_description": 11
+  },
+  "issues": [
+    {
+      "issue_type": "missing_title",
+      "module_name": "modular_implementations",
+      "module_path": "model_architectures/modular_implementations",
+      "severity": "warning",
+      "details": {
+        "component_count": 21,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "modular_implementations",
+      "module_path": "model_architectures/modular_implementations",
+      "severity": "warning",
+      "details": {
+        "component_count": 21,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_fusion",
+      "module_path": "model_architectures/model_fusion",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_fusion",
+      "module_path": "model_architectures/model_fusion",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "tokenization",
+      "module_path": "data_processing/tokenization",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "tokenization",
+      "module_path": "data_processing/tokenization",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "image_processing",
+      "module_path": "data_processing/image_processing",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "image_processing",
+      "module_path": "data_processing/image_processing",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "general_processors",
+      "module_path": "data_processing/general_processors",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "general_processors",
+      "module_path": "data_processing/general_processors",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_conversion",
+      "module_path": "model_management_and_optimization/model_conversion",
+      "severity": "warning",
+      "details": {
+        "component_count": 175,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_conversion",
+      "module_path": "model_management_and_optimization/model_conversion",
+      "severity": "warning",
+      "details": {
+        "component_count": 175,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_quantization",
+      "module_path": "model_management_and_optimization/model_quantization",
+      "severity": "warning",
+      "details": {
+        "component_count": 10,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_quantization",
+      "module_path": "model_management_and_optimization/model_quantization",
+      "severity": "warning",
+      "details": {
+        "component_count": 10,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "generation_utilities",
+      "module_path": "training_and_inference_tools/generation_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "generation_utilities",
+      "module_path": "training_and_inference_tools/generation_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "integrations",
+      "module_path": "training_and_inference_tools/integrations",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "integrations",
+      "module_path": "training_and_inference_tools/integrations",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "cli_tools",
+      "module_path": "training_and_inference_tools/cli_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "cli_tools",
+      "module_path": "training_and_inference_tools/cli_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "core_pipelines",
+      "module_path": "pipelines/core_pipelines",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "core_pipelines",
+      "module_path": "pipelines/core_pipelines",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    }
+  ],
+  "files_created": [],
+  "metadata_added": [
+    "modular_implementations:title",
+    "modular_implementations:description",
+    "model_fusion:title",
+    "model_fusion:description",
+    "tokenization:title",
+    "tokenization:description",
+    "image_processing:title",
+    "image_processing:description",
+    "general_processors:title",
+    "general_processors:description",
+    "model_conversion:title",
+    "model_conversion:description",
+    "model_quantization:title",
+    "model_quantization:description",
+    "generation_utilities:title",
+    "generation_utilities:description",
+    "integrations:title",
+    "integrations:description",
+    "cli_tools:title",
+    "cli_tools:description",
+    "core_pipelines:title",
+    "core_pipelines:description"
+  ],
+  "diagrams_added": []
+}

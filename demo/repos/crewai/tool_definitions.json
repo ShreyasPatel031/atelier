@@ -1,0 +1,177 @@
+{
+  "title": "Tool Definitions",
+  "summary": "This module defines a comprehensive set of tools for AI agents, enabling interactions with web services, data sources, file systems, and external platforms for diverse tasks like web scraping, data retrieval, and automation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "web_interaction_tools",
+        "label": "Web Interaction Tools",
+        "type": "component",
+        "link": null,
+        "title": "Web Interaction Tools",
+        "description": "Tools for browsing, scraping, and interacting with web pages, including headless browser operations and content extraction."
+      },
+      {
+        "id": "search_and_research_tools",
+        "label": "Search & Research Tools",
+        "type": "component",
+        "link": null,
+        "title": "Search and Research Tools",
+        "description": "Tools for performing various types of searches (web, academic, code, local POIs) and conducting in-depth research."
+      },
+      {
+        "id": "data_query_and_retrieval_tools",
+        "label": "Data Query & Retrieval Tools",
+        "type": "component",
+        "link": null,
+        "title": "Data Query and Retrieval Tools",
+        "description": "Tools for querying structured and unstructured data from databases, knowledge bases, and various file formats."
+      },
+      {
+        "id": "file_system_tools",
+        "label": "File System Tools",
+        "type": "component",
+        "link": null,
+        "title": "File System Tools",
+        "description": "Tools for reading, writing, searching, and managing files and directories."
+      },
+      {
+        "id": "ai_agent_integration_tools",
+        "label": "AI Agent Integration Tools",
+        "type": "component",
+        "link": null,
+        "title": "AI Agent Integration Tools",
+        "description": "Tools for invoking other AI agents, integrating with AI platforms, and managing agent workflows."
+      },
+      {
+        "id": "external_api_integrations",
+        "label": "External API Integrations",
+        "type": "component",
+        "link": null,
+        "title": "External API Integrations",
+        "description": "Tools that connect to and leverage various third-party APIs and services for specialized tasks."
+      },
+      {
+        "id": "rag_system",
+        "label": "RAG System",
+        "type": "external",
+        "link": "data_and_knowledge",
+        "title": "Retrieval Augmented Generation System",
+        "description": "Manages the retrieval and augmentation of information for various tools."
+      },
+      {
+        "id": "external_data_sources",
+        "label": "External Data Sources",
+        "type": "external",
+        "link": "data_and_knowledge",
+        "title": "External Data Sources",
+        "description": "Various external databases, knowledge bases, and web services providing data."
+      },
+      {
+        "id": "llm_vision_capabilities",
+        "label": "LLM Vision Capabilities",
+        "type": "external",
+        "link": "core_framework",
+        "title": "LLM Vision Capabilities",
+        "description": "Leverages the vision models of Large Language Models for image analysis and OCR."
+      }
+    ],
+    "edges": [
+      {
+        "source": "web_interaction_tools",
+        "target": "external_api_integrations",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "search_and_research_tools",
+        "target": "external_api_integrations",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_query_and_retrieval_tools",
+        "target": "external_data_sources",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_query_and_retrieval_tools",
+        "target": "rag_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_system_tools",
+        "target": "rag_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ai_agent_integration_tools",
+        "target": "external_api_integrations",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "web_interaction_tools",
+        "target": "llm_vision_capabilities",
+        "label": "uses for OCR",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_query_and_retrieval_tools",
+        "target": "llm_vision_capabilities",
+        "label": "uses for OCR",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_access_and_manipulation",
+        "label": "Data Access & Manipulation",
+        "nodes": [
+          "web_interaction_tools",
+          "search_and_research_tools",
+          "data_query_and_retrieval_tools",
+          "file_system_tools"
+        ],
+        "title": "Data Access and Manipulation",
+        "description": "Tools focused on retrieving, processing, and managing various forms of data, from web content to structured databases and local files.",
+        "role": "data"
+      },
+      {
+        "id": "agent_orchestration_and_extension",
+        "label": "Agent Orchestration & Extension",
+        "nodes": [
+          "ai_agent_integration_tools",
+          "external_api_integrations"
+        ],
+        "title": "Agent Orchestration and Extension",
+        "description": "Tools designed to enhance AI agent capabilities through integration with other agents, platforms, and specialized external services.",
+        "role": "generative"
+      },
+      {
+        "id": "core_dependencies",
+        "label": "Core Dependencies",
+        "nodes": [
+          "rag_system",
+          "external_data_sources",
+          "llm_vision_capabilities"
+        ],
+        "title": "Core Dependencies",
+        "description": "Essential external systems and capabilities that underpin the functionality of many tools within this module.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

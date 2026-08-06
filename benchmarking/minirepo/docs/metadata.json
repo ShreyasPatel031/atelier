@@ -1,6 +1,6 @@
 {
     "generation_info": {
-        "timestamp": "2026-05-24T18:15:51.391599",
+        "timestamp": "2026-05-24T20:44:47.973040",
         "main_model": "gemini-2.5-flash",
         "generator_version": "1.0.0",
         "repo_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo",
@@ -15,14 +15,11 @@
         "overview.json",
         "module_tree.json",
         "first_module_tree.json",
-        "metrics.json",
         "external_api.json",
         "main_logic.json",
         "system_metrics.json",
-        "metadata.json",
         "observability.json",
         "api_interface.json",
-        "sync_issues.json",
         "core_workflow.json",
         "data_processing.json",
         "input_output.json",

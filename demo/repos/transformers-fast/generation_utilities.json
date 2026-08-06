@@ -1,0 +1,473 @@
+{
+  "title": "Generation Utilities Module",
+  "summary": "This module provides comprehensive functionalities for text generation, including various decoding strategies like greedy, sampling, beam search, and assisted decoding. It also supports continuous batching, input preparation, and managing generation configurations and state.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "user_input",
+        "label": "User Input & Params",
+        "type": "external",
+        "link": null,
+        "title": "User Input",
+        "description": "Provides initial prompts, input IDs, and various generation parameters to control the output."
+      },
+      {
+        "id": "model_config",
+        "label": "Model Configuration",
+        "type": "external",
+        "link": null,
+        "title": "Model Config",
+        "description": "Defines the underlying model's architecture and default generation settings, influencing how tokens are processed and generated."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Tokenizer",
+        "type": "external",
+        "link": null,
+        "title": "Tokenizer",
+        "description": "Converts raw text into numerical token IDs and vice-versa. Essential for processing prompts and decoding generated sequences, also used for token healing."
+      },
+      {
+        "id": "assistant_model",
+        "label": "Assistant Model",
+        "type": "external",
+        "link": null,
+        "title": "Assistant Model",
+        "description": "A smaller, faster model used in assisted decoding to propose candidate token sequences, accelerating the generation process of the main model."
+      },
+      {
+        "id": "main_generate_api",
+        "label": "Main Generation API",
+        "type": "component",
+        "link": null,
+        "title": "Generation Entry Point",
+        "description": "The primary interface (`GenerationMixin.generate`) for initiating text generation, orchestrating various decoding strategies and parameter handling."
+      },
+      {
+        "id": "continuous_batching_api",
+        "label": "Continuous Batching API",
+        "type": "component",
+        "link": null,
+        "title": "Continuous Batching",
+        "description": "Provides an interface (`ContinuousMixin.generate_batch`) for efficient, continuous processing of multiple generation requests in a batch."
+      },
+      {
+        "id": "generation_config_obj",
+        "label": "Generation Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Generation Config",
+        "description": "An object that consolidates and manages all parameters governing the generation process, such as `max_length`, `num_beams`, and `do_sample`."
+      },
+      {
+        "id": "prepare_model_inputs",
+        "label": "Prepare Model Inputs",
+        "type": "component",
+        "link": null,
+        "title": "Input Preparation",
+        "description": "Formats and preprocesses input tensors, including attention masks and position IDs, ensuring they are ready for the model's forward pass."
+      },
+      {
+        "id": "manage_kv_cache",
+        "label": "Manage KV Cache",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Management",
+        "description": "Handles the key-value cache, storing past attention states to optimize sequential token generation and reduce redundant computations."
+      },
+      {
+        "id": "execute_model_forward",
+        "label": "Execute Model Forward",
+        "type": "component",
+        "link": null,
+        "title": "Model Forward Pass",
+        "description": "Executes the core model's forward pass with the prepared inputs, producing raw logits for the next token and updated hidden states."
+      },
+      {
+        "id": "apply_logits_processors",
+        "label": "Apply Logits Processors",
+        "type": "component",
+        "link": null,
+        "title": "Logits Processing",
+        "description": "Modifies the raw logits using various strategies like temperature scaling, top-k filtering, and repetition penalties to influence token selection."
+      },
+      {
+        "id": "select_next_tokens",
+        "label": "Select Next Tokens",
+        "type": "component",
+        "link": null,
+        "title": "Token Selection",
+        "description": "Chooses the next token(s) based on the applied decoding strategy, such as greedy selection, multinomial sampling, or beam search."
+      },
+      {
+        "id": "check_stopping_criteria",
+        "label": "Check Stopping Criteria",
+        "type": "component",
+        "link": null,
+        "title": "Stopping Criteria",
+        "description": "Evaluates conditions (e.g., maximum length reached, end-of-sequence token generated) to determine if the generation process should terminate."
+      },
+      {
+        "id": "update_model_state",
+        "label": "Update Model State",
+        "type": "component",
+        "link": null,
+        "title": "State Update",
+        "description": "Updates the internal model state, including the generated sequence and other relevant parameters, for the subsequent generation step."
+      },
+      {
+        "id": "output_sequences",
+        "label": "Generated Sequences",
+        "type": "external",
+        "link": null,
+        "title": "Output Sequences",
+        "description": "The final output of the generation process, consisting of the complete sequence of token IDs or decoded text."
+      },
+      {
+        "id": "continuous_batch_manager",
+        "label": "Continuous Batch Manager",
+        "type": "component",
+        "link": null,
+        "title": "Batch Manager",
+        "description": "An internal manager that handles the lifecycle of continuous batching requests, from adding prompts to retrieving results."
+      },
+      {
+        "id": "candidate_generator",
+        "label": "Candidate Generator",
+        "type": "component",
+        "link": null,
+        "title": "Candidate Generation",
+        "description": "Generates speculative candidate token sequences, primarily used in assisted decoding to speed up the verification process."
+      },
+      {
+        "id": "token_healing",
+        "label": "Perform Token Healing",
+        "type": "component",
+        "link": null,
+        "title": "Token Healing",
+        "description": "Adjusts the input token sequence to ensure valid continuations, particularly useful for subword tokenizers to prevent malformed tokens."
+      },
+      {
+        "id": "decoding_strategy_sample",
+        "label": "Sampling Decoding",
+        "type": "component",
+        "link": null,
+        "title": "Sampling Decoding",
+        "description": "Implements multinomial sampling, top-k, top-p, and other probabilistic methods to generate diverse and creative text sequences."
+      },
+      {
+        "id": "decoding_strategy_beam_search",
+        "label": "Beam Search Decoding",
+        "type": "component",
+        "link": null,
+        "title": "Beam Search Decoding",
+        "description": "Explores multiple high-probability sequences simultaneously, aiming to find a globally optimal sequence by maintaining a 'beam' of candidates."
+      },
+      {
+        "id": "decoding_strategy_assisted",
+        "label": "Assisted Decoding",
+        "type": "component",
+        "link": null,
+        "title": "Assisted Decoding",
+        "description": "A decoding method that leverages a smaller, faster assistant model to predict and verify candidate tokens, accelerating the generation process."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_input",
+        "target": "main_generate_api",
+        "label": "Initiates generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_config",
+        "target": "main_generate_api",
+        "label": "Provides defaults",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenizer",
+        "target": "main_generate_api",
+        "label": "Used for token processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "assistant_model",
+        "target": "decoding_strategy_assisted",
+        "label": "Assists generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "generation_config_obj",
+        "label": "Configures generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "prepare_model_inputs",
+        "label": "Prepares initial inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "manage_kv_cache",
+        "label": "Initializes cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "apply_logits_processors",
+        "label": "Sets up processors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "check_stopping_criteria",
+        "label": "Sets up criteria",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "token_healing",
+        "label": "Applies if enabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "token_healing",
+        "target": "tokenizer",
+        "label": "Uses for tokenization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "token_healing",
+        "target": "main_generate_api",
+        "label": "Calls generate internally",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "decoding_strategy_sample",
+        "label": "Delegates (if sampling)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "decoding_strategy_beam_search",
+        "label": "Delegates (if beam search)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_generate_api",
+        "target": "decoding_strategy_assisted",
+        "label": "Delegates (if assisted)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "continuous_batching_api",
+        "target": "continuous_batch_manager",
+        "label": "Manages requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "continuous_batch_manager",
+        "target": "output_sequences",
+        "label": "Returns results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prepare_model_inputs",
+        "target": "execute_model_forward",
+        "label": "Passes inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_kv_cache",
+        "target": "prepare_model_inputs",
+        "label": "Provides past KV",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_model_forward",
+        "target": "apply_logits_processors",
+        "label": "Provides logits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_logits_processors",
+        "target": "select_next_tokens",
+        "label": "Provides processed logits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "select_next_tokens",
+        "target": "check_stopping_criteria",
+        "label": "Checks if done",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "select_next_tokens",
+        "target": "update_model_state",
+        "label": "Updates sequence",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "update_model_state",
+        "target": "prepare_model_inputs",
+        "label": "For next step",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_model_forward",
+        "target": "manage_kv_cache",
+        "label": "Updates KV cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_stopping_criteria",
+        "target": "output_sequences",
+        "label": "Terminates loop",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "update_model_state",
+        "target": "output_sequences",
+        "label": "Final sequences",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decoding_strategy_assisted",
+        "target": "candidate_generator",
+        "label": "Requests candidates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "candidate_generator",
+        "target": "prepare_model_inputs",
+        "label": "Provides candidate inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_model_forward",
+        "target": "candidate_generator",
+        "label": "Provides model outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decoding_strategy_sample",
+        "target": "prepare_model_inputs",
+        "label": "Uses core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decoding_strategy_beam_search",
+        "target": "prepare_model_inputs",
+        "label": "Uses core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decoding_strategy_assisted",
+        "target": "prepare_model_inputs",
+        "label": "Uses core logic",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "main_generate_api",
+          "continuous_batching_api"
+        ],
+        "title": "Surface API",
+        "description": "User-facing methods for initiating generation, providing high-level control over the process.",
+        "role": "surface"
+      },
+      {
+        "id": "generation_core",
+        "label": "Generation Core Logic",
+        "nodes": [
+          "prepare_model_inputs",
+          "execute_model_forward",
+          "apply_logits_processors",
+          "select_next_tokens",
+          "check_stopping_criteria",
+          "update_model_state"
+        ],
+        "title": "Generation Core",
+        "description": "The central loop and mechanisms for token generation, including input preparation, model execution, and token selection.",
+        "role": "generative"
+      },
+      {
+        "id": "decoding_strategies",
+        "label": "Decoding Strategies",
+        "nodes": [
+          "decoding_strategy_sample",
+          "decoding_strategy_beam_search",
+          "decoding_strategy_assisted"
+        ],
+        "title": "Decoding Strategies",
+        "description": "Implementations of various token selection algorithms, each offering different trade-offs between output quality and diversity.",
+        "role": "generative"
+      },
+      {
+        "id": "configuration_and_state",
+        "label": "Configuration & State Management",
+        "nodes": [
+          "generation_config_obj",
+          "manage_kv_cache",
+          "continuous_batch_manager",
+          "candidate_generator"
+        ],
+        "title": "Config & State",
+        "description": "Components responsible for managing generation parameters, internal model state, and optimizing resource usage during generation.",
+        "role": "data"
+      },
+      {
+        "id": "utilities",
+        "label": "Internal Utilities",
+        "nodes": [
+          "token_healing"
+        ],
+        "title": "Internal Utilities",
+        "description": "Helper functions for specific generation tasks, such as ensuring valid token sequences or optimizing model behavior.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

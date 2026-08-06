@@ -1,0 +1,102 @@
+{
+  "title": "Library Model Chat Tests",
+  "summary": "This module contains integration tests for various library models, focusing on their chat capabilities and ensuring they respond as expected to specific prompts.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "test_library_models_chat",
+        "label": "Test Library Models Chat",
+        "type": "component",
+        "link": null,
+        "title": "Test Library Models Chat",
+        "description": "Tests the chat functionality of various library models, including special handling for specific models like 'duckdb-nsql' or 'starcoder'."
+      },
+      {
+        "id": "init_server_connection",
+        "label": "Initialize Server Connection",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Server Connection",
+        "description": "Establishes a connection to the server for testing purposes, returning a client, server instance, and a cleanup function."
+      },
+      {
+        "id": "pull_or_skip_model",
+        "label": "Pull or Skip Model",
+        "type": "component",
+        "link": null,
+        "title": "Pull or Skip Model",
+        "description": "Ensures the required model is available locally by pulling it if necessary, or skips the test if pulling fails or is not applicable."
+      },
+      {
+        "id": "show_model_info",
+        "label": "Show Model Information",
+        "type": "component",
+        "link": null,
+        "title": "Show Model Information",
+        "description": "Retrieves detailed information about a specific model, including its architecture, to validate against target architectures."
+      },
+      {
+        "id": "do_chat_test",
+        "label": "Execute Chat Test",
+        "type": "component",
+        "link": null,
+        "title": "Execute Chat Test",
+        "description": "Performs a chat interaction with the model using a predefined request and validates the response against expected outputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "init_server_connection",
+        "target": "test_library_models_chat",
+        "label": "client, cleanup",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_library_models_chat",
+        "target": "pull_or_skip_model",
+        "label": "model, client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pull_or_skip_model",
+        "target": "show_model_info",
+        "label": "model, client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "show_model_info",
+        "target": "do_chat_test",
+        "label": "model info, chat request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_library_models_chat",
+        "target": "do_chat_test",
+        "label": "chat request, expected response",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "test_execution",
+        "label": "Test Execution Flow",
+        "nodes": [
+          "test_library_models_chat",
+          "init_server_connection",
+          "pull_or_skip_model",
+          "show_model_info",
+          "do_chat_test"
+        ],
+        "title": "Test Execution Flow",
+        "description": "Orchestrates the setup, execution, and validation steps for library model chat tests.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

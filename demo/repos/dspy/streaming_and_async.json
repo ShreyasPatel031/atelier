@@ -1,0 +1,136 @@
+{
+  "title": "Streaming and Asynchronous Utilities",
+  "summary": "This module provides utilities for streaming program outputs and managing asynchronous execution within DSPy, enabling real-time feedback and non-blocking operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "streamify_program",
+        "label": "Streamify Program Output",
+        "type": "component",
+        "link": null,
+        "title": "Streamify Program Output",
+        "description": "Wraps a DSPy program to stream its outputs incrementally, providing status messages and handling stream listeners for specific fields."
+      },
+      {
+        "id": "stream_listener",
+        "label": "Manage Stream Listeners",
+        "type": "component",
+        "link": null,
+        "title": "Manage Stream Listeners",
+        "description": "Listens to the output stream of a specific field within a predictor, capturing and processing chunks based on adapter configurations."
+      },
+      {
+        "id": "async_program_execution",
+        "label": "Execute Program Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "Execute Program Asynchronously",
+        "description": "Wraps a synchronous program to allow its execution in an asynchronous context, managing thread-local overrides and concurrency limits."
+      },
+      {
+        "id": "sync_wrapper",
+        "label": "Synchronous Wrapper for Async",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Wrapper for Async",
+        "description": "Provides a synchronous interface for an asynchronous DSPy program, allowing it to be called from synchronous contexts."
+      },
+      {
+        "id": "run_in_new_loop",
+        "label": "Run in New Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "Run in New Event Loop",
+        "description": "Executes an asynchronous function within a newly created and managed asyncio event loop, ensuring isolation."
+      },
+      {
+        "id": "get_limiter",
+        "label": "Get Concurrency Limiter",
+        "type": "component",
+        "link": null,
+        "title": "Get Concurrency Limiter",
+        "description": "Retrieves or initializes a concurrency limiter to control the number of concurrent asynchronous operations."
+      },
+      {
+        "id": "streaming_response_formatter",
+        "label": "Format Streaming Response",
+        "type": "component",
+        "link": null,
+        "title": "Format Streaming Response",
+        "description": "Converts DSPy program output streams into an OpenAI-compatible streaming response format for API consumption."
+      }
+    ],
+    "edges": [
+      {
+        "source": "streamify_program",
+        "target": "stream_listener",
+        "label": "configures and uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_program",
+        "target": "async_program_execution",
+        "label": "uses for async execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_program",
+        "target": "sync_wrapper",
+        "label": "provides sync interface",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_execution",
+        "target": "get_limiter",
+        "label": "uses for concurrency",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper",
+        "target": "run_in_new_loop",
+        "label": "executes async in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_program",
+        "target": "streaming_response_formatter",
+        "label": "output to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "streaming_core",
+        "label": "Core Streaming Logic",
+        "nodes": [
+          "streamify_program",
+          "stream_listener",
+          "streaming_response_formatter"
+        ],
+        "title": "Core Streaming Logic",
+        "description": "Components responsible for enabling and managing incremental output streaming from DSPy programs.",
+        "role": "generative"
+      },
+      {
+        "id": "async_execution",
+        "label": "Asynchronous Execution",
+        "nodes": [
+          "async_program_execution",
+          "sync_wrapper",
+          "run_in_new_loop",
+          "get_limiter"
+        ],
+        "title": "Asynchronous Execution Management",
+        "description": "Utilities for converting and managing synchronous and asynchronous program execution flows.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "title": "Event System",
+  "summary": "This module provides a robust event bus for CrewAI, enabling event-driven architecture with synchronous and asynchronous handler management, dependency resolution, and event recording for tracing and state management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_event",
+        "label": "BaseEvent",
+        "type": "component",
+        "link": null,
+        "title": "Base Event Class",
+        "description": "The foundational class for all events within the CrewAI system, defining common attributes like timestamp, type, source, and unique identifiers."
+      },
+      {
+        "id": "crewai_events_bus",
+        "label": "CrewAIEventsBus",
+        "type": "component",
+        "link": null,
+        "title": "CrewAI Event Bus",
+        "description": "A singleton event bus responsible for registering, emitting, and managing event handlers. It supports both synchronous and asynchronous processing with dependency resolution."
+      },
+      {
+        "id": "event_context",
+        "label": "Event Context Management",
+        "type": "component",
+        "link": null,
+        "title": "Event Context Management",
+        "description": "Provides utilities for managing event scopes and parent-child relationships between events, crucial for tracing and structured event logging."
+      },
+      {
+        "id": "a2a_event_types",
+        "label": "A2A Event Types",
+        "type": "component",
+        "link": null,
+        "title": "A2A Specific Event Types",
+        "description": "Defines various event types specifically for Agent-to-Agent (A2A) communication, covering notifications, agent card fetching, delegation, and context lifecycle."
+      },
+      {
+        "id": "checkpoint_listener",
+        "label": "Checkpoint Listener",
+        "type": "component",
+        "link": null,
+        "title": "Checkpoint Listener",
+        "description": "A listener that triggers checkpointing based on specific events, ensuring system state is saved at critical junctures."
+      },
+      {
+        "id": "event_record",
+        "label": "EventRecord",
+        "type": "component",
+        "link": null,
+        "title": "Event Record",
+        "description": "A directed graph-like structure that stores and manages all emitted events, allowing for O(1) lookup and traversal of event relationships."
+      },
+      {
+        "id": "tracing_utils",
+        "label": "Tracing Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Tracing Utilities",
+        "description": "Provides utility functions related to tracing, such as confirming tracing enablement on first execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "crewai_events_bus",
+        "target": "base_event",
+        "label": "emits and processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_events_bus",
+        "target": "event_context",
+        "label": "uses for scope",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_events_bus",
+        "target": "event_record",
+        "label": "records events in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "a2a_event_types",
+        "target": "base_event",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "checkpoint_listener",
+        "target": "base_event",
+        "label": "listens for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "event_record",
+        "target": "base_event",
+        "label": "stores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tracing_utils",
+        "target": "crewai_events_bus",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "event_core",
+        "label": "Event Core",
+        "nodes": [
+          "base_event",
+          "crewai_events_bus",
+          "event_context"
+        ],
+        "title": "Core Event Handling",
+        "description": "Components central to defining, emitting, and managing events within the system.",
+        "role": "analytical"
+      },
+      {
+        "id": "event_types",
+        "label": "Event Types",
+        "nodes": [
+          "a2a_event_types"
+        ],
+        "title": "Specific Event Definitions",
+        "description": "Definitions for various specialized event types, particularly those related to Agent-to-Agent communication.",
+        "role": "data"
+      },
+      {
+        "id": "event_persistence",
+        "label": "Event Persistence & State",
+        "nodes": [
+          "event_record",
+          "checkpoint_listener"
+        ],
+        "title": "Event Persistence and State Management",
+        "description": "Components responsible for recording events and managing system state based on event occurrences.",
+        "role": "data"
+      },
+      {
+        "id": "event_utilities",
+        "label": "Event Utilities",
+        "nodes": [
+          "tracing_utils"
+        ],
+        "title": "Event-Related Utilities",
+        "description": "Helper functions and utilities that support the event system's functionality, such as tracing.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

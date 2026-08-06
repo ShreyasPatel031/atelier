@@ -1,0 +1,269 @@
+{
+  "gemini-2.5-flash_5000tok": {
+    "elapsed": 1.668752908706665,
+    "prompt_tokens": 4104,
+    "completion_tokens": 108,
+    "thoughts_tokens": 0,
+    "total_tokens": 4212
+  },
+  "gemini-2.5-flash_20000tok": {
+    "elapsed": 1.8894777297973633,
+    "prompt_tokens": 16434,
+    "completion_tokens": 102,
+    "thoughts_tokens": 0,
+    "total_tokens": 16536
+  },
+  "gemini-2.5-flash_50000tok": {
+    "elapsed": 2.9638078212738037,
+    "prompt_tokens": 41094,
+    "completion_tokens": 200,
+    "thoughts_tokens": 0,
+    "total_tokens": 41294
+  },
+  "gemini-2.5-flash-lite_5000tok": {
+    "elapsed": 1.1944420337677002,
+    "prompt_tokens": 4104,
+    "completion_tokens": 142,
+    "thoughts_tokens": 0,
+    "total_tokens": 4246
+  },
+  "gemini-2.5-flash-lite_20000tok": {
+    "elapsed": 1.8463408946990967,
+    "prompt_tokens": 16434,
+    "completion_tokens": 188,
+    "thoughts_tokens": 0,
+    "total_tokens": 16622
+  },
+  "gemini-2.5-flash-lite_50000tok": {
+    "elapsed": 2.1268606185913086,
+    "prompt_tokens": 41094,
+    "completion_tokens": 187,
+    "thoughts_tokens": 0,
+    "total_tokens": 41281
+  },
+  "gemini-2.0-flash_5000tok": {
+    "error": "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "elapsed": 0.48062801361083984
+  },
+  "gemini-2.0-flash_20000tok": {
+    "error": "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "elapsed": 0.6159121990203857
+  },
+  "gemini-2.0-flash_50000tok": {
+    "error": "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "elapsed": 0.8551340103149414
+  },
+  "concurrent_1": {
+    "model": "gemini-2.5-flash",
+    "concurrency": 1,
+    "wall_time": 1.9341466426849365,
+    "successes": 1,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 16434,
+    "total_output_tokens": 102,
+    "total_tokens": 16536,
+    "effective_input_tpm": 509806.22577365837,
+    "effective_total_tpm": 512970.4119139111,
+    "avg_latency": 1.9336400032043457,
+    "p50_latency": 1.9336400032043457,
+    "max_latency": 1.9336400032043457
+  },
+  "concurrent_4": {
+    "model": "gemini-2.5-flash",
+    "concurrency": 4,
+    "wall_time": 2.5765318870544434,
+    "successes": 4,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 65736,
+    "total_output_tokens": 351,
+    "total_tokens": 66087,
+    "effective_input_tpm": 1530801.935662851,
+    "effective_total_tpm": 1538975.7137968668,
+    "avg_latency": 2.425077795982361,
+    "p50_latency": 2.484402894973755,
+    "max_latency": 2.5764012336730957
+  },
+  "concurrent_8": {
+    "model": "gemini-2.5-flash",
+    "concurrency": 8,
+    "wall_time": 3.676914930343628,
+    "successes": 8,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 131472,
+    "total_output_tokens": 702,
+    "total_tokens": 132174,
+    "effective_input_tpm": 2145363.749077217,
+    "effective_total_tpm": 2156819.004582969,
+    "avg_latency": 3.394801676273346,
+    "p50_latency": 3.575691342353821,
+    "max_latency": 3.6760919094085693
+  },
+  "concurrent_16": {
+    "model": "gemini-2.5-flash",
+    "concurrency": 16,
+    "wall_time": 4.746496915817261,
+    "successes": 16,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 262944,
+    "total_output_tokens": 1518,
+    "total_tokens": 264462,
+    "effective_input_tpm": 3323849.2049633088,
+    "effective_total_tpm": 3343038.093445778,
+    "avg_latency": 3.386544778943062,
+    "p50_latency": 3.2880665063858032,
+    "max_latency": 4.737507104873657
+  },
+  "flash_lite_concurrent_1": {
+    "model": "gemini-2.5-flash-lite",
+    "concurrency": 1,
+    "wall_time": 1.4112930297851562,
+    "successes": 1,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 16434,
+    "total_output_tokens": 188,
+    "total_tokens": 16622,
+    "effective_input_tpm": 698678.4311902303,
+    "effective_total_tpm": 706671.1015725939,
+    "avg_latency": 1.4109768867492676,
+    "p50_latency": 1.4109768867492676,
+    "max_latency": 1.4109768867492676
+  },
+  "flash_lite_concurrent_4": {
+    "model": "gemini-2.5-flash-lite",
+    "concurrency": 4,
+    "wall_time": 2.171990156173706,
+    "successes": 4,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 65736,
+    "total_output_tokens": 752,
+    "total_tokens": 66488,
+    "effective_input_tpm": 1815919.8322280813,
+    "effective_total_tpm": 1836693.407039988,
+    "avg_latency": 2.046449303627014,
+    "p50_latency": 2.042620062828064,
+    "max_latency": 2.1707730293273926
+  },
+  "flash_lite_concurrent_8": {
+    "model": "gemini-2.5-flash-lite",
+    "concurrency": 8,
+    "wall_time": 1.9385039806365967,
+    "successes": 8,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 131472,
+    "total_output_tokens": 1504,
+    "total_tokens": 132976,
+    "effective_input_tpm": 4069282.332559105,
+    "effective_total_tpm": 4115833.6942799953,
+    "avg_latency": 1.716426968574524,
+    "p50_latency": 1.7684355974197388,
+    "max_latency": 1.9376068115234375
+  },
+  "flash_lite_concurrent_16": {
+    "model": "gemini-2.5-flash-lite",
+    "concurrency": 16,
+    "wall_time": 3.0604496002197266,
+    "successes": 16,
+    "errors": 0,
+    "error_msgs": [],
+    "total_input_tokens": 262944,
+    "total_output_tokens": 3008,
+    "total_tokens": 265952,
+    "effective_input_tpm": 5155007.290061992,
+    "effective_total_tpm": 5213979.017610468,
+    "avg_latency": 2.2992306649684906,
+    "p50_latency": 2.176689624786377,
+    "max_latency": 3.0584890842437744
+  },
+  "flash_2_concurrent_1": {
+    "model": "gemini-2.0-flash",
+    "concurrency": 1,
+    "wall_time": 0.5969500541687012,
+    "successes": 0,
+    "errors": 1,
+    "error_msgs": [
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements."
+    ],
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "total_tokens": 0,
+    "effective_input_tpm": 0.0,
+    "effective_total_tpm": 0.0,
+    "avg_latency": 0,
+    "p50_latency": 0,
+    "max_latency": 0
+  },
+  "flash_2_concurrent_4": {
+    "model": "gemini-2.0-flash",
+    "concurrency": 4,
+    "wall_time": 0.7132229804992676,
+    "successes": 0,
+    "errors": 4,
+    "error_msgs": [
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements."
+    ],
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "total_tokens": 0,
+    "effective_input_tpm": 0.0,
+    "effective_total_tpm": 0.0,
+    "avg_latency": 0,
+    "p50_latency": 0,
+    "max_latency": 0
+  },
+  "flash_2_concurrent_8": {
+    "model": "gemini-2.0-flash",
+    "concurrency": 8,
+    "wall_time": 1.053999900817871,
+    "successes": 0,
+    "errors": 8,
+    "error_msgs": [
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+      "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements."
+    ],
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "total_tokens": 0,
+    "effective_input_tpm": 0.0,
+    "effective_total_tpm": 0.0,
+    "avg_latency": 0,
+    "p50_latency": 0,
+    "max_latency": 0
+  },
+  "context_caching": {
+    "cache_create_time": 2.8789780139923096,
+    "cached_tokens": 24655,
+    "cached_call_latency": 2.6243369579315186,
+    "non_cached_call_latency": 2.2979609966278076,
+    "speedup": 0.8756348873884862,
+    "cached_prompt_tokens": 28767,
+    "cached_cached_tokens": 24655
+  },
+  "large_gemini-2.5-flash": {
+    "elapsed": 2.7353339195251465,
+    "prompt_tokens": 78084,
+    "completion_tokens": 41,
+    "thoughts_tokens": 0,
+    "total_tokens": 78125
+  },
+  "large_gemini-2.5-flash-lite": {
+    "elapsed": 1.9218521118164062,
+    "prompt_tokens": 78084,
+    "completion_tokens": 186,
+    "thoughts_tokens": 0,
+    "total_tokens": 78270
+  },
+  "large_gemini-2.0-flash": {
+    "error": "This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "elapsed": 1.348172903060913
+  }
+}

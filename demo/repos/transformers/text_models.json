@@ -1,0 +1,251 @@
+{
+  "title": "Text Models",
+  "summary": "The text_models module provides a comprehensive collection of transformer-based models for various natural language processing tasks, including causal language modeling, sequence classification, question answering, and conditional generation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "causal_lm",
+        "label": "Causal Language Models",
+        "type": "module",
+        "link": null,
+        "title": "Causal Language Models",
+        "description": "Models designed for generating text by predicting the next token in a sequence, often used for text generation and auto-completion. Many incorporate Mixture-of-Experts (MoE) architectures."
+      },
+      {
+        "id": "seq_classification",
+        "label": "Sequence Classification Models",
+        "type": "module",
+        "link": null,
+        "title": "Sequence Classification Models",
+        "description": "Models that classify entire input sequences, suitable for tasks like sentiment analysis, topic classification, or protein function prediction."
+      },
+      {
+        "id": "qa_models",
+        "label": "Question Answering Models",
+        "type": "module",
+        "link": null,
+        "title": "Question Answering Models",
+        "description": "Models specialized in extracting answers from a given text based on a question, predicting start and end positions of the answer span."
+      },
+      {
+        "id": "conditional_gen",
+        "label": "Conditional Generation Models",
+        "type": "module",
+        "link": null,
+        "title": "Conditional Generation Models",
+        "description": "Models that generate text or other sequences conditioned on an input, used for tasks like summarization, machine translation, and dialogue systems."
+      },
+      {
+        "id": "masked_lm",
+        "label": "Masked Language Models",
+        "type": "module",
+        "link": null,
+        "title": "Masked Language Models",
+        "description": "Models that predict masked tokens within a sequence, primarily used for pre-training and understanding contextual relationships in text."
+      },
+      {
+        "id": "token_classification",
+        "label": "Token Classification Models",
+        "type": "module",
+        "link": null,
+        "title": "Token Classification Models",
+        "description": "Models that classify individual tokens within a sequence, useful for tasks such as Named Entity Recognition (NER) or Part-of-Speech (POS) tagging."
+      },
+      {
+        "id": "time_series_prediction",
+        "label": "Time Series Prediction Models",
+        "type": "module",
+        "link": null,
+        "title": "Time Series Prediction Models",
+        "description": "Models adapted for forecasting future values in time-dependent data, often utilizing Transformer architectures with various distribution outputs."
+      },
+      {
+        "id": "multimodal_models",
+        "label": "Multimodal Models",
+        "type": "module",
+        "link": null,
+        "title": "Multimodal Models",
+        "description": "Models capable of processing and generating across multiple modalities, such as text and audio, integrating different generation components."
+      },
+      {
+        "id": "model_architectures",
+        "label": "Model Architectures",
+        "type": "external",
+        "link": "model_architectures",
+        "title": "Model Architectures",
+        "description": "Core architectural components and base models that serve as foundations for various task-specific models."
+      },
+      {
+        "id": "data_processing",
+        "label": "Data Processing",
+        "type": "external",
+        "link": "data_processing",
+        "title": "Data Processing",
+        "description": "Utilities and components for preparing and transforming data for model input, including tokenizers and feature extractors."
+      }
+    ],
+    "edges": [
+      {
+        "source": "model_architectures",
+        "target": "causal_lm",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "seq_classification",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "qa_models",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "conditional_gen",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "masked_lm",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "token_classification",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "time_series_prediction",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_architectures",
+        "target": "multimodal_models",
+        "label": "builds upon",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "causal_lm",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "seq_classification",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "qa_models",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "conditional_gen",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "masked_lm",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "token_classification",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "time_series_prediction",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "multimodal_models",
+        "label": "preprocessed data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "text_generation",
+        "label": "Text Generation",
+        "nodes": [
+          "causal_lm",
+          "conditional_gen"
+        ],
+        "title": "Text Generation Models",
+        "description": "Models primarily focused on generating coherent and contextually relevant text, including causal language models and conditional generation models.",
+        "role": "generative"
+      },
+      {
+        "id": "text_understanding",
+        "label": "Text Understanding",
+        "nodes": [
+          "seq_classification",
+          "qa_models",
+          "masked_lm",
+          "token_classification"
+        ],
+        "title": "Text Understanding Models",
+        "description": "Models designed for analyzing and interpreting text, encompassing tasks like classification, question answering, and token-level analysis.",
+        "role": "analytical"
+      },
+      {
+        "id": "specialized_models",
+        "label": "Specialized Models",
+        "nodes": [
+          "time_series_prediction",
+          "multimodal_models"
+        ],
+        "title": "Specialized Models",
+        "description": "Models tailored for specific domains or advanced functionalities beyond general text processing, such as time series or multimodal tasks.",
+        "role": "analytical"
+      },
+      {
+        "id": "dependencies",
+        "label": "Dependencies",
+        "nodes": [
+          "model_architectures",
+          "data_processing"
+        ],
+        "title": "External Dependencies",
+        "description": "Core components and utilities from other modules that this module relies on for its functionality.",
+        "role": "data"
+      }
+    ]
+  }
+}

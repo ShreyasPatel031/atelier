@@ -1,0 +1,246 @@
+{
+  "title": "Model Checkpoint Conversion",
+  "summary": "This module provides utilities and scripts to convert pre-trained model checkpoints from various original frameworks (e.g., TensorFlow, Fairseq, native PyTorch, Flax) into the Hugging Face Transformers PyTorch format. It ensures compatibility and enables seamless integration with the Hugging Face ecosystem.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "original_weights",
+        "label": "Original Model Checkpoint",
+        "type": "external",
+        "link": null,
+        "title": "Source Model Weights",
+        "description": "Contains pre-trained weights from various frameworks (e.g., TensorFlow, Fairseq, native PyTorch, Flax, Haiku)."
+      },
+      {
+        "id": "conversion_rules",
+        "label": "Extract Conversion Rules",
+        "type": "component",
+        "link": null,
+        "title": "Weight Conversion Logic",
+        "description": "Identifies and retrieves specific weight mapping and transformation rules based on the model type or class name."
+      },
+      {
+        "id": "hf_config",
+        "label": "Define HF Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Config",
+        "description": "Generates or loads the appropriate Hugging Face model and processor configuration objects."
+      },
+      {
+        "id": "load_original",
+        "label": "Load Original Weights",
+        "type": "component",
+        "link": null,
+        "title": "Load Source Weights",
+        "description": "Loads the raw parameter state dictionary from the original model checkpoint file."
+      },
+      {
+        "id": "transform_weights",
+        "label": "Transform & Rename Weights",
+        "type": "component",
+        "link": null,
+        "title": "Map to HF Format",
+        "description": "Applies renaming, reshaping, and other transformations to align original weights with Hugging Face conventions."
+      },
+      {
+        "id": "instantiate_hf_model",
+        "label": "Instantiate HF Model",
+        "type": "component",
+        "link": "model_architectures",
+        "title": "Create HF Model",
+        "description": "Initializes an empty Hugging Face model instance using the prepared configuration."
+      },
+      {
+        "id": "instantiate_hf_processor",
+        "label": "Instantiate HF Processor",
+        "type": "component",
+        "link": "data_processing",
+        "title": "Create HF Processor",
+        "description": "Initializes a Hugging Face data processor (tokenizer, image processor, or feature extractor) instance."
+      },
+      {
+        "id": "load_into_hf",
+        "label": "Load Weights into HF Model",
+        "type": "component",
+        "link": null,
+        "title": "Populate HF Model",
+        "description": "Assigns the transformed weights to the corresponding layers of the Hugging Face model."
+      },
+      {
+        "id": "sample_data",
+        "label": "Sample Input Data",
+        "type": "external",
+        "link": null,
+        "title": "Test Inputs",
+        "description": "Example data (e.g., images, text, audio) used for functional verification of the converted model."
+      },
+      {
+        "id": "verify_outputs",
+        "label": "Verify Model Outputs",
+        "type": "component",
+        "link": null,
+        "title": "Validate Conversion",
+        "description": "Compares the outputs (e.g., logits, hidden states) of the original and converted models to ensure numerical fidelity."
+      },
+      {
+        "id": "save_local",
+        "label": "Save Locally",
+        "type": "component",
+        "link": null,
+        "title": "Save to Disk",
+        "description": "Persists the converted Hugging Face model, configuration, and processor to a specified local directory."
+      },
+      {
+        "id": "push_to_hub",
+        "label": "Push to Hugging Face Hub",
+        "type": "component",
+        "link": null,
+        "title": "Upload to HF Hub",
+        "description": "Uploads the saved model and processor artifacts to the Hugging Face Model Hub."
+      }
+    ],
+    "edges": [
+      {
+        "source": "original_weights",
+        "target": "load_original",
+        "label": "Provides checkpoint",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_original",
+        "target": "transform_weights",
+        "label": "Raw weights",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conversion_rules",
+        "target": "transform_weights",
+        "label": "Guides renaming",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_config",
+        "target": "instantiate_hf_model",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_config",
+        "target": "instantiate_hf_processor",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "transform_weights",
+        "target": "load_into_hf",
+        "label": "Transformed weights",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instantiate_hf_model",
+        "target": "load_into_hf",
+        "label": "Target model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_into_hf",
+        "target": "verify_outputs",
+        "label": "Converted model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instantiate_hf_processor",
+        "target": "verify_outputs",
+        "label": "Processor for inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sample_data",
+        "target": "verify_outputs",
+        "label": "Test inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "verify_outputs",
+        "target": "save_local",
+        "label": "Validated",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_into_hf",
+        "target": "save_local",
+        "label": "Model to save",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instantiate_hf_processor",
+        "target": "save_local",
+        "label": "Processor to save",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "save_local",
+        "target": "push_to_hub",
+        "label": "Upload artifacts",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "input_sources",
+        "label": "Input Sources",
+        "nodes": [
+          "original_weights",
+          "sample_data"
+        ],
+        "title": "Input Data & Models",
+        "description": "External sources providing original model checkpoints and sample data for conversion and verification.",
+        "role": "data"
+      },
+      {
+        "id": "conversion_pipeline",
+        "label": "Conversion Pipeline",
+        "nodes": [
+          "conversion_rules",
+          "hf_config",
+          "load_original",
+          "transform_weights",
+          "instantiate_hf_model",
+          "instantiate_hf_processor",
+          "load_into_hf",
+          "verify_outputs"
+        ],
+        "title": "Core Conversion Process",
+        "description": "The sequence of steps involved in loading, transforming, and validating model weights for the Hugging Face format.",
+        "role": "generative"
+      },
+      {
+        "id": "output_management",
+        "label": "Output Management",
+        "nodes": [
+          "save_local",
+          "push_to_hub"
+        ],
+        "title": "Saving & Publishing",
+        "description": "Handles the persistence and distribution of the converted Hugging Face models and processors.",
+        "role": "surface"
+      }
+    ]
+  }
+}

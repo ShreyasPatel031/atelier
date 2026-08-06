@@ -1,0 +1,127 @@
+{
+    "title": "Program Optimization & Evaluation",
+    "summary": "This module provides tools for optimizing DSPy programs through automated prompt engineering and program refinement, and for evaluating their performance using various metrics.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "teleprompters",
+                "label": "Teleprompters (Optimizers)",
+                "type": "module",
+                "link": "teleprompters",
+                "title": "Teleprompters Module",
+                "description": "Contains various optimizers (teleprompters) for automated prompt engineering, few-shot example selection, and program refinement using techniques like evolutionary search, RL, and Bayesian optimization."
+            },
+            {
+                "id": "evaluation_metrics",
+                "label": "Evaluation Metrics",
+                "type": "module",
+                "link": "evaluation_metrics",
+                "title": "Evaluation Metrics Module",
+                "description": "Provides a suite of metrics for evaluating the performance of language model programs, including semantic F1, completeness, groundedness, and exact match scores."
+            },
+            {
+                "id": "optimization_utilities",
+                "label": "Optimization Utilities",
+                "type": "module",
+                "link": "optimization_utilities",
+                "title": "Optimization Utilities Module",
+                "description": "Offers utility functions supporting program optimization, such as patching forward passes for tracing, appending rules/demonstrations, and logging token usage during trials."
+            },
+            {
+                "id": "program_execution_and_primitives",
+                "label": "Program Execution & Primitives",
+                "type": "external",
+                "link": "program_execution_and_primitives",
+                "title": "Program Execution & Primitives",
+                "description": "The core DSPy modules and primitives that define and execute programs, which are the targets of optimization."
+            },
+            {
+                "id": "language_model_integration",
+                "label": "Language Model Integration",
+                "type": "external",
+                "link": "language_model_integration",
+                "title": "Language Model Integration",
+                "description": "Modules responsible for interacting with various language models, providing the underlying LMs used by optimizers and programs."
+            }
+        ],
+        "edges": [
+            {
+                "source": "teleprompters",
+                "target": "program_execution_and_primitives",
+                "label": "optimizes",
+                "title": "Optimizes DSPy Programs",
+                "description": "Teleprompters apply various strategies to improve the performance of DSPy programs by modifying their instructions or demonstrations."
+            },
+            {
+                "source": "teleprompters",
+                "target": "evaluation_metrics",
+                "label": "uses for feedback",
+                "title": "Uses Metrics for Feedback",
+                "description": "Optimizers rely on evaluation metrics to assess the quality of program outputs and guide the optimization process."
+            },
+            {
+                "source": "teleprompters",
+                "target": "optimization_utilities",
+                "label": "leverages utilities",
+                "title": "Leverages Optimization Utilities",
+                "description": "Teleprompters use helper functions from the optimization utilities for tasks like tracing, rule generation, and logging."
+            },
+            {
+                "source": "teleprompters",
+                "target": "language_model_integration",
+                "label": "interacts with LMs",
+                "title": "Interacts with Language Models",
+                "description": "Optimizers interact with language models to generate new prompts, evaluate responses, or fine-tune models."
+            },
+            {
+                "source": "evaluation_metrics",
+                "target": "language_model_integration",
+                "label": "can use LMs for auto-evaluation",
+                "title": "Can Use LMs for Auto-Evaluation",
+                "description": "Some advanced evaluation metrics leverage language models to perform semantic comparisons and groundedness checks."
+            },
+            {
+                "source": "optimization_utilities",
+                "target": "program_execution_and_primitives",
+                "label": "monitors program execution",
+                "title": "Monitors Program Execution",
+                "description": "Utilities like patched forward passes monitor and trace the execution of DSPy programs to gather data for optimization."
+            }
+        ],
+        "groups": [
+            {
+                "id": "optimization_core",
+                "label": "Optimization Core",
+                "nodes": [
+                    "teleprompters"
+                ],
+                "title": "Core Optimization Logic",
+                "description": "The central component housing all teleprompters responsible for automated program improvement and prompt engineering.",
+                "role": null
+            },
+            {
+                "id": "evaluation_and_support",
+                "label": "Evaluation & Support",
+                "nodes": [
+                    "evaluation_metrics",
+                    "optimization_utilities"
+                ],
+                "title": "Evaluation and Support Tools",
+                "description": "Provides the necessary tools for measuring program performance and utility functions to aid the optimization process.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External DSPy Modules",
+                "nodes": [
+                    "program_execution_and_primitives",
+                    "language_model_integration"
+                ],
+                "title": "Dependencies on Other DSPy Modules",
+                "description": "This module relies on core DSPy program definitions and language model integrations to function.",
+                "role": null
+            }
+        ]
+    }
+}

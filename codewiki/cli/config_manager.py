@@ -25,6 +25,7 @@ class ConfigManager:
     Storage:
         - All settings including API key: ~/.codewiki/config.json
         - Environment variable fallback: GEMINI_API_KEY or LLM_API_KEY
+        - Anthropic: anthropic_api_key field or ANTHROPIC_API_KEY
     """
     
     def __init__(self):
@@ -56,6 +57,9 @@ class ConfigManager:
             
             # Load API key from config file or env var
             self._api_key = data.get('api_key') or os.getenv('GEMINI_API_KEY') or os.getenv('LLM_API_KEY')
+            anth = (data.get('anthropic_api_key') or os.getenv('ANTHROPIC_API_KEY') or '').strip()
+            if self._config is not None and anth:
+                self._config.anthropic_api_key = anth
             
             return True
         except (json.JSONDecodeError, FileSystemError) as e:
@@ -67,17 +71,14 @@ class ConfigManager:
         base_url: Optional[str] = None,
         main_model: Optional[str] = None,
         cluster_model: Optional[str] = None,
-        default_output: Optional[str] = None
+        default_output: Optional[str] = None,
+        llm_provider: Optional[str] = None,
+        anthropic_api_key: Optional[str] = None,
+        use_vertex_ai: Optional[bool] = None,
+        gcp_project: Optional[str] = None,
     ):
         """
         Save configuration to file.
-        
-        Args:
-            api_key: API key (stored in config file)
-            base_url: LLM API base URL
-            main_model: Primary model
-            cluster_model: Clustering model
-            default_output: Default output directory
         """
         # Ensure config directory exists
         try:
@@ -106,6 +107,14 @@ class ConfigManager:
             self._config.cluster_model = cluster_model
         if default_output is not None:
             self._config.default_output = default_output
+        if llm_provider is not None:
+            self._config.llm_provider = llm_provider.strip().lower()
+        if anthropic_api_key is not None:
+            self._config.anthropic_api_key = anthropic_api_key
+        if use_vertex_ai is not None:
+            self._config.use_vertex_ai = bool(use_vertex_ai)
+        if gcp_project is not None:
+            self._config.gcp_project = gcp_project
         
         # Validate configuration
         self._config.validate()
@@ -138,6 +147,12 @@ class ConfigManager:
             self._api_key = os.getenv('GEMINI_API_KEY') or os.getenv('LLM_API_KEY')
         
         return self._api_key
+
+    def get_anthropic_api_key(self) -> Optional[str]:
+        """Anthropic API key from config or ANTHROPIC_API_KEY env."""
+        if self._config and (self._config.anthropic_api_key or "").strip():
+            return self._config.anthropic_api_key.strip()
+        return (os.getenv("ANTHROPIC_API_KEY") or "").strip() or None
     
     def get_config(self) -> Optional[Configuration]:
         """
@@ -157,8 +172,20 @@ class ConfigManager:
         """
         if self._config is None:
             return False
+
+        provider = (getattr(self._config, "llm_provider", None) or "gemini").strip().lower()
+        # Claude path: Anthropic key only (Gemini Vertex ADC stays available when provider=gemini).
+        if provider in ("claude", "anthropic"):
+            if not self.get_anthropic_api_key():
+                return False
+            return self._config.is_complete()
         
-        # Accept ADC (Vertex AI mode) as valid credentials even without an API key
+        # When use_vertex_ai is set, ADC is the only valid credential path.
+        # Do NOT fall back to a Gemini API key if ADC is missing — free-tier keys
+        # look "configured" then die on 429s and hide the real ADC failure.
+        # Agents: never force use_vertex_ai=False / GEMINI_API_KEY to "unblock"
+        # generation; fix ADC instead (`gcloud auth application-default login`).
+        # (Model FallbackModel chain is unrelated — keep that.)
         use_vertex = bool(getattr(self._config, 'use_vertex_ai', False))
         if use_vertex:
             try:
@@ -171,13 +198,12 @@ class ConfigManager:
                 if creds.token:
                     return self._config.is_complete()
             except Exception:
-                pass
+                return False
+            return False
         
-        # Fall back to API key check
         if not self.get_api_key():
             return False
         
-        # Check if config is complete
         return self._config.is_complete()
     
     def delete_api_key(self):

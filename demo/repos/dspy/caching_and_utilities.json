@@ -1,0 +1,216 @@
+{
+  "title": "Caching and Utilities",
+  "summary": "This module provides caching mechanisms for language model interactions and utility functions for managing cache behavior and LiteLLM logging.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "configure_cache",
+        "label": "Configure Cache",
+        "type": "component",
+        "link": null,
+        "title": "Configure Cache Settings",
+        "description": "Initializes and configures the DSPy caching system, allowing control over disk and memory caching, directory, size limits, and pickle serialization restrictions."
+      },
+      {
+        "id": "get_dspy_cache",
+        "label": "Get DSPy Cache Instance",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve DSPy Cache",
+        "description": "Retrieves or initializes the DSPy cache instance, falling back to a memory-only cache if disk cache setup fails."
+      },
+      {
+        "id": "sync_wrapper",
+        "label": "Synchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Caching",
+        "description": "A decorator or utility function that wraps synchronous function calls, caching their results based on input arguments and returning cached results when available."
+      },
+      {
+        "id": "async_wrapper",
+        "label": "Asynchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Caching",
+        "description": "A decorator or utility function that wraps asynchronous function calls, caching their results and returning cached results for subsequent identical calls."
+      },
+      {
+        "id": "restricted_disk",
+        "label": "Restricted Disk Serialization",
+        "type": "component",
+        "link": null,
+        "title": "Secure Disk Serialization",
+        "description": "A specialized disk serialization class that restricts pickle deserialization to an allowlist of safe types, enhancing security."
+      },
+      {
+        "id": "cached_compute_embeddings",
+        "label": "Cached Compute Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Cached Embedding Computation",
+        "description": "A utility function that computes embeddings, leveraging the caching mechanism to store and retrieve previously computed embeddings for efficiency."
+      },
+      {
+        "id": "cached_acompute_embeddings",
+        "label": "Cached Async Compute Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Cached Asynchronous Embedding Computation",
+        "description": "An asynchronous utility function that computes embeddings, utilizing the caching system to avoid redundant computations."
+      },
+      {
+        "id": "enable_litellm_logging",
+        "label": "Enable LiteLLM Logging",
+        "type": "component",
+        "link": null,
+        "title": "Activate LiteLLM Debug Logging",
+        "description": "Enables detailed debug logging for LiteLLM, providing insights into API interactions and responses."
+      },
+      {
+        "id": "disable_litellm_logging",
+        "label": "Disable LiteLLM Logging",
+        "type": "component",
+        "link": null,
+        "title": "Deactivate LiteLLM Debug Logging",
+        "description": "Disables detailed debug logging for LiteLLM, reducing log verbosity to error messages only."
+      },
+      {
+        "id": "base_lm_clients",
+        "label": "Base LM Clients",
+        "type": "module",
+        "link": "base_lm_clients",
+        "title": "Base Language Model Clients",
+        "description": "Provides foundational interfaces and implementations for interacting with various language models, including local and cloud-based providers."
+      },
+      {
+        "id": "lm_api_interaction",
+        "label": "LM API Interaction",
+        "type": "module",
+        "link": "lm_api_interaction",
+        "title": "Language Model API Interaction",
+        "description": "Handles the core logic for interacting with language model APIs, including completion, streaming, and request formatting."
+      }
+    ],
+    "edges": [
+      {
+        "source": "configure_cache",
+        "target": "get_dspy_cache",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper",
+        "target": "get_dspy_cache",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_wrapper",
+        "target": "get_dspy_cache",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "restricted_disk",
+        "target": "configure_cache",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_compute_embeddings",
+        "target": "sync_wrapper",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_acompute_embeddings",
+        "target": "async_wrapper",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_api_interaction",
+        "target": "sync_wrapper",
+        "label": "can be wrapped by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_api_interaction",
+        "target": "async_wrapper",
+        "label": "can be wrapped by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_litellm_logging",
+        "target": "lm_api_interaction",
+        "label": "configures logging for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "disable_litellm_logging",
+        "target": "lm_api_interaction",
+        "label": "configures logging for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cache_management",
+        "label": "Cache Management",
+        "nodes": [
+          "configure_cache",
+          "get_dspy_cache",
+          "restricted_disk"
+        ],
+        "title": "Cache Management",
+        "description": "Functions and components responsible for configuring, initializing, and interacting with the DSPy caching system.",
+        "role": "analytical"
+      },
+      {
+        "id": "caching_wrappers",
+        "label": "Caching Wrappers",
+        "nodes": [
+          "sync_wrapper",
+          "async_wrapper"
+        ],
+        "title": "Caching Wrappers",
+        "description": "Decorators and utilities that apply caching logic to synchronous and asynchronous function calls.",
+        "role": "generative"
+      },
+      {
+        "id": "embedding_caching",
+        "label": "Embedding Caching",
+        "nodes": [
+          "cached_compute_embeddings",
+          "cached_acompute_embeddings"
+        ],
+        "title": "Embedding Caching",
+        "description": "Specialized functions for caching the computation of embeddings to improve performance.",
+        "role": "analytical"
+      },
+      {
+        "id": "logging_control",
+        "label": "Logging Control",
+        "nodes": [
+          "enable_litellm_logging",
+          "disable_litellm_logging"
+        ],
+        "title": "LiteLLM Logging Control",
+        "description": "Utilities for enabling and disabling detailed logging for the LiteLLM integration.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

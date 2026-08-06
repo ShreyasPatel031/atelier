@@ -1,0 +1,190 @@
+{
+  "title": "CLI Commands",
+  "summary": "This module defines and implements the command-line interface (CLI) commands for interacting with the application, including running models, managing integrations, and handling server operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_server",
+        "label": "Run Server",
+        "type": "component",
+        "link": null,
+        "title": "Run Server",
+        "description": "Initializes the keypair and starts the main application server, listening for incoming requests."
+      },
+      {
+        "id": "launch_interactive_model",
+        "label": "Launch Interactive Model",
+        "type": "component",
+        "link": null,
+        "title": "Launch Interactive Model",
+        "description": "Handles the interactive execution of a model, including model loading, capability inference, and generating responses."
+      },
+      {
+        "id": "run_embedding_model",
+        "label": "Run Embedding Model",
+        "type": "component",
+        "link": null,
+        "title": "Run Embedding Model",
+        "description": "Processes requests to generate embeddings for text input, supporting various flags and input methods."
+      },
+      {
+        "id": "handle_cloud_stub_pull",
+        "label": "Handle Cloud Stub Pull",
+        "type": "component",
+        "link": null,
+        "title": "Handle Cloud Stub Pull",
+        "description": "Manages the pulling of cloud model stubs, ensuring models are available for use, even if the pull fails (best-effort)."
+      },
+      {
+        "id": "create_model_handler",
+        "label": "Create Model Handler",
+        "type": "component",
+        "link": null,
+        "title": "Create Model Handler",
+        "description": "Manages the creation of new models from a Modelfile, including handling draft quantization and server communication."
+      },
+      {
+        "id": "push_model_handler",
+        "label": "Push Model Handler",
+        "type": "component",
+        "link": null,
+        "title": "Push Model Handler",
+        "description": "Handles pushing models to a remote registry, including authentication, progress reporting, and error handling."
+      },
+      {
+        "id": "interactive_tui_actions",
+        "label": "Interactive TUI Actions",
+        "type": "component",
+        "link": null,
+        "title": "Interactive TUI Actions",
+        "description": "Manages actions within the interactive terminal user interface (TUI), such as launching integrations or running models."
+      },
+      {
+        "id": "integration_launchers",
+        "label": "Integration Launchers",
+        "type": "module",
+        "link": "integration_launchers",
+        "title": "Integration Launchers",
+        "description": "Manages the launching and configuration of various external integrations."
+      },
+      {
+        "id": "model_serving_api",
+        "label": "Model Serving API",
+        "type": "module",
+        "link": "api_endpoints",
+        "title": "Model Serving API",
+        "description": "Provides API endpoints for model operations like generation, embedding, and management."
+      },
+      {
+        "id": "configuration_management",
+        "label": "Configuration Management",
+        "type": "module",
+        "link": "configuration_management",
+        "title": "Configuration Management",
+        "description": "Handles the saving, listing, and migration of application configurations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "launch_interactive_model",
+        "target": "model_serving_api",
+        "label": "model show/generate requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "launch_interactive_model",
+        "target": "handle_cloud_stub_pull",
+        "label": "pull cloud model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_embedding_model",
+        "target": "model_serving_api",
+        "label": "embed requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "handle_cloud_stub_pull",
+        "target": "model_serving_api",
+        "label": "pull/show requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_model_handler",
+        "target": "model_serving_api",
+        "label": "create model requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "push_model_handler",
+        "target": "model_serving_api",
+        "label": "push/auth requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "interactive_tui_actions",
+        "target": "integration_launchers",
+        "label": "launch integration requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "interactive_tui_actions",
+        "target": "launch_interactive_model",
+        "label": "run model requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "interactive_tui_actions",
+        "target": "configuration_management",
+        "label": "update last selection",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_entrypoints",
+        "label": "CLI Entrypoints",
+        "nodes": [
+          "run_server",
+          "launch_interactive_model",
+          "run_embedding_model"
+        ],
+        "title": "CLI Entrypoints",
+        "description": "The primary command-line functions that users interact with to start the server or run models.",
+        "role": "surface"
+      },
+      {
+        "id": "model_management_commands",
+        "label": "Model Management Commands",
+        "nodes": [
+          "create_model_handler",
+          "push_model_handler",
+          "handle_cloud_stub_pull"
+        ],
+        "title": "Model Management Commands",
+        "description": "Commands related to creating, pushing, and managing models via the CLI.",
+        "role": "generative"
+      },
+      {
+        "id": "interactive_interface",
+        "label": "Interactive Interface",
+        "nodes": [
+          "interactive_tui_actions"
+        ],
+        "title": "Interactive Interface",
+        "description": "Components that provide an interactive terminal user interface for model and integration selection.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

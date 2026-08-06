@@ -1,0 +1,24 @@
+{
+    "generation_info": {
+        "timestamp": "2026-08-06T02:52:01.577968",
+        "main_model": "claude-haiku-4-5",
+        "generator_version": "1.0.0",
+        "repo_path": "/workspace/demo/repos-src/medhelm",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 2592,
+        "leaf_nodes": 360,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "overview.json",
+        "module_tree.json",
+        "first_module_tree.json",
+        "model_adaptation.json",
+        "infrastructure_and_utilities.json",
+        "benchmark_execution.json",
+        "client_and_inference.json",
+        "evaluation_and_metrics.json"
+    ]
+}

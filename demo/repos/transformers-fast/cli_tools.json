@@ -1,0 +1,302 @@
+{
+  "title": "CLI Model Serving Tool",
+  "summary": "This module provides a command-line interface for serving Hugging Face models via an HTTP API, supporting features like continuous batching, quantization, and various generation tasks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_entrypoint",
+        "label": "Start CLI Server",
+        "type": "component",
+        "link": null,
+        "title": "Serve CLI Entrypoint",
+        "description": "The main entry point for the CLI server, responsible for parsing arguments and orchestrating the server setup."
+      },
+      {
+        "id": "model_management",
+        "label": "Manage Model Lifecycle",
+        "type": "component",
+        "link": null,
+        "title": "Model Manager",
+        "description": "Handles loading, unloading, and caching of Hugging Face models based on requests and idle timeouts."
+      },
+      {
+        "id": "chat_handling",
+        "label": "Handle Chat Completions",
+        "type": "component",
+        "link": null,
+        "title": "Chat Completion Handler",
+        "description": "Processes incoming chat completion requests, applies chat templates, and generates responses using loaded models."
+      },
+      {
+        "id": "text_completion",
+        "label": "Handle Text Completions",
+        "type": "component",
+        "link": null,
+        "title": "Completion Handler",
+        "description": "Manages standard text completion requests, generating continuations based on provided prompts."
+      },
+      {
+        "id": "response_generation",
+        "label": "Handle General Responses",
+        "type": "component",
+        "link": null,
+        "title": "Response Handler",
+        "description": "A general-purpose handler for various response generation tasks, leveraging model capabilities."
+      },
+      {
+        "id": "audio_transcription",
+        "label": "Handle Audio Transcription",
+        "type": "component",
+        "link": null,
+        "title": "Transcription Handler",
+        "description": "Processes audio input to perform speech-to-text transcription using appropriate models."
+      },
+      {
+        "id": "http_server",
+        "label": "Run HTTP API Server",
+        "type": "component",
+        "link": null,
+        "title": "Uvicorn HTTP Server",
+        "description": "The FastAPI/Uvicorn server that exposes the model serving API endpoints to external clients."
+      },
+      {
+        "id": "cb_configuration",
+        "label": "Configure Continuous Batching",
+        "type": "component",
+        "link": null,
+        "title": "Continuous Batching Config",
+        "description": "Defines parameters for continuous batching, such as KV cache block size and memory limits, to optimize inference throughput."
+      },
+      {
+        "id": "generation_settings",
+        "label": "Manage Generation Settings",
+        "type": "component",
+        "link": null,
+        "title": "Generation State",
+        "description": "Holds global generation parameters like continuous batching enablement, torch.compile status, and other inference optimizations."
+      },
+      {
+        "id": "hf_model",
+        "label": "Hugging Face Model",
+        "type": "external",
+        "link": null,
+        "title": "External Hugging Face Model",
+        "description": "Represents a pre-trained model from the Hugging Face ecosystem, loaded and managed by the ModelManager for inference."
+      },
+      {
+        "id": "external_client",
+        "label": "External Client",
+        "type": "external",
+        "link": null,
+        "title": "External API Client",
+        "description": "An external application or user interacting with the model serving API via HTTP requests."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_entrypoint",
+        "target": "model_management",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "generation_settings",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "chat_handling",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "text_completion",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "response_generation",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "audio_transcription",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entrypoint",
+        "target": "http_server",
+        "label": "Builds & Runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_management",
+        "target": "hf_model",
+        "label": "Loads & Unloads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_handling",
+        "target": "model_management",
+        "label": "Requests Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_handling",
+        "target": "generation_settings",
+        "label": "Applies Settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_completion",
+        "target": "model_management",
+        "label": "Requests Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_completion",
+        "target": "generation_settings",
+        "label": "Applies Settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "response_generation",
+        "target": "model_management",
+        "label": "Requests Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "response_generation",
+        "target": "generation_settings",
+        "label": "Applies Settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_transcription",
+        "target": "model_management",
+        "label": "Requests Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_transcription",
+        "target": "generation_settings",
+        "label": "Applies Settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generation_settings",
+        "target": "cb_configuration",
+        "label": "Uses Configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_server",
+        "target": "chat_handling",
+        "label": "Routes Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_server",
+        "target": "text_completion",
+        "label": "Routes Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_server",
+        "target": "response_generation",
+        "label": "Routes Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_server",
+        "target": "audio_transcription",
+        "label": "Routes Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_client",
+        "target": "http_server",
+        "label": "Sends Requests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_interface",
+        "label": "Surface Interface",
+        "nodes": [
+          "cli_entrypoint",
+          "http_server",
+          "external_client"
+        ],
+        "title": "User-Facing Components",
+        "description": "Components that directly interact with the user or external systems.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_tasks",
+        "label": "Generative Tasks",
+        "nodes": [
+          "chat_handling",
+          "text_completion",
+          "response_generation",
+          "audio_transcription"
+        ],
+        "title": "Model Generation Handlers",
+        "description": "Components responsible for handling specific types of model generation requests.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_logic",
+        "label": "Analytical Logic",
+        "nodes": [
+          "model_management",
+          "generation_settings",
+          "cb_configuration"
+        ],
+        "title": "Core Logic & Configuration",
+        "description": "Components that manage model state, configurations, and core inference logic.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_resources",
+        "label": "Data Resources",
+        "nodes": [
+          "hf_model"
+        ],
+        "title": "Model Resources",
+        "description": "External models or data resources utilized by the system.",
+        "role": "data"
+      }
+    ]
+  }
+}

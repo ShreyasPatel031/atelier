@@ -1,0 +1,104 @@
+{
+  "title": "Model Fusion Specifications",
+  "summary": "This module defines specifications for fusing compatible 3D convolutional patch embeddings into flattened linear projections within neural network models, optimizing their structure and weight conversion.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "patch_fusion_spec",
+        "label": "Define Patch Embedding Fusion",
+        "type": "component",
+        "link": null,
+        "title": "PatchEmbeddingsFusionSpec",
+        "description": "Specifies how to identify compatible 3D convolutional patch embeddings and transform them into linear layers for fusion."
+      },
+      {
+        "id": "conv3d_layer",
+        "label": "PyTorch Conv3d Layer",
+        "type": "external",
+        "link": null,
+        "title": "nn.Conv3d",
+        "description": "A standard 3D convolutional layer from PyTorch, whose properties are checked for fusion compatibility."
+      },
+      {
+        "id": "model_config",
+        "label": "Model Configuration",
+        "type": "external",
+        "link": null,
+        "title": "PretrainedConfig",
+        "description": "Configuration object providing model-specific parameters (e.g., patch size, input channels) necessary for fusion."
+      },
+      {
+        "id": "fused_module_class",
+        "label": "Generate Fused Module Class",
+        "type": "component",
+        "link": null,
+        "title": "Fused Module Class",
+        "description": "A new module class created by combining the original module with a fusion mixin, enabling the optimized structure."
+      },
+      {
+        "id": "weight_conversion_rules",
+        "label": "Generate Weight Conversion Rules",
+        "type": "component",
+        "link": null,
+        "title": "WeightTransform List",
+        "description": "A list of instructions (WeightConverter, WeightRenaming) detailing how to transform the original module's weights to fit the new fused module structure."
+      }
+    ],
+    "edges": [
+      {
+        "source": "patch_fusion_spec",
+        "target": "conv3d_layer",
+        "label": "Checks compatibility of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patch_fusion_spec",
+        "target": "fused_module_class",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patch_fusion_spec",
+        "target": "weight_conversion_rules",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_config",
+        "target": "patch_fusion_spec",
+        "label": "Provides parameters to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "fusion_logic",
+        "label": "Fusion Logic",
+        "nodes": [
+          "patch_fusion_spec",
+          "fused_module_class",
+          "weight_conversion_rules"
+        ],
+        "title": "Core Fusion Mechanism",
+        "description": "Components responsible for defining and executing the model fusion process, including class generation and weight transformation.",
+        "role": "generative"
+      },
+      {
+        "id": "external_deps",
+        "label": "External Dependencies",
+        "nodes": [
+          "conv3d_layer",
+          "model_config"
+        ],
+        "title": "External Libraries and Data",
+        "description": "Components from external libraries or data structures used by the fusion process for checks and configuration.",
+        "role": "data"
+      }
+    ]
+  }
+}

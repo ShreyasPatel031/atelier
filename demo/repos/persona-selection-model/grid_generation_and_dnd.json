@@ -1,0 +1,142 @@
+{
+  "title": "Grid Generation and D&D",
+  "summary": "This module generates grids of model responses by steering along persona vectors, supporting both 3x3 and 2x2 configurations. It also provides utilities for analyzing and selecting the 'best' cells from these generated grids.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "grid_nine_main",
+        "label": "Generate Response Grids",
+        "type": "component",
+        "link": null,
+        "title": "Generate Response Grids",
+        "description": "Orchestrates the generation of model responses across a grid of sycophancy and chaos steering values. Supports 3x3 and 2x2 grids, with optional trait and coherence judging."
+      },
+      {
+        "id": "grid_nine_register",
+        "label": "Register Steering Hook",
+        "type": "component",
+        "link": null,
+        "title": "Register Steering Hook",
+        "description": "Registers a forward hook on a model layer to apply a steering vector with a given alpha value, enabling persona steering."
+      },
+      {
+        "id": "grid_nine_run_generate",
+        "label": "Execute Model Generation",
+        "type": "component",
+        "link": null,
+        "title": "Execute Model Generation",
+        "description": "Runs the model's text generation process after applying steering hooks, then removes the hooks to clean up."
+      },
+      {
+        "id": "dnd_playground_corner_alphas",
+        "label": "Extract Corner Alphas",
+        "type": "component",
+        "link": null,
+        "title": "Extract Corner Alphas",
+        "description": "Retrieves the alpha values for the 'best' cell within a specified corner of a D&D playground grid."
+      },
+      {
+        "id": "dnd_playground_best",
+        "label": "Get Best Cell",
+        "type": "component",
+        "link": null,
+        "title": "Get Best Cell",
+        "description": "Identifies and returns the 'best' cell from a given D&D playground corner, typically based on evaluation metrics."
+      },
+      {
+        "id": "steering_mechanisms",
+        "label": "Steering Mechanisms",
+        "type": "module",
+        "link": "steering_mechanisms",
+        "title": "Steering Mechanisms",
+        "description": "Handles the core logic for applying persona steering vectors to the model's activations."
+      },
+      {
+        "id": "vector_composition_tools",
+        "label": "Vector Composition Tools",
+        "type": "module",
+        "link": "vector_composition_tools",
+        "title": "Vector Composition Tools",
+        "description": "Provides utilities for combining and calibrating persona vectors, used in multi-axis steering."
+      },
+      {
+        "id": "persona_evaluation_and_testing",
+        "label": "Persona Evaluation",
+        "type": "module",
+        "link": "persona_evaluation_and_testing",
+        "title": "Persona Evaluation and Testing",
+        "description": "Contains tools and scripts for validating, evaluating, and testing persona steering effectiveness and coherence."
+      }
+    ],
+    "edges": [
+      {
+        "source": "grid_nine_main",
+        "target": "grid_nine_run_generate",
+        "label": "orchestrates generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "persona_evaluation_and_testing",
+        "label": "sends for judging",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "vector_composition_tools",
+        "label": "uses calibration scales",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_run_generate",
+        "target": "grid_nine_register",
+        "label": "registers hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_register",
+        "target": "steering_mechanisms",
+        "label": "uses steering hook logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_corner_alphas",
+        "target": "dnd_playground_best",
+        "label": "gets best cell",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "grid_generation",
+        "label": "Grid Generation",
+        "nodes": [
+          "grid_nine_main",
+          "grid_nine_register",
+          "grid_nine_run_generate"
+        ],
+        "title": "Grid Generation",
+        "description": "Components responsible for generating model responses across a grid of steering parameters.",
+        "role": "generative"
+      },
+      {
+        "id": "dnd_playground_analysis",
+        "label": "D&D Playground Analysis",
+        "nodes": [
+          "dnd_playground_corner_alphas",
+          "dnd_playground_best"
+        ],
+        "title": "D&D Playground Analysis",
+        "description": "Utilities for analyzing and extracting key information from D&D playground results.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

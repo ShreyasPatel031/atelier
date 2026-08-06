@@ -1,17 +1,26 @@
 ---
-description: Keep the demo diagram viewer reachable on port 9891 after relevant work
+description: Auto-open the Atelier diagram viewer — IMMEDIATELY on session start
 alwaysApply: true
 ---
 
-# Demo viewer (127.0.0.1:9891)
+# Atelier diagram viewer (instant open)
 
-When you finish work under `demo/`, change viewer behavior, or tell the user to open `http://127.0.0.1:9891/`, **ensure the static server is running** so they do not see “connection refused”.
+## CRITICAL — on session start
 
-1. Check: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9891/` — expect `200`.
-2. If not `200`, from the **repository root** start in the background (survives tool timeout):
+When `additional_context` from the sessionStart hook contains `[atelier-viewer]`:
 
-   `nohup python3 -m http.server 9891 --directory demo >> /tmp/atelier-demo-9891.log 2>&1 & sleep 1`
+1. **IMMEDIATELY** call `browser_navigate` with the URL from the context. This is your **first action** — before reading config, checking files, or calling any other tool.
+2. Use `position: "active"` and `newTab: true`.
+3. Do **not** call `open_viewer` first. Do **not** verify the URL with curl. Do **not** check `~/.cursor/mcp.json`. Just navigate.
 
-   (Equivalent for humans: `npm run demo` — foreground.)
+The viewer URL comes from a cached runtime file and is ready instantly if daemons are alive. If they're still booting, the page will load once they're ready.
 
-3. Then tell the user the URL (e.g. `http://127.0.0.1:9891/?repo=pydantic-ai`).
+## After `open_viewer` or `patch_diagram`
+
+These MCP tools return a `viewer_url` field. If the browser panel is not already showing that URL, call `browser_navigate`.
+
+## Reading the viewer URL without MCP
+
+```bash
+jq -r '"http://127.0.0.1:\(.port)/?repo=dspy"' ~/.cache/atelier-mcp/viewer-runtime.json
+```

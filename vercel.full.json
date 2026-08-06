@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "buildCommand": "node demo/scripts/generate-repos-index.js",
+  "outputDirectory": "demo",
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 60,
+      "includeFiles": "demo/repos/**"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/chat.py"
+    },
+    {
+      "src": "/repos/(.*)",
+      "dest": "/repos/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

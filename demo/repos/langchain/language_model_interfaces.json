@@ -1,0 +1,95 @@
+{
+    "title": "Language Model Interfaces",
+    "summary": "This module defines the core interfaces and base classes for interacting with various language models (LLMs) and chat models, providing a consistent abstraction layer for different providers and model types.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_models",
+                "label": "Base Language Models",
+                "type": "module",
+                "link": "base_models",
+                "title": "Base Language Models",
+                "description": "Defines the foundational interfaces for interacting with various language models, including abstract base classes for LLMs and chat models, enabling consistent integration and extensibility."
+            },
+            {
+                "id": "fake_models",
+                "label": "Fake Language Models",
+                "type": "module",
+                "link": "fake_models",
+                "title": "Fake Language Models",
+                "description": "Provides various fake chat model implementations for testing and development purposes, simulating different response behaviors without external API calls."
+            },
+            {
+                "id": "message_handling",
+                "label": "Message Handling",
+                "type": "module",
+                "link": "message_handling",
+                "title": "Message Handling",
+                "description": "Provides utilities for handling and translating messages, including content block creation, message filtering, merging, and history management. It supports various LLM provider-specific message formats."
+            },
+            {
+                "id": "partner_models",
+                "label": "Partner LLM Integrations",
+                "type": "module",
+                "link": "partner_models",
+                "title": "Partner LLM Integrations",
+                "description": "Provides interfaces and utilities for integrating with various partner-specific Large Language Models (LLMs), including Anthropic, Groq, HuggingFace, Mistral AI, Ollama, and OpenAI, handling message conversion, tool calling, and prompt caching."
+            }
+        ],
+        "edges": [
+            {
+                "source": "base_models",
+                "target": "fake_models",
+                "label": "provides base classes for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_models",
+                "target": "partner_models",
+                "label": "are implemented by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "message_handling",
+                "target": "base_models",
+                "label": "defines message structures for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "message_handling",
+                "target": "partner_models",
+                "label": "translates messages for",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_abstractions",
+                "label": "Core Abstractions",
+                "nodes": [
+                    "base_models",
+                    "message_handling"
+                ],
+                "title": "Core Abstractions",
+                "description": "These components define the fundamental interfaces and message structures that all language models and chat models adhere to, ensuring consistency across different implementations.",
+                "role": null
+            },
+            {
+                "id": "model_implementations",
+                "label": "Model Implementations",
+                "nodes": [
+                    "fake_models",
+                    "partner_models"
+                ],
+                "title": "Model Implementations",
+                "description": "This group includes concrete implementations of language models, ranging from fake models for testing to integrations with various third-party LLM providers.",
+                "role": null
+            }
+        ]
+    }
+}

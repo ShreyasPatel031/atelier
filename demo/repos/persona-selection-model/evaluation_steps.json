@@ -1,0 +1,124 @@
+{
+  "title": "Persona Evaluation Steps",
+  "summary": "This module defines a series of command-line steps (B, C, D) for generating persona artifacts, evaluating them through rollouts, and creating persona vectors.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "generate_trait_artifact",
+        "label": "Generate Persona Trait Artifact",
+        "type": "component",
+        "link": null,
+        "title": "Generate Persona Trait Artifact",
+        "description": "Creates a structured JSON artifact representing a persona's traits, either from a predefined JSON file or by calling a Vertex AI model."
+      },
+      {
+        "id": "run_step_c",
+        "label": "Run Rollout Evaluation (Step C)",
+        "type": "component",
+        "link": null,
+        "title": "Run Rollout Evaluation (Step C)",
+        "description": "Executes a series of rollouts to evaluate the generated persona artifact, optionally using a Vertex AI judge model, and saves the results."
+      },
+      {
+        "id": "run_step_d",
+        "label": "Generate Persona Vectors (Step D)",
+        "type": "component",
+        "link": null,
+        "title": "Generate Persona Vectors (Step D)",
+        "description": "Processes the rollout evaluation results to generate numerical persona vectors and a summary, which can be used for further analysis or steering."
+      },
+      {
+        "id": "persona_schemas",
+        "label": "Persona Schemas",
+        "type": "module",
+        "link": "persona_schemas",
+        "title": "Persona Schemas",
+        "description": "Defines the data structures and validation rules for persona-related artifacts, ensuring consistency across the system."
+      },
+      {
+        "id": "vertex_ai_platform",
+        "label": "Vertex AI Platform",
+        "type": "external",
+        "link": null,
+        "title": "Vertex AI Platform",
+        "description": "Google Cloud's machine learning platform, used for generating persona artifacts and judging rollout evaluations."
+      },
+      {
+        "id": "steering_mechanisms",
+        "label": "Steering Mechanisms",
+        "type": "module",
+        "link": "steering_mechanisms",
+        "title": "Steering Mechanisms",
+        "description": "Provides functionalities to steer model behavior using persona vectors, influencing responses based on desired traits."
+      }
+    ],
+    "edges": [
+      {
+        "source": "generate_trait_artifact",
+        "target": "run_step_c",
+        "label": "trait bundle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_step_c",
+        "target": "run_step_d",
+        "label": "rollout results (JSONL)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_step_d",
+        "target": "steering_mechanisms",
+        "label": "persona vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_schemas",
+        "target": "generate_trait_artifact",
+        "label": "artifact definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vertex_ai_platform",
+        "target": "generate_trait_artifact",
+        "label": "artifact generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vertex_ai_platform",
+        "target": "run_step_c",
+        "label": "evaluation judging",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "artifact_generation",
+        "label": "Artifact Generation (Step B)",
+        "nodes": [
+          "generate_trait_artifact"
+        ],
+        "title": "Artifact Generation (Step B)",
+        "description": "Handles the creation of persona trait artifacts, either from local files or via external AI services.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_and_vectorization",
+        "label": "Evaluation & Vectorization",
+        "nodes": [
+          "run_step_c",
+          "run_step_d"
+        ],
+        "title": "Evaluation and Vectorization",
+        "description": "Orchestrates the evaluation of persona artifacts through rollouts and the subsequent generation of persona vectors.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

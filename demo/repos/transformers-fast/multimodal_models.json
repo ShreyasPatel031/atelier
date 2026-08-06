@@ -1,0 +1,17 @@
+{
+    "title": "Multimodal Model Architectures",
+    "summary": "This module encompasses various multimodal model architectures that integrate and process different data types like text, image, and video for diverse tasks.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "blip_models", "label": "BLIP Family Models", "type": "module", "link": "blip_models", "title": "BLIP Family Models", "description": "Contains models based on the BLIP architecture, integrating vision and language components for tasks like image captioning and visual question answering."},
+            {"id": "bridgetower_models", "label": "BridgeTower Models", "type": "module", "link": "bridgetower_models", "title": "BridgeTower Models", "description": "Includes BridgeTower models designed for contrastive learning and image-text retrieval by bridging vision and language modalities."},
+            {"id": "qwen_moe_models", "label": "Qwen MoE Models", "type": "module", "link": "qwen_moe_models", "title": "Qwen Mixture-of-Experts Models", "description": "Houses Qwen models utilizing Mixture-of-Experts (MoE) architectures, including specialized text and talker models for diverse modalities."},
+            {"id": "other_multimodal_architectures", "label": "Other Multimodal Architectures", "type": "module", "link": "other_multimodal_architectures", "title": "Diverse Multimodal Architectures", "description": "A collection of other distinct multimodal models such as Kosmos2, Mllama, and XCLIP, each offering unique approaches to multimodal understanding."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "core_multimodal_models", "label": "Core Multimodal Models", "title": "Core Multimodal Models", "description": "Central implementations of various multimodal architectures that process and integrate data from multiple modalities.", "role": "analytical", "nodes": ["blip_models", "bridgetower_models", "qwen_moe_models", "other_multimodal_architectures"]}
+        ]
+    }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Experimental Features",
+  "summary": "This module houses experimental features, including conversational AI capabilities and evaluation tools for agents and crews. These features are subject to change as they evolve.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "conversational_mixin",
+        "label": "Conversational Mixin",
+        "type": "component",
+        "link": null,
+        "title": "Conversational AI Capabilities",
+        "description": "Provides experimental conversational AI features for Flows, enabling chat behavior, routing, and message handling within a conversational context."
+      },
+      {
+        "id": "conversation_start_router",
+        "label": "Conversation Start Router",
+        "type": "component",
+        "link": null,
+        "title": "Route Conversational Turns",
+        "description": "A decorator that marks a method as the starting point and router for conversational turns, integrating it into the Flow's execution graph."
+      },
+      {
+        "id": "base_evaluator",
+        "label": "Base Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Base for Evaluation",
+        "description": "An abstract base class for creating evaluators, defining the interface for assessing agent and crew performance based on specific metrics."
+      },
+      {
+        "id": "run_experiment",
+        "label": "Run Experiment",
+        "type": "component",
+        "link": null,
+        "title": "Execute Evaluation Experiments",
+        "description": "Executes an evaluation experiment on a given dataset with a specified crew or agents, returning the results for analysis."
+      },
+      {
+        "id": "assert_experiment_successfully",
+        "label": "Assert Experiment Success",
+        "type": "component",
+        "link": null,
+        "title": "Validate Experiment Results",
+        "description": "Asserts that an experiment ran successfully and optionally compares its results against a baseline to detect regressions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "conversational_mixin",
+        "target": "conversation_start_router",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_experiment",
+        "target": "base_evaluator",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "assert_experiment_successfully",
+        "target": "run_experiment",
+        "label": "validates output of",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "conversational_ai",
+        "label": "Conversational AI",
+        "nodes": [
+          "conversational_mixin",
+          "conversation_start_router"
+        ],
+        "title": "Conversational AI Features",
+        "description": "Components enabling interactive chat and conversational flow management within the system.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_tools",
+        "label": "Evaluation Tools",
+        "nodes": [
+          "base_evaluator",
+          "run_experiment",
+          "assert_experiment_successfully"
+        ],
+        "title": "Agent and Crew Evaluation",
+        "description": "Tools and frameworks for evaluating the performance and correctness of agents and crews through experiments and assertions.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

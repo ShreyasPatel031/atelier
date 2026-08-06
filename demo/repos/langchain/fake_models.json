@@ -1,0 +1,102 @@
+{
+  "title": "Fake Language Models",
+  "summary": "This module provides various fake chat model implementations for testing and development purposes, simulating different response behaviors without external API calls.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_chat_model",
+        "label": "BaseChatModel",
+        "type": "external",
+        "link": null,
+        "title": "Base Chat Model",
+        "description": "The foundational abstract class for all chat models, defining the core interface for chat interactions."
+      },
+      {
+        "id": "simple_chat_model",
+        "label": "SimpleChatModel",
+        "type": "external",
+        "link": null,
+        "title": "Simple Chat Model",
+        "description": "A simplified base class for chat models, providing basic implementations for common chat model functionalities."
+      },
+      {
+        "id": "fake_list_chat_model",
+        "label": "FakeListChatModel",
+        "type": "component",
+        "link": null,
+        "title": "Fake List Chat Model",
+        "description": "A fake chat model that cycles through a predefined list of string responses, useful for predictable testing scenarios."
+      },
+      {
+        "id": "fake_chat_model",
+        "label": "FakeChatModel",
+        "type": "component",
+        "link": null,
+        "title": "Fake Chat Model",
+        "description": "A basic fake chat model that always returns a static 'fake response', suitable for simple integration tests."
+      },
+      {
+        "id": "fake_messages_list_chat_model",
+        "label": "FakeMessagesListChatModel",
+        "type": "component",
+        "link": null,
+        "title": "Fake Messages List Chat Model",
+        "description": "A fake chat model that cycles through a predefined list of BaseMessage objects, allowing for more complex message-based response testing."
+      },
+      {
+        "id": "parrot_fake_chat_model",
+        "label": "ParrotFakeChatModel",
+        "type": "component",
+        "link": null,
+        "title": "Parrot Fake Chat Model",
+        "description": "A fake chat model that 'parrots' back the last message it received, useful for testing message passing and basic conversational flow."
+      }
+    ],
+    "edges": [
+      {
+        "source": "simple_chat_model",
+        "target": "fake_list_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simple_chat_model",
+        "target": "fake_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_chat_model",
+        "target": "fake_messages_list_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_chat_model",
+        "target": "parrot_fake_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "fake_implementations",
+        "label": "Fake Implementations",
+        "nodes": [
+          "fake_list_chat_model",
+          "fake_chat_model",
+          "fake_messages_list_chat_model",
+          "parrot_fake_chat_model"
+        ],
+        "title": "Fake Model Implementations",
+        "description": "Concrete implementations of fake chat models designed for various testing scenarios.",
+        "role": "generative"
+      }
+    ]
+  }
+}

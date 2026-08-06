@@ -1,19 +1,115 @@
 {
   "repos": [
     {
-      "repo": "pydantic-ai",
+      "repo": "crewai",
       "generation": {
         "exit_code": 0,
-        "duration_seconds": 234.1,
-        "stdout_lines": 923,
-        "stderr_lines": 36,
+        "duration_seconds": 125.3,
+        "stdout_lines": 1058,
+        "stderr_lines": 34,
         "docs_exist": true,
         "md_files": 0
       },
       "validation": {
         "validation_passed": true,
         "errors": 0,
-        "warnings": 10
+        "warnings": 0
+      }
+    },
+    {
+      "repo": "dspy",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 63.7,
+        "stdout_lines": 882,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 3
+      }
+    },
+    {
+      "repo": "langchain",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 135.0,
+        "stdout_lines": 1073,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 4
+      }
+    },
+    {
+      "repo": "ollama",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 89.6,
+        "stdout_lines": 1158,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": false,
+        "errors": 1,
+        "warnings": 1
+      }
+    },
+    {
+      "repo": "persona-selection-model",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 41.5,
+        "stdout_lines": 881,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 1
+      }
+    },
+    {
+      "repo": "pydantic-ai",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 164.9,
+        "stdout_lines": 1007,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 2
+      }
+    },
+    {
+      "repo": "transformers",
+      "generation": {
+        "exit_code": 0,
+        "duration_seconds": 120.3,
+        "stdout_lines": 1125,
+        "stderr_lines": 34,
+        "docs_exist": true,
+        "md_files": 0
+      },
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 3
       }
     }
   ]

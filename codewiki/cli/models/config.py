@@ -29,6 +29,8 @@ class Configuration:
         default_output: Default output directory
         use_vertex_ai: Use Vertex AI + ADC instead of a static API key
         gcp_project: GCP project ID for Vertex AI quota
+        llm_provider: "gemini" (Vertex/ADC or Gemini API) or "claude" (Anthropic API)
+        anthropic_api_key: Anthropic API key when llm_provider is claude (also ANTHROPIC_API_KEY env)
     """
     base_url: str
     main_model: str
@@ -36,6 +38,8 @@ class Configuration:
     default_output: str = "docs"
     use_vertex_ai: bool = False
     gcp_project: str = ""
+    llm_provider: str = "gemini"
+    anthropic_api_key: str = ""
     
     def validate(self):
         """
@@ -44,7 +48,9 @@ class Configuration:
         Raises:
             ConfigurationError: If validation fails
         """
-        validate_url(self.base_url)
+        # Claude uses Anthropic HTTP API; base_url may still be a Gemini URL from prior config.
+        if (self.llm_provider or "").strip().lower() not in ("claude", "anthropic"):
+            validate_url(self.base_url)
         validate_model_name(self.main_model)
         validate_model_name(self.cluster_model)
     
@@ -70,10 +76,15 @@ class Configuration:
             default_output=data.get('default_output', 'docs'),
             use_vertex_ai=bool(data.get('use_vertex_ai', False)),
             gcp_project=data.get('gcp_project', ''),
+            llm_provider=(data.get('llm_provider') or 'gemini').strip().lower() or 'gemini',
+            anthropic_api_key=data.get('anthropic_api_key') or '',
         )
     
     def is_complete(self) -> bool:
         """Check if all required fields are set."""
+        provider = (self.llm_provider or "gemini").strip().lower()
+        if provider in ("claude", "anthropic"):
+            return bool(self.main_model and self.cluster_model)
         return bool(
             self.base_url and 
             self.main_model and 
@@ -106,5 +117,6 @@ class Configuration:
             cluster_model=self.cluster_model,
             use_vertex_ai=self.use_vertex_ai,
             gcp_project=self.gcp_project,
+            llm_provider=self.llm_provider,
+            anthropic_api_key=self.anthropic_api_key,
         )
-

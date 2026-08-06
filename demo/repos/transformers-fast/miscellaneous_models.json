@@ -1,0 +1,21 @@
+ newTokenCount: 2288
+
+```json
+{
+    "title": "Diverse Specialized Models",
+    "summary": "This module houses various specialized model implementations, including protein folding, GPT-2 variants, Switch Transformers, and Ernie VL-Moe models.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "esm_protein_folding", "label": "ESM Protein Folding Model", "type": "module", "link": "protein_folding_models", "title": "ESM Protein Folding Model", "description": "Implements the ESM model specifically designed for protein structure prediction and folding."},
+            {"id": "gpt2_double_heads", "label": "GPT2 Double Heads Model", "type": "module", "link": "gpt2_variants", "title": "GPT2 Double Heads Model", "description": "A variant of GPT-2 featuring dual heads for both language modeling and multiple-choice classification tasks."},
+            {"id": "switch_transformers", "label": "Switch Transformers Models", "type": "module", "link": "switch_transformers_models", "title": "Switch Transformers Models", "description": "Contains implementations of the Switch Transformers architecture, including both the full model and its encoder component."},
+            {"id": "ernie_vl_moe", "label": "Ernie VL-Moe Text Model", "type": "module", "link": "ernie_vl_moe_models", "title": "Ernie VL-Moe Text Model", "description": "Provides the text model component for the Ernie4.5 VL-Moe architecture, handling text-related processing."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "specialized_implementations", "label": "Specialized Implementations", "title": "Specialized Implementations", "description": "Collection of models with specific architectures or task-oriented modifications.", "role": "generative", "nodes": ["esm_protein_folding", "gpt2_double_heads", "switch_transformers", "ernie_vl_moe"]}
+        ]
+    }
+}
+```

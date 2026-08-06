@@ -181,14 +181,17 @@
     function rootLayoutOptions(elkDirection, target) {
         if (target === 'elkjs') {
             // INCLUDE_CHILDREN: edges cross compound boundaries (common in diagram IR).
-            return {
-                'elk.algorithm': 'layered',
-                'elk.direction': elkDirection,
-                'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
-                'elk.spacing.nodeNode': '48',
-                'elk.layered.spacing.nodeNodeBetweenLayers': '56',
-                'elk.padding': '[top=20,left=20,bottom=20,right=20]',
-            };
+            return Object.assign(
+                {
+                    'elk.algorithm': 'layered',
+                    'elk.direction': elkDirection,
+                    'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+                    'elk.spacing.nodeNode': '48',
+                    'elk.layered.spacing.nodeNodeBetweenLayers': '56',
+                    'elk.padding': '[top=20,left=20,bottom=20,right=20]',
+                },
+                getDimApi().getElkPortEdgeSpacingLayoutOptions(global)
+            );
         }
         /** Matches ELK Live examples; see https://rtsys.informatik.uni-kiel.de/elklive/json.html */
         return {
@@ -205,11 +208,14 @@
         }
         P = Math.max(4, Math.min(48, P));
         if (target === 'elkjs') {
-            return {
-                'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
-                'elk.padding': '[top=' + P + ',left=' + P + ',bottom=' + P + ',right=' + P + ']',
-                'elk.spacing.nodeNode': '28',
-            };
+            return Object.assign(
+                {
+                    'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+                    'elk.padding': '[top=' + P + ',left=' + P + ',bottom=' + P + ',right=' + P + ']',
+                    'elk.spacing.nodeNode': '28',
+                },
+                getDimApi().getElkPortEdgeSpacingLayoutOptions(global)
+            );
         }
         return {
             algorithm: 'layered',

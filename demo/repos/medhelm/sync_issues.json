@@ -1,0 +1,1092 @@
+{
+  "docs_dir": "/workspace/demo/repos-src/medhelm/atelier_docs",
+  "timestamp": "2026-08-06T02:52:01.590739",
+  "summary": {
+    "total_modules": 23,
+    "missing_files": 18,
+    "failure_rate_pct": 78.26,
+    "success_rate_pct": 21.74,
+    "total_issues": 72,
+    "errors": 36,
+    "warnings": 36,
+    "files_created": 0,
+    "metadata_added": 36,
+    "diagrams_added": 18
+  },
+  "metrics": {
+    "presync_audit": {
+      "modules_total": 23,
+      "missing_md": 18,
+      "missing_title": 18,
+      "missing_description": 18,
+      "leaf_missing_diagram": 18,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 12,
+      "parent_diagram_gaps_to_inject": 12,
+      "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
+      "placeholder_md_files": 0
+    },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 23,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "postsync_audit": {
+      "modules_total": 23,
+      "missing_md": 18,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
+      "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
+      "placeholder_md_files": 0
+    },
+    "delta_presync_minus_postsync": {
+      "parent_diagram_gaps_to_inject": 12.0,
+      "missing_description": 18.0,
+      "invalid_module_json_parse": 0.0,
+      "children_missing_from_diagram_nodes": 12.0,
+      "modules_total": 0.0,
+      "missing_md": 0.0,
+      "mermaid_fence_blocks_total": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "placeholder_md_files": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "missing_title": 18.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "leaf_missing_diagram": 18.0
+    },
+    "fixes_applied_counts": {
+      "metadata_field_updates": 36,
+      "placeholder_md_files_created": 0,
+      "leaf_diagrams_added": 18,
+      "parent_diagram_child_nodes_injected": 12,
+      "diagram_ir_edges_dropped": 0,
+      "overview_md_created": 0
+    },
+    "measurement_summary": {
+      "1_stage3_defects_before_stage45": {
+        "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+        "presync_audit": {
+          "modules_total": 23,
+          "missing_md": 18,
+          "missing_title": 18,
+          "missing_description": 18,
+          "leaf_missing_diagram": 18,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 12,
+          "parent_diagram_gaps_to_inject": 12,
+          "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1b_stage45_fixes_applied_counters": {
+        "metadata_field_updates": 36,
+        "placeholder_md_files_created": 0,
+        "leaf_diagrams_added": 18,
+        "parent_diagram_child_nodes_injected": 12,
+        "diagram_ir_edges_dropped": 0,
+        "overview_md_created": 0
+      },
+      "1c_residual_after_stage45": {
+        "postsync_audit": {
+          "modules_total": 23,
+          "missing_md": 18,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
+          "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1d_reduction_delta_presync_minus_postsync": {
+        "note": "Positive number = fewer problems after sync for that metric",
+        "delta": {
+          "parent_diagram_gaps_to_inject": 12.0,
+          "missing_description": 18.0,
+          "invalid_module_json_parse": 0.0,
+          "children_missing_from_diagram_nodes": 12.0,
+          "modules_total": 0.0,
+          "missing_md": 0.0,
+          "mermaid_fence_blocks_total": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "placeholder_md_files": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "missing_title": 18.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "leaf_missing_diagram": 18.0
+        }
+      },
+      "1e_issues_logged_this_run_by_type": {
+        "all": {
+          "missing_title": 18,
+          "missing_description": 18,
+          "missing_md_file": 18,
+          "missing_diagram": 18
+        }
+      },
+      "2_diagram_ir": {
+        "audit": {
+          "module_diagrams_total": 23,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code": {}
+      }
+    }
+  },
+  "issues_by_type": {
+    "missing_title": 18,
+    "missing_description": 18,
+    "missing_md_file": 18,
+    "missing_diagram": 18
+  },
+  "issues": [
+    {
+      "issue_type": "missing_title",
+      "module_name": "run_management",
+      "module_path": "benchmark_execution/run_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "run_management",
+      "module_path": "benchmark_execution/run_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "scenario_and_data",
+      "module_path": "benchmark_execution/scenario_and_data",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "scenario_and_data",
+      "module_path": "benchmark_execution/scenario_and_data",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "scenario_tests",
+      "module_path": "benchmark_execution/scenario_tests",
+      "severity": "warning",
+      "details": {
+        "component_count": 197,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "scenario_tests",
+      "module_path": "benchmark_execution/scenario_tests",
+      "severity": "warning",
+      "details": {
+        "component_count": 197,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "run_specs",
+      "module_path": "benchmark_execution/run_specs",
+      "severity": "warning",
+      "details": {
+        "component_count": 45,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "run_specs",
+      "module_path": "benchmark_execution/run_specs",
+      "severity": "warning",
+      "details": {
+        "component_count": 45,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "adapters",
+      "module_path": "model_adaptation/adapters",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "adapters",
+      "module_path": "model_adaptation/adapters",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "augmentations",
+      "module_path": "model_adaptation/augmentations",
+      "severity": "warning",
+      "details": {
+        "component_count": 19,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "augmentations",
+      "module_path": "model_adaptation/augmentations",
+      "severity": "warning",
+      "details": {
+        "component_count": 19,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "metrics",
+      "module_path": "evaluation_and_metrics/metrics",
+      "severity": "warning",
+      "details": {
+        "component_count": 8,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "metrics",
+      "module_path": "evaluation_and_metrics/metrics",
+      "severity": "warning",
+      "details": {
+        "component_count": 8,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "annotation",
+      "module_path": "evaluation_and_metrics/annotation",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "annotation",
+      "module_path": "evaluation_and_metrics/annotation",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "presentation",
+      "module_path": "evaluation_and_metrics/presentation",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "presentation",
+      "module_path": "evaluation_and_metrics/presentation",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "language_models",
+      "module_path": "client_and_inference/language_models",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "language_models",
+      "module_path": "client_and_inference/language_models",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "multimodal_models",
+      "module_path": "client_and_inference/multimodal_models",
+      "severity": "warning",
+      "details": {
+        "component_count": 9,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "multimodal_models",
+      "module_path": "client_and_inference/multimodal_models",
+      "severity": "warning",
+      "details": {
+        "component_count": 9,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "image_generation",
+      "module_path": "client_and_inference/image_generation",
+      "severity": "warning",
+      "details": {
+        "component_count": 14,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "image_generation",
+      "module_path": "client_and_inference/image_generation",
+      "severity": "warning",
+      "details": {
+        "component_count": 14,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "tokenization",
+      "module_path": "infrastructure_and_utilities/tokenization",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "tokenization",
+      "module_path": "infrastructure_and_utilities/tokenization",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "proxy_and_services",
+      "module_path": "infrastructure_and_utilities/proxy_and_services",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "proxy_and_services",
+      "module_path": "infrastructure_and_utilities/proxy_and_services",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "window_services",
+      "module_path": "infrastructure_and_utilities/window_services",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "window_services",
+      "module_path": "infrastructure_and_utilities/window_services",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "common",
+      "module_path": "infrastructure_and_utilities/common",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "common",
+      "module_path": "infrastructure_and_utilities/common",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "scripts",
+      "module_path": "infrastructure_and_utilities/scripts",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "scripts",
+      "module_path": "infrastructure_and_utilities/scripts",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "frontend",
+      "module_path": "infrastructure_and_utilities/frontend",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "frontend",
+      "module_path": "infrastructure_and_utilities/frontend",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "run_management",
+      "module_path": "benchmark_execution/run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 6,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "benchmark_execution"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "scenario_and_data",
+      "module_path": "benchmark_execution/scenario_and_data",
+      "severity": "error",
+      "details": {
+        "component_count": 6,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "benchmark_execution"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "scenario_tests",
+      "module_path": "benchmark_execution/scenario_tests",
+      "severity": "error",
+      "details": {
+        "component_count": 197,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "benchmark_execution"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "run_specs",
+      "module_path": "benchmark_execution/run_specs",
+      "severity": "error",
+      "details": {
+        "component_count": 45,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "benchmark_execution"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "adapters",
+      "module_path": "model_adaptation/adapters",
+      "severity": "error",
+      "details": {
+        "component_count": 4,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "model_adaptation"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "augmentations",
+      "module_path": "model_adaptation/augmentations",
+      "severity": "error",
+      "details": {
+        "component_count": 19,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "model_adaptation"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "metrics",
+      "module_path": "evaluation_and_metrics/metrics",
+      "severity": "error",
+      "details": {
+        "component_count": 8,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "evaluation_and_metrics"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "annotation",
+      "module_path": "evaluation_and_metrics/annotation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "evaluation_and_metrics"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "presentation",
+      "module_path": "evaluation_and_metrics/presentation",
+      "severity": "error",
+      "details": {
+        "component_count": 7,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "evaluation_and_metrics"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "language_models",
+      "module_path": "client_and_inference/language_models",
+      "severity": "error",
+      "details": {
+        "component_count": 16,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "client_and_inference"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "multimodal_models",
+      "module_path": "client_and_inference/multimodal_models",
+      "severity": "error",
+      "details": {
+        "component_count": 9,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "client_and_inference"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "image_generation",
+      "module_path": "client_and_inference/image_generation",
+      "severity": "error",
+      "details": {
+        "component_count": 14,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "client_and_inference"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "tokenization",
+      "module_path": "infrastructure_and_utilities/tokenization",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "proxy_and_services",
+      "module_path": "infrastructure_and_utilities/proxy_and_services",
+      "severity": "error",
+      "details": {
+        "component_count": 7,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "window_services",
+      "module_path": "infrastructure_and_utilities/window_services",
+      "severity": "error",
+      "details": {
+        "component_count": 16,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "common",
+      "module_path": "infrastructure_and_utilities/common",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "scripts",
+      "module_path": "infrastructure_and_utilities/scripts",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "frontend",
+      "module_path": "infrastructure_and_utilities/frontend",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "infrastructure_and_utilities"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "run_management",
+      "module_path": "benchmark_execution/run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 6,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "scenario_and_data",
+      "module_path": "benchmark_execution/scenario_and_data",
+      "severity": "error",
+      "details": {
+        "component_count": 6,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "scenario_tests",
+      "module_path": "benchmark_execution/scenario_tests",
+      "severity": "error",
+      "details": {
+        "component_count": 197,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "run_specs",
+      "module_path": "benchmark_execution/run_specs",
+      "severity": "error",
+      "details": {
+        "component_count": 45,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "adapters",
+      "module_path": "model_adaptation/adapters",
+      "severity": "error",
+      "details": {
+        "component_count": 4,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "augmentations",
+      "module_path": "model_adaptation/augmentations",
+      "severity": "error",
+      "details": {
+        "component_count": 19,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "metrics",
+      "module_path": "evaluation_and_metrics/metrics",
+      "severity": "error",
+      "details": {
+        "component_count": 8,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "annotation",
+      "module_path": "evaluation_and_metrics/annotation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "presentation",
+      "module_path": "evaluation_and_metrics/presentation",
+      "severity": "error",
+      "details": {
+        "component_count": 7,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "language_models",
+      "module_path": "client_and_inference/language_models",
+      "severity": "error",
+      "details": {
+        "component_count": 16,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "multimodal_models",
+      "module_path": "client_and_inference/multimodal_models",
+      "severity": "error",
+      "details": {
+        "component_count": 9,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "image_generation",
+      "module_path": "client_and_inference/image_generation",
+      "severity": "error",
+      "details": {
+        "component_count": 14,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "tokenization",
+      "module_path": "infrastructure_and_utilities/tokenization",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "proxy_and_services",
+      "module_path": "infrastructure_and_utilities/proxy_and_services",
+      "severity": "error",
+      "details": {
+        "component_count": 7,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "window_services",
+      "module_path": "infrastructure_and_utilities/window_services",
+      "severity": "error",
+      "details": {
+        "component_count": 16,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "common",
+      "module_path": "infrastructure_and_utilities/common",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "scripts",
+      "module_path": "infrastructure_and_utilities/scripts",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "frontend",
+      "module_path": "infrastructure_and_utilities/frontend",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    }
+  ],
+  "files_created": [],
+  "metadata_added": [
+    "run_management:title",
+    "run_management:description",
+    "scenario_and_data:title",
+    "scenario_and_data:description",
+    "scenario_tests:title",
+    "scenario_tests:description",
+    "run_specs:title",
+    "run_specs:description",
+    "adapters:title",
+    "adapters:description",
+    "augmentations:title",
+    "augmentations:description",
+    "metrics:title",
+    "metrics:description",
+    "annotation:title",
+    "annotation:description",
+    "presentation:title",
+    "presentation:description",
+    "language_models:title",
+    "language_models:description",
+    "multimodal_models:title",
+    "multimodal_models:description",
+    "image_generation:title",
+    "image_generation:description",
+    "tokenization:title",
+    "tokenization:description",
+    "proxy_and_services:title",
+    "proxy_and_services:description",
+    "window_services:title",
+    "window_services:description",
+    "common:title",
+    "common:description",
+    "scripts:title",
+    "scripts:description",
+    "frontend:title",
+    "frontend:description"
+  ],
+  "diagrams_added": [
+    "run_management",
+    "scenario_and_data",
+    "scenario_tests",
+    "run_specs",
+    "adapters",
+    "augmentations",
+    "metrics",
+    "annotation",
+    "presentation",
+    "language_models",
+    "multimodal_models",
+    "image_generation",
+    "tokenization",
+    "proxy_and_services",
+    "window_services",
+    "common",
+    "scripts",
+    "frontend"
+  ]
+}

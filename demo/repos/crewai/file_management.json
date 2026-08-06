@@ -1,0 +1,143 @@
+{
+  "title": "File Management",
+  "summary": "This module handles file operations, including caching, cleanup, and resolution of various file sources, ensuring efficient and secure file handling within the system.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "file_source_normalization",
+        "label": "Normalize File Sources",
+        "type": "component",
+        "link": null,
+        "title": "Normalize File Sources",
+        "description": "Converts various input types (paths, URLs, bytes, streams) into standardized FileSource objects for consistent processing."
+      },
+      {
+        "id": "file_resolver_creation",
+        "label": "Create File Resolver",
+        "type": "component",
+        "link": null,
+        "title": "Create File Resolver",
+        "description": "Initializes a FileResolver with configurable settings for file upload preferences, size thresholds, and caching."
+      },
+      {
+        "id": "cache_cleanup_sync",
+        "label": "Synchronous Cache Cleanup",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Cache Cleanup",
+        "description": "Manages the removal of expired or provider-specific files from the cache and optionally from the storage provider in a synchronous manner."
+      },
+      {
+        "id": "cache_cleanup_async",
+        "label": "Asynchronous Cache Cleanup",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Cache Cleanup",
+        "description": "Handles the removal of expired or provider-specific files from the cache and storage provider asynchronously, supporting concurrent operations."
+      },
+      {
+        "id": "file_operation_logging",
+        "label": "Log File Operations",
+        "type": "component",
+        "link": null,
+        "title": "Log File Operations",
+        "description": "Records detailed metrics and events for all file-related actions, including success, failure, duration, and file metadata."
+      },
+      {
+        "id": "file_retrieval",
+        "label": "Retrieve Stored Files",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Stored Files",
+        "description": "Provides functionality to retrieve files associated with specific execution or task IDs from the file store."
+      }
+    ],
+    "edges": [
+      {
+        "source": "file_source_normalization",
+        "target": "file_resolver_creation",
+        "label": "normalized file sources",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_resolver_creation",
+        "target": "cache_cleanup_sync",
+        "label": "cache configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_resolver_creation",
+        "target": "cache_cleanup_async",
+        "label": "cache configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_cleanup_sync",
+        "target": "file_operation_logging",
+        "label": "cleanup results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_cleanup_async",
+        "target": "file_operation_logging",
+        "label": "cleanup results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_source_normalization",
+        "target": "file_operation_logging",
+        "label": "file metadata",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_retrieval",
+        "target": "file_source_normalization",
+        "label": "raw file inputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "file_resolution",
+        "label": "File Resolution",
+        "nodes": [
+          "file_source_normalization",
+          "file_resolver_creation"
+        ],
+        "title": "File Resolution",
+        "description": "Manages the conversion of diverse file inputs into standardized formats and configures how files are handled and uploaded.",
+        "role": "analytical"
+      },
+      {
+        "id": "cache_management",
+        "label": "Cache Management",
+        "nodes": [
+          "cache_cleanup_sync",
+          "cache_cleanup_async"
+        ],
+        "title": "Cache Management",
+        "description": "Handles the lifecycle of cached files, including cleanup of expired or provider-specific data, supporting both synchronous and asynchronous operations.",
+        "role": "data"
+      },
+      {
+        "id": "monitoring_and_retrieval",
+        "label": "Monitoring and Retrieval",
+        "nodes": [
+          "file_operation_logging",
+          "file_retrieval"
+        ],
+        "title": "Monitoring and Retrieval",
+        "description": "Provides logging for file operations and mechanisms to retrieve files based on execution or task identifiers.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

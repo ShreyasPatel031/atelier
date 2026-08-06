@@ -1,0 +1,26 @@
+{
+    "title": "Conditional Generation Models",
+    "summary": "This module provides a collection of models for generating various outputs such as text, speech, or images conditioned on diverse inputs, supporting tasks like translation, summarization, and speech recognition.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "text_to_text_generation", "label": "Text-to-Text Generation", "type": "module", "link": "text_to_text_generation", "title": "Text-to-Text Generation", "description": "Models focused on generating text outputs from text inputs, often used for tasks like translation and summarization."}, 
+            {"id": "speech_to_text_generation", "label": "Speech-to-Text Generation", "type": "module", "link": "speech_to_text_generation", "title": "Speech-to-Text Generation", "description": "Models that transcribe spoken language into written text, converting audio inputs into textual outputs."}, 
+            {"id": "text_to_speech_generation", "label": "Text-to-Speech Generation", "type": "module", "link": "text_to_speech_generation", "title": "Text-to-Speech Generation", "description": "Models that synthesize speech from text inputs, enabling verbal output from written content."}, 
+            {"id": "speech_to_speech_generation", "label": "Speech-to-Speech Generation", "type": "module", "link": "speech_to_speech_generation", "title": "Speech-to-Speech Generation", "description": "Models that translate spoken language from one language to another, directly generating speech output from speech input."}, 
+            {"id": "vision_to_text_generation", "label": "Vision-to-Text Generation", "type": "module", "link": "vision_to_text_generation", "title": "Vision-to-Text Generation", "description": "Models that interpret visual inputs (images/videos) and generate descriptive text or perform visual question answering."}, 
+            {"id": "multi_modal_generation", "label": "Multi-Modal Generation", "type": "module", "link": "multi_modal_generation", "title": "Multi-Modal Generation", "description": "Models capable of processing and generating content across multiple modalities, such as text, audio, and visual data."}, 
+            {"id": "protein_sequence_generation", "label": "Protein Sequence Generation", "type": "module", "link": "protein_sequence_generation", "title": "Protein Sequence Generation", "description": "Models specialized in generating text outputs related to protein sequences, often for biological analysis."}
+        ],
+        "edges": [
+            {"source": "text_to_text_generation", "target": "multi_modal_generation", "label": "integrated in"}, 
+            {"source": "speech_to_text_generation", "target": "multi_modal_generation", "label": "integrated in"}, 
+            {"source": "text_to_speech_generation", "target": "multi_modal_generation", "label": "integrated in"}, 
+            {"source": "speech_to_speech_generation", "target": "multi_modal_generation", "label": "integrated in"}, 
+            {"source": "vision_to_text_generation", "target": "multi_modal_generation", "label": "integrated in"}
+        ],
+        "groups": [
+            {"id": "generative_models", "label": "Generative Models", "title": "Generative Models", "description": "Core models and architectures for various conditional generation tasks across different modalities.", "role": "generative", "nodes": ["text_to_text_generation", "speech_to_text_generation", "text_to_speech_generation", "speech_to_speech_generation", "vision_to_text_generation", "multi_modal_generation", "protein_sequence_generation"]}
+        ]
+    }
+}

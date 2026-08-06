@@ -1,0 +1,162 @@
+{
+  "title": "CLI Utilities",
+  "summary": "This module provides foundational utilities for the CrewAI CLI, including authentication, base command structures, template file management, and secure file extraction.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "authentication_command",
+        "label": "Authentication Command",
+        "type": "component",
+        "link": null,
+        "title": "Authentication Command",
+        "description": "Handles user authentication for the CLI, including logging into the tool repository and managing API keys."
+      },
+      {
+        "id": "plus_api_mixin",
+        "label": "Plus API Mixin",
+        "type": "component",
+        "link": null,
+        "title": "Plus API Mixin",
+        "description": "Provides common functionality for interacting with the CrewAI+ API, including telemetry setup and response validation."
+      },
+      {
+        "id": "base_command",
+        "label": "Base Command",
+        "type": "component",
+        "link": null,
+        "title": "Base Command",
+        "description": "Establishes a base class for all CLI commands, initializing telemetry for tracking."
+      },
+      {
+        "id": "copy_template_files",
+        "label": "Copy Template Files",
+        "type": "component",
+        "link": null,
+        "title": "Copy Template Files",
+        "description": "Manages the copying of template files for new crew, tool, or skill projects, ensuring proper structure and content."
+      },
+      {
+        "id": "safe_extract_utilities",
+        "label": "Safe Extraction Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Safe Extraction Utilities",
+        "description": "Provides secure methods for extracting archive files (tar and zip) to prevent path traversal vulnerabilities."
+      },
+      {
+        "id": "content_crew_template",
+        "label": "Content Crew Template",
+        "type": "component",
+        "link": null,
+        "title": "Content Crew Template",
+        "description": "Defines a template for a 'Content Crew' with pre-configured agents (planner, writer, editor) and tasks."
+      },
+      {
+        "id": "shim_finder",
+        "label": "Shim Finder",
+        "type": "component",
+        "link": null,
+        "title": "Shim Finder",
+        "description": "A meta path finder that maps 'crewai.cli' imports to 'crewai_cli' for compatibility and module resolution."
+      },
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "module",
+        "link": "cli_commands",
+        "title": "CLI Commands",
+        "description": "Handles the various command-line interface operations for managing crews, tools, and deployments."
+      },
+      {
+        "id": "telemetry",
+        "label": "Telemetry",
+        "type": "external",
+        "link": null,
+        "title": "Telemetry",
+        "description": "External service for collecting and reporting usage data and errors."
+      },
+      {
+        "id": "tool_commands",
+        "label": "Tool Commands",
+        "type": "external",
+        "link": null,
+        "title": "Tool Commands",
+        "description": "External module responsible for managing tool-related operations, including login to the tool repository."
+      }
+    ],
+    "edges": [
+      {
+        "source": "authentication_command",
+        "target": "tool_commands",
+        "label": "logs in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_mixin",
+        "target": "telemetry",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_command",
+        "target": "telemetry",
+        "label": "initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copy_template_files",
+        "target": "content_crew_template",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shim_finder",
+        "target": "cli_commands",
+        "label": "maps imports to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_foundations",
+        "label": "CLI Foundations",
+        "nodes": [
+          "authentication_command",
+          "plus_api_mixin",
+          "base_command"
+        ],
+        "title": "CLI Foundations",
+        "description": "Core components providing basic structure and cross-cutting concerns for CLI operations.",
+        "role": "analytical"
+      },
+      {
+        "id": "template_management",
+        "label": "Template Management",
+        "nodes": [
+          "copy_template_files",
+          "safe_extract_utilities",
+          "content_crew_template"
+        ],
+        "title": "Template Management",
+        "description": "Components responsible for creating and managing project templates and ensuring secure file operations.",
+        "role": "generative"
+      },
+      {
+        "id": "module_resolution",
+        "label": "Module Resolution",
+        "nodes": [
+          "shim_finder"
+        ],
+        "title": "Module Resolution",
+        "description": "Handles dynamic module loading and mapping for CLI components.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

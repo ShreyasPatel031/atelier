@@ -1,0 +1,128 @@
+{
+  "title": "User Interface Module",
+  "summary": "This module provides components for integrating Pydantic AI agents with various user interfaces, handling request/response transformations and event streaming.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "ui_adapter",
+        "label": "UIAdapter",
+        "type": "component",
+        "link": null,
+        "title": "UIAdapter Base Class",
+        "description": "Abstract base class for UI adapters, responsible for transforming frontend requests into agent inputs and agent outputs into protocol-specific events."
+      },
+      {
+        "id": "ag_ui_runner",
+        "label": "run_ag_ui",
+        "type": "component",
+        "link": null,
+        "title": "Run AG-UI Agent",
+        "description": "Runs an agent with AG-UI specific input and streams AG-UI protocol events, handling file data preservation and system prompt management."
+      },
+      {
+        "id": "vercel_ai_adapter",
+        "label": "VercelAIAdapter",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Adapter",
+        "description": "Specialized UI adapter for integrating with the Vercel AI protocol, handling message transformations and tool approval streaming."
+      },
+      {
+        "id": "ui_event_stream",
+        "label": "UIEventStream",
+        "type": "component",
+        "link": null,
+        "title": "UI Event Stream Base Class",
+        "description": "Abstract base class for transforming Pydantic AI events into protocol-specific events for streaming to user interfaces."
+      },
+      {
+        "id": "docs_site_handlers",
+        "label": "Docs Site Handlers",
+        "type": "component",
+        "link": null,
+        "title": "Documentation Site Request Handlers",
+        "description": "Functions for handling specific requests on the documentation site, such as retrieving text responses or changelog data."
+      },
+      {
+        "id": "agent_framework",
+        "label": "Agent Framework",
+        "type": "module",
+        "link": "agent_framework",
+        "title": "Agent Framework",
+        "description": "Provides the core components for defining and running AI agents, including abstract agent definitions and result streaming."
+      }
+    ],
+    "edges": [
+      {
+        "source": "ag_ui_runner",
+        "target": "ui_adapter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter",
+        "target": "agent_framework",
+        "label": "runs agent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter",
+        "target": "ui_event_stream",
+        "label": "builds",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "ui_adapter",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "ui_event_stream",
+        "label": "builds specific",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "adapters",
+        "label": "UI Adapters",
+        "nodes": [
+          "ui_adapter",
+          "ag_ui_runner",
+          "vercel_ai_adapter"
+        ],
+        "title": "User Interface Adapters",
+        "description": "Components responsible for adapting Pydantic AI agents to various user interface protocols and handling message transformations.",
+        "role": "surface"
+      },
+      {
+        "id": "event_processing",
+        "label": "Event Processing",
+        "nodes": [
+          "ui_event_stream"
+        ],
+        "title": "Event Stream Processing",
+        "description": "Handles the transformation and encoding of Pydantic AI events into a format suitable for streaming to user interfaces.",
+        "role": "analytical"
+      },
+      {
+        "id": "docs_site_utilities",
+        "label": "Docs Site Utilities",
+        "nodes": [
+          "docs_site_handlers"
+        ],
+        "title": "Documentation Site Utilities",
+        "description": "Functions specifically designed to support the documentation website, such as content retrieval.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

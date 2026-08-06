@@ -1,0 +1,177 @@
+{
+  "title": "General Processing Utilities",
+  "summary": "This module provides general-purpose processing utilities, including a mixin for common processor functionalities and specific processors for multimodal inputs like ColModernVBert and GotOcr2.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "processor_mixin",
+        "label": "ProcessorMixin",
+        "type": "component",
+        "link": null,
+        "title": "ProcessorMixin",
+        "description": "Provides core functionalities for all processor classes, including saving/loading, input validation, and handling of multimodal inputs."
+      },
+      {
+        "id": "colmodernvbert_processor",
+        "label": "ColModernVBertProcessor",
+        "type": "component",
+        "link": null,
+        "title": "ColModernVBertProcessor",
+        "description": "A specialized processor for ColModernVBert models, handling image and text inputs, including visual prompt prefixes and query augmentation."
+      },
+      {
+        "id": "got_ocr2_processor",
+        "label": "GotOcr2Processor",
+        "type": "component",
+        "link": null,
+        "title": "GotOcr2Processor",
+        "description": "A processor designed for GotOcr2 models, managing image and text inputs with specific handling for image tokens, bounding boxes, and multi-page documents."
+      },
+      {
+        "id": "ernie4_5_vl_moe_processor_conversion",
+        "label": "Ernie4_5_VLMoe Processor Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Ernie4_5_VLMoe Processor Conversion",
+        "description": "Utility function to convert and save the Ernie4_5_VLMoe processor, including its tokenizer, image processor, and video processor."
+      },
+      {
+        "id": "image_processing",
+        "label": "Image Processing",
+        "type": "module",
+        "link": "image_processing",
+        "title": "Image Processing",
+        "description": "Handles the preprocessing and transformation of image data for various models."
+      },
+      {
+        "id": "text_processing",
+        "label": "Text Processing",
+        "type": "module",
+        "link": "text_processing",
+        "title": "Text Processing",
+        "description": "Manages the tokenization, encoding, and decoding of text data."
+      },
+      {
+        "id": "audio_processing",
+        "label": "Audio Processing",
+        "type": "module",
+        "link": "audio_processing",
+        "title": "Audio Processing",
+        "description": "Manages the preprocessing and feature extraction of audio data."
+      }
+    ],
+    "edges": [
+      {
+        "source": "colmodernvbert_processor",
+        "target": "processor_mixin",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "got_ocr2_processor",
+        "target": "processor_mixin",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "colmodernvbert_processor",
+        "target": "image_processing",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "colmodernvbert_processor",
+        "target": "text_processing",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "got_ocr2_processor",
+        "target": "image_processing",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "got_ocr2_processor",
+        "target": "text_processing",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ernie4_5_vl_moe_processor_conversion",
+        "target": "text_processing",
+        "label": "converts tokenizer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ernie4_5_vl_moe_processor_conversion",
+        "target": "image_processing",
+        "label": "uses image processor",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "processor_mixin",
+        "target": "image_processing",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "processor_mixin",
+        "target": "text_processing",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "processor_mixin",
+        "target": "audio_processing",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_functionality",
+        "label": "Core Functionality",
+        "nodes": [
+          "processor_mixin"
+        ],
+        "title": "Core Processing Functionality",
+        "description": "Centralized utilities and mixins that provide foundational processing capabilities across different modalities.",
+        "role": "analytical"
+      },
+      {
+        "id": "specialized_processors",
+        "label": "Specialized Processors",
+        "nodes": [
+          "colmodernvbert_processor",
+          "got_ocr2_processor"
+        ],
+        "title": "Model-Specific Processors",
+        "description": "Processors tailored for specific model architectures, handling their unique input requirements and data transformations.",
+        "role": "generative"
+      },
+      {
+        "id": "conversion_utilities",
+        "label": "Conversion Utilities",
+        "nodes": [
+          "ernie4_5_vl_moe_processor_conversion"
+        ],
+        "title": "Processor Conversion Tools",
+        "description": "Functions and scripts dedicated to converting and preparing processors for use within the Hugging Face ecosystem.",
+        "role": "data"
+      }
+    ]
+  }
+}

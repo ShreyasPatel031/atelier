@@ -1,0 +1,96 @@
+{
+    "title": "Language Model Integration",
+    "summary": "This module provides the core infrastructure for interacting with various language models, including client implementations, API communication, caching, and utility functions.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_lm_clients",
+                "label": "Base LM Clients",
+                "type": "module",
+                "link": "base_lm_clients",
+                "title": "Base Language Model Clients",
+                "description": "Defines the foundational `BaseLM` class and concrete implementations for local and cloud-based (Databricks, OpenAI) LM providers, supporting finetuning and deployment."
+            },
+            {
+                "id": "lm_api_interaction",
+                "label": "LM API Interaction",
+                "type": "module",
+                "link": "lm_api_interaction",
+                "title": "LM API Interaction",
+                "description": "Provides synchronous and asynchronous functions for interacting with Language Model APIs, primarily via LiteLLM, handling request formatting, caching, and retry logic."
+            },
+            {
+                "id": "caching_and_utilities",
+                "label": "Caching and Utilities",
+                "type": "module",
+                "link": "caching_and_utilities",
+                "title": "Caching and Utilities",
+                "description": "Offers caching mechanisms for language model interactions and utility functions for managing cache behavior and LiteLLM logging."
+            },
+            {
+                "id": "program_execution_and_primitives",
+                "label": "Program Execution & Primitives",
+                "type": "external",
+                "link": "program_execution_and_primitives",
+                "title": "Program Execution & Primitives",
+                "description": "The core DSPy modules and primitives that define how programs are structured and executed, relying on LMs for their operations."
+            }
+        ],
+        "edges": [
+            {
+                "source": "program_execution_and_primitives",
+                "target": "base_lm_clients",
+                "label": "uses LM clients",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_lm_clients",
+                "target": "lm_api_interaction",
+                "label": "makes API calls via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_api_interaction",
+                "target": "caching_and_utilities",
+                "label": "uses for caching/logging",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "lm_providers",
+                "label": "Language Model Providers",
+                "nodes": [
+                    "base_lm_clients"
+                ],
+                "title": "Language Model Providers",
+                "description": "Manages the connection and interaction with various language models, both local and cloud-based.",
+                "role": null
+            },
+            {
+                "id": "api_communication",
+                "label": "API Communication Layer",
+                "nodes": [
+                    "lm_api_interaction"
+                ],
+                "title": "API Communication Layer",
+                "description": "Handles the technical details of sending requests to and receiving responses from language model APIs.",
+                "role": null
+            },
+            {
+                "id": "support_services",
+                "label": "Support Services",
+                "nodes": [
+                    "caching_and_utilities"
+                ],
+                "title": "Support Services",
+                "description": "Provides essential services like caching to optimize performance and logging for debugging and monitoring.",
+                "role": null
+            }
+        ]
+    }
+}

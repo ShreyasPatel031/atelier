@@ -1,0 +1,39 @@
+{
+    "title": "Core Implementations",
+    "summary": "This module provides core implementations of various transformer-based models for diverse tasks including language modeling, classification, object detection, and multimodal processing.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "causal_lm", "label": "Causal Language Models", "type": "module", "link": "causal_lm", "title": "Causal Language Models", "description": "Models focused on generating text sequences by predicting the next token."}, 
+            {"id": "sequence_classification", "label": "Sequence Classification Models", "type": "module", "link": "sequence_classification", "title": "Sequence Classification", "description": "Models designed for classifying entire input sequences into predefined categories."}, 
+            {"id": "object_detection", "label": "Object Detection Models", "type": "module", "link": "object_detection", "title": "Object Detection", "description": "Models for identifying and localizing objects within images or videos."}, 
+            {"id": "conditional_generation", "label": "Conditional Generation Models", "type": "module", "link": "conditional_generation", "title": "Conditional Generation", "description": "Models that generate output based on specified input conditions or prompts."}, 
+            {"id": "question_answering", "label": "Question Answering Models", "type": "module", "link": "question_answering", "title": "Question Answering", "description": "Models capable of extracting answers from text or generating responses to questions."}, 
+            {"id": "masked_lm", "label": "Masked Language Models", "type": "module", "link": "masked_lm", "title": "Masked Language Models", "description": "Models trained to predict masked tokens in a sequence, useful for understanding context."}, 
+            {"id": "multi_modal", "label": "Multi-Modal Models", "type": "module", "link": "multi_modal", "title": "Multi-Modal Processing", "description": "Models that integrate and process information from multiple data modalities, such as text and images."}, 
+            {"id": "speech_audio", "label": "Speech and Audio Models", "type": "module", "link": "speech_audio", "title": "Speech and Audio Processing", "description": "Models for tasks involving speech recognition, audio generation, and audio feature extraction."}, 
+            {"id": "segmentation", "label": "Segmentation Models", "type": "module", "link": "segmentation", "title": "Image Segmentation", "description": "Models for pixel-level classification and delineation of objects or regions in images."}, 
+            {"id": "time_series", "label": "Time Series Models", "type": "module", "link": "time_series", "title": "Time Series Prediction", "description": "Models specialized in analyzing and forecasting time-dependent data sequences."}, 
+            {"id": "protein", "label": "Protein Models", "type": "module", "link": "protein", "title": "Protein Structure and Sequence Models", "description": "Models for tasks related to protein sequence, structure prediction, and function analysis."}, 
+            {"id": "base_models", "label": "Base Model Structures", "type": "module", "link": "base_models", "title": "Base Model Architectures", "description": "Core or foundational model architectures that serve as building blocks or wrappers for other implementations."}
+        ],
+        "edges": [
+            {"source": "causal_lm", "target": "conditional_generation", "label": "can inform"},
+            {"source": "sequence_classification", "target": "question_answering", "label": "text understanding"},
+            {"source": "masked_lm", "target": "causal_lm", "label": "pre-training for"},
+            {"source": "multi_modal", "target": "conditional_generation", "label": "enables multimodal"},
+            {"source": "multi_modal", "target": "object_detection", "label": "integrates with"},
+            {"source": "multi_modal", "target": "speech_audio", "label": "integrates with"},
+            {"source": "object_detection", "target": "segmentation", "label": "often precedes"},
+            {"source": "base_models", "target": "causal_lm", "label": "provides foundation"},
+            {"source": "base_models", "target": "multi_modal", "label": "provides foundation"}
+        ],
+        "groups": [
+            {"id": "text_processing_group", "label": "Text Processing", "title": "Text Processing Models", "description": "Models primarily dealing with textual data for various NLP tasks.", "role": "analytical", "nodes": ["causal_lm", "sequence_classification", "question_answering", "masked_lm", "conditional_generation"]},
+            {"id": "vision_processing_group", "label": "Vision Processing", "title": "Vision Processing Models", "description": "Models specialized in computer vision tasks like detection and segmentation.", "role": "analytical", "nodes": ["object_detection", "segmentation"]},
+            {"id": "cross_modal_group", "label": "Cross-Modal Integration", "title": "Cross-Modal Integration Models", "description": "Models designed to handle and integrate data from multiple modalities.", "role": "generative", "nodes": ["multi_modal", "speech_audio"]},
+            {"id": "specialized_models_group", "label": "Specialized Domain Models", "title": "Specialized Domain Models", "description": "Models tailored for specific scientific or data domains.", "role": "analytical", "nodes": ["time_series", "protein"]},
+            {"id": "foundational_architectures_group", "label": "Foundational Architectures", "title": "Foundational Architectures", "description": "Base model structures and general-purpose components.", "role": "analytical", "nodes": ["base_models"]}
+        ]
+    }
+}

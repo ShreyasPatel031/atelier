@@ -1,0 +1,191 @@
+{
+    "title": "Persona Steering and Generation",
+    "summary": "This module encompasses the entire lifecycle of persona steering, from defining and evaluating persona traits to generating steered model responses and analyzing their effects. It provides tools for creating, testing, and applying persona vectors to influence large language model behavior.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "persona_schemas",
+                "label": "Define Persona Schemas",
+                "type": "module",
+                "link": "persona_schemas",
+                "title": "Define Persona Schemas",
+                "description": "Establishes the data structures for persona traits, including prompts, questions, and evaluation rubrics, ensuring consistent data representation."
+            },
+            {
+                "id": "evaluation_steps",
+                "label": "Evaluate & Vectorize Personas",
+                "type": "module",
+                "link": "evaluation_steps",
+                "title": "Evaluate & Vectorize Personas",
+                "description": "Generates persona trait artifacts, evaluates them through rollouts, and creates numerical persona vectors for steering."
+            },
+            {
+                "id": "vector_composition_tools",
+                "label": "Compose & Analyze Vectors",
+                "type": "module",
+                "link": "vector_composition_tools",
+                "title": "Compose & Analyze Vectors",
+                "description": "Provides utilities for combining, calibrating, and analyzing steering vectors, including orthogonalization and cosine similarity."
+            },
+            {
+                "id": "steering_mechanisms",
+                "label": "Apply Steering Mechanisms",
+                "type": "module",
+                "link": "steering_mechanisms",
+                "title": "Apply Steering Mechanisms",
+                "description": "Implements the core logic for applying persona vectors to influence model activations and generate steered responses."
+            },
+            {
+                "id": "grid_generation_and_dnd",
+                "label": "Generate Response Grids",
+                "type": "module",
+                "link": "grid_generation_and_dnd",
+                "title": "Generate Response Grids",
+                "description": "Creates grids of model responses by steering along multiple persona vectors, useful for exploring behavioral landscapes like D&D alignments."
+            },
+            {
+                "id": "persona_evaluation_and_testing",
+                "label": "Test & Validate Steering",
+                "type": "module",
+                "link": "persona_evaluation_and_testing",
+                "title": "Test & Validate Steering",
+                "description": "Offers tools for validating persona vectors, performing sanity checks, A/B testing, and evaluating the stability and effectiveness of steering."
+            },
+            {
+                "id": "coherence_sweeps",
+                "label": "Optimize Coherence",
+                "type": "module",
+                "link": "coherence_sweeps",
+                "title": "Optimize Coherence",
+                "description": "Performs alpha sweeps to determine optimal scaling factors for persona traits, ensuring coherent and balanced steering effects."
+            },
+            {
+                "id": "chat_interface",
+                "label": "Chat Interface",
+                "type": "module",
+                "link": "chat_interface",
+                "title": "Chat Interface",
+                "description": "The user-facing API endpoints that utilize persona steering for interactive chat experiences."
+            }
+        ],
+        "edges": [
+            {
+                "source": "persona_schemas",
+                "target": "evaluation_steps",
+                "label": "defines artifact structure",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_steps",
+                "target": "steering_mechanisms",
+                "label": "produces persona vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_steps",
+                "target": "persona_evaluation_and_testing",
+                "label": "provides evaluation data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_composition_tools",
+                "target": "steering_mechanisms",
+                "label": "refines steering vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_composition_tools",
+                "target": "grid_generation_and_dnd",
+                "label": "prepares vectors for grids",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "steering_mechanisms",
+                "target": "grid_generation_and_dnd",
+                "label": "applies steering for grids",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "steering_mechanisms",
+                "target": "chat_interface",
+                "label": "generates steered responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "grid_generation_and_dnd",
+                "target": "persona_evaluation_and_testing",
+                "label": "generates responses for testing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "coherence_sweeps",
+                "target": "vector_composition_tools",
+                "label": "informs vector calibration",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_evaluation_and_testing",
+                "target": "coherence_sweeps",
+                "label": "uses evaluation metrics",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "persona_definition_and_creation",
+                "label": "Persona Definition & Creation",
+                "nodes": [
+                    "persona_schemas",
+                    "evaluation_steps"
+                ],
+                "title": "Persona Definition and Creation",
+                "description": "This group handles the initial stages of persona development, from defining their structural schemas to generating and vectorizing their core traits.",
+                "role": null
+            },
+            {
+                "id": "steering_logic_and_application",
+                "label": "Steering Logic & Application",
+                "nodes": [
+                    "vector_composition_tools",
+                    "steering_mechanisms",
+                    "grid_generation_and_dnd"
+                ],
+                "title": "Steering Logic and Application",
+                "description": "This group focuses on the core mechanisms for manipulating and applying persona vectors to influence model behavior, including advanced vector composition and grid-based response generation.",
+                "role": null
+            },
+            {
+                "id": "evaluation_and_optimization",
+                "label": "Evaluation & Optimization",
+                "nodes": [
+                    "persona_evaluation_and_testing",
+                    "coherence_sweeps"
+                ],
+                "title": "Evaluation and Optimization",
+                "description": "This group provides tools for rigorously testing, validating, and optimizing the effectiveness and coherence of persona steering mechanisms.",
+                "role": null
+            },
+            {
+                "id": "user_interaction",
+                "label": "User Interaction",
+                "nodes": [
+                    "chat_interface"
+                ],
+                "title": "User Interaction",
+                "description": "This group represents the interface through which users interact with the persona-steered language models.",
+                "role": null
+            }
+        ]
+    }
+}
