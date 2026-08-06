@@ -1,0 +1,102 @@
+{
+  "title": "System Utilities",
+  "summary": "This module provides core utility functions for interacting with external systems, including browser operations (opening and searching web pages) and a centralized tool registry for executing various system tools.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "browser_open",
+        "label": "Open Browser Page",
+        "type": "component",
+        "link": null,
+        "title": "BrowserOpen.Execute",
+        "description": "Handles opening web pages, either from a cached state, a link ID on the current page, or by crawling a new URL. Manages the browser's page history and cache."
+      },
+      {
+        "id": "browser_search",
+        "label": "Search Browser",
+        "type": "component",
+        "link": null,
+        "title": "BrowserSearch.Execute",
+        "description": "Executes a web search query, retrieves results, and constructs a search results page. It caches individual search result pages for later access."
+      },
+      {
+        "id": "tool_registry",
+        "label": "Execute Registered Tool",
+        "type": "component",
+        "link": null,
+        "title": "Registry.Execute",
+        "description": "Provides a centralized mechanism to execute registered tools by name, routing requests to the appropriate tool implementation."
+      },
+      {
+        "id": "web_search_tool",
+        "label": "Web Search Tool",
+        "type": "external",
+        "link": null,
+        "title": "Web Search Tool",
+        "description": "An external dependency responsible for performing actual web searches and returning raw search results."
+      },
+      {
+        "id": "browser_crawler",
+        "label": "Browser Crawler",
+        "type": "external",
+        "link": null,
+        "title": "Browser Crawler",
+        "description": "An external component used by BrowserOpen to fetch and parse content from new, uncached URLs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "browser_search",
+        "target": "web_search_tool",
+        "label": "search query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "browser_open",
+        "target": "browser_crawler",
+        "label": "URL to crawl",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_registry",
+        "target": "browser_open",
+        "label": "tool execution request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_registry",
+        "target": "browser_search",
+        "label": "tool execution request",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "browser_operations",
+        "label": "Browser Operations",
+        "nodes": [
+          "browser_open",
+          "browser_search"
+        ],
+        "title": "Browser Operations",
+        "description": "Handles all interactions related to web browsing, including opening pages, navigating, and performing searches.",
+        "role": "generative"
+      },
+      {
+        "id": "tool_management",
+        "label": "Tool Management",
+        "nodes": [
+          "tool_registry"
+        ],
+        "title": "Tool Management",
+        "description": "Manages the registration and execution of various system tools, providing a unified interface for tool invocation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

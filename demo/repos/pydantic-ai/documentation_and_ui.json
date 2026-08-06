@@ -1,0 +1,80 @@
+{
+    "title": "Documentation and UI",
+    "summary": "This module encompasses tools for generating documentation, managing command-line interfaces, and integrating AI agents with various user interfaces for interactive experiences.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "documentation_generation",
+                "label": "Documentation Generation",
+                "type": "module",
+                "link": "documentation_generation",
+                "title": "Documentation Generation",
+                "description": "Handles the creation and management of project documentation, including dynamic content injection and formatting."
+            },
+            {
+                "id": "cli_and_readme_tools",
+                "label": "CLI and README Tools",
+                "type": "module",
+                "link": "cli_and_readme_tools",
+                "title": "CLI and README Tools",
+                "description": "Provides command-line interface functionalities and utilities for maintaining the project's README documentation."
+            },
+            {
+                "id": "user_interface",
+                "label": "User Interface",
+                "type": "module",
+                "link": "user_interface",
+                "title": "User Interface",
+                "description": "Integrates AI agents with various user interfaces, managing request/response transformations and event streaming."
+            },
+            {
+                "id": "agent_framework",
+                "label": "Agent Framework",
+                "type": "module",
+                "link": "agent_framework",
+                "title": "Agent Framework",
+                "description": "The core module for defining, running, and managing AI agents, which can be exposed via user interfaces."
+            }
+        ],
+        "edges": [
+            {
+                "source": "documentation_generation",
+                "target": "cli_and_readme_tools",
+                "label": "documents CLI usage",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_interface",
+                "target": "agent_framework",
+                "label": "interacts with",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "documentation_tools",
+                "label": "Documentation Tools",
+                "nodes": [
+                    "documentation_generation",
+                    "cli_and_readme_tools"
+                ],
+                "title": "Documentation Tools",
+                "description": "Components focused on generating, managing, and maintaining project documentation and command-line interfaces.",
+                "role": "analytical"
+            },
+            {
+                "id": "user_interaction",
+                "label": "User Interaction",
+                "nodes": [
+                    "user_interface"
+                ],
+                "title": "User Interaction",
+                "description": "Components enabling interactive engagement with AI agents through various user interfaces.",
+                "role": "surface"
+            }
+        ]
+    }
+}

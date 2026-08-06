@@ -1,0 +1,150 @@
+{
+  "title": "A2A Core",
+  "summary": "This module provides the core functionality for Agent-to-Agent (A2A) communication, including configuration, task execution wrappers, and utilities for agent card management and delegation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "a2a_config",
+        "label": "A2A Configuration",
+        "type": "component",
+        "link": null,
+        "title": "A2A Configuration",
+        "description": "Defines the configuration settings for A2A communication, including endpoints, authentication, timeouts, and update mechanisms."
+      },
+      {
+        "id": "task_execution_wrappers",
+        "label": "Task Execution Wrappers",
+        "type": "component",
+        "link": null,
+        "title": "Task Execution Wrappers",
+        "description": "Provides synchronous and asynchronous wrappers for executing tasks and agent kickoffs with A2A delegation support."
+      },
+      {
+        "id": "agent_card_utilities",
+        "label": "Agent Card Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Agent Card Utilities",
+        "description": "Handles the creation, fetching, and verification of agent cards, which describe an agent's capabilities for A2A communication."
+      },
+      {
+        "id": "delegation_utilities",
+        "label": "Delegation Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Delegation Utilities",
+        "description": "Manages gRPC metadata injection for authentication during A2A delegation and provides mechanisms for watching task cancellations."
+      },
+      {
+        "id": "logging_utilities",
+        "label": "Logging Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Logging Utilities",
+        "description": "Configures JSON logging specifically for the A2A module to standardize log output."
+      },
+      {
+        "id": "a2a_authentication",
+        "label": "A2A Authentication",
+        "type": "module",
+        "link": "a2a_authentication",
+        "title": "A2A Authentication",
+        "description": "Manages various client and server-side authentication schemes for secure Agent-to-Agent communication."
+      },
+      {
+        "id": "a2a_extensions_and_updates",
+        "label": "A2A Extensions and Updates",
+        "type": "module",
+        "link": "a2a_extensions_and_updates",
+        "title": "A2A Extensions and Updates",
+        "description": "Handles client and server-side extensions for A2A communication, including UI extensions and various update mechanisms like polling and push notifications."
+      }
+    ],
+    "edges": [
+      {
+        "source": "a2a_config",
+        "target": "task_execution_wrappers",
+        "label": "uses configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "a2a_config",
+        "target": "agent_card_utilities",
+        "label": "configures card fetching",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_execution_wrappers",
+        "target": "agent_card_utilities",
+        "label": "uses agent cards",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_execution_wrappers",
+        "target": "delegation_utilities",
+        "label": "uses delegation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "delegation_utilities",
+        "target": "a2a_authentication",
+        "label": "applies auth metadata",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "a2a_config",
+        "target": "a2a_extensions_and_updates",
+        "label": "configures extensions/updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_execution_wrappers",
+        "target": "a2a_extensions_and_updates",
+        "label": "integrates extensions",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "configuration",
+        "label": "Configuration",
+        "nodes": [
+          "a2a_config"
+        ],
+        "title": "A2A Configuration Management",
+        "description": "Manages the settings and parameters for Agent-to-Agent communication, defining how agents connect and interact.",
+        "role": "data"
+      },
+      {
+        "id": "core_operations",
+        "label": "Core Operations",
+        "nodes": [
+          "task_execution_wrappers",
+          "agent_card_utilities"
+        ],
+        "title": "Core A2A Interaction Logic",
+        "description": "Encapsulates the primary logic for agents to delegate tasks and manage their identity within the A2A ecosystem.",
+        "role": "generative"
+      },
+      {
+        "id": "communication_infrastructure",
+        "label": "Communication Infrastructure",
+        "nodes": [
+          "delegation_utilities",
+          "logging_utilities"
+        ],
+        "title": "A2A Communication Infrastructure",
+        "description": "Provides the underlying mechanisms for secure and reliable communication between agents, including authentication and metadata handling.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "title": "Tool Registry and Websearch",
+  "summary": "This module manages a registry of available tools and provides functionality for executing them, including a web search tool. It handles tool registration, execution, and argument validation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "tool_registry",
+        "label": "Tool Registry",
+        "type": "component",
+        "link": null,
+        "title": "Tool Registry",
+        "description": "Manages the registration and lookup of various tools available to the system."
+      },
+      {
+        "id": "tool_execution",
+        "label": "Execute Tool",
+        "type": "component",
+        "link": null,
+        "title": "Tool Execution",
+        "description": "Executes a registered tool based on its name and provided arguments, handling potential errors for unknown tools."
+      },
+      {
+        "id": "web_search_tool",
+        "label": "Web Search Tool",
+        "type": "component",
+        "link": null,
+        "title": "Web Search Tool",
+        "description": "A specific tool that performs web searches, validating the presence and content of the search query."
+      },
+      {
+        "id": "tool_call_api",
+        "label": "Tool Call API",
+        "type": "external",
+        "link": null,
+        "title": "Tool Call API",
+        "description": "Represents the external API structure for defining and invoking tool calls, including function names and arguments."
+      }
+    ],
+    "edges": [
+      {
+        "source": "tool_call_api",
+        "target": "tool_execution",
+        "label": "tool call request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_registry",
+        "target": "tool_execution",
+        "label": "registered tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_execution",
+        "target": "web_search_tool",
+        "label": "execute web search",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_management",
+        "label": "Tool Management",
+        "nodes": [
+          "tool_registry",
+          "tool_execution"
+        ],
+        "title": "Tool Management",
+        "description": "Handles the core logic for registering and executing various tools within the system.",
+        "role": "analytical"
+      },
+      {
+        "id": "specific_tools",
+        "label": "Specific Tools",
+        "nodes": [
+          "web_search_tool"
+        ],
+        "title": "Specific Tool Implementations",
+        "description": "Contains implementations of individual tools, such as the web search functionality.",
+        "role": "generative"
+      }
+    ]
+  }
+}

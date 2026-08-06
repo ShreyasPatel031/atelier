@@ -1,0 +1,168 @@
+{
+  "title": "MLX Runner and Cache Management",
+  "summary": "This module provides core functionalities for running MLX models, including efficient key-value cache management for attention mechanisms and snapshotting for conversation resumption and branching.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "mlx_generator",
+        "label": "MLX Generator",
+        "type": "component",
+        "link": null,
+        "title": "MLX Generator",
+        "description": "Generates MLX-specific code from C++ source files using Tree-sitter for parsing and Go templates for output."
+      },
+      {
+        "id": "text_generation_pipeline",
+        "label": "Text Generation Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Text Generation Pipeline",
+        "description": "Manages the end-to-end process of text generation, including prefill, decoding, and interaction with the KV cache and sampler."
+      },
+      {
+        "id": "kv_cache_management",
+        "label": "KV Cache Management",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Management",
+        "description": "Handles the storage, retrieval, and eviction of key-value states for attention mechanisms, supporting both recurrent and rotating caches."
+      },
+      {
+        "id": "cache_snapshotting",
+        "label": "Cache Snapshotting",
+        "type": "component",
+        "link": null,
+        "title": "Cache Snapshotting",
+        "description": "Provides mechanisms for creating and restoring snapshots of the KV cache, enabling conversation branching and efficient resumption."
+      },
+      {
+        "id": "sampling_logic",
+        "label": "Sampling Logic",
+        "type": "component",
+        "link": null,
+        "title": "Sampling Logic",
+        "description": "Implements various sampling strategies (e.g., top-k, top-p, min-p, penalties) to select the next token during text generation."
+      },
+      {
+        "id": "mlx_model_forward",
+        "label": "MLX Model Forward Pass",
+        "type": "external",
+        "link": null,
+        "title": "MLX Model Forward Pass",
+        "description": "Represents the core MLX model's forward computation, which processes input tokens and updates the KV cache."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Tokenizer",
+        "type": "external",
+        "link": null,
+        "title": "Tokenizer",
+        "description": "Converts text to token IDs and vice-versa, and identifies end-of-sequence tokens."
+      }
+    ],
+    "edges": [
+      {
+        "source": "mlx_generator",
+        "target": "mlx_model_forward",
+        "label": "generates model code",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_generation_pipeline",
+        "target": "kv_cache_management",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_generation_pipeline",
+        "target": "cache_snapshotting",
+        "label": "manages snapshots",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_generation_pipeline",
+        "target": "sampling_logic",
+        "label": "uses sampler",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_generation_pipeline",
+        "target": "mlx_model_forward",
+        "label": "executes forward pass",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_generation_pipeline",
+        "target": "tokenizer",
+        "label": "uses tokenizer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kv_cache_management",
+        "target": "cache_snapshotting",
+        "label": "provides cache state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sampling_logic",
+        "target": "text_generation_pipeline",
+        "label": "returns sampled tokens",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "model_execution",
+        "label": "Model Execution",
+        "nodes": [
+          "text_generation_pipeline",
+          "mlx_model_forward"
+        ],
+        "title": "Model Execution",
+        "description": "Components responsible for running the MLX model and managing its computational flow.",
+        "role": "generative"
+      },
+      {
+        "id": "cache_system",
+        "label": "Cache System",
+        "nodes": [
+          "kv_cache_management",
+          "cache_snapshotting"
+        ],
+        "title": "Cache System",
+        "description": "Manages the key-value cache for attention mechanisms, including storage, rotation, and snapshotting capabilities.",
+        "role": "data"
+      },
+      {
+        "id": "token_sampling",
+        "label": "Token Sampling",
+        "nodes": [
+          "sampling_logic"
+        ],
+        "title": "Token Sampling",
+        "description": "Handles the probabilistic selection of the next token based on model logits and various sampling parameters.",
+        "role": "analytical"
+      },
+      {
+        "id": "utility_components",
+        "label": "Utility Components",
+        "nodes": [
+          "mlx_generator",
+          "tokenizer"
+        ],
+        "title": "Utility Components",
+        "description": "Supporting components for code generation and external interfaces.",
+        "role": "surface"
+      }
+    ]
+  }
+}

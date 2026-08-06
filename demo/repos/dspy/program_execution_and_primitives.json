@@ -1,0 +1,136 @@
+{
+    "title": "Program Execution & Primitives",
+    "summary": "This module defines the core building blocks and execution logic for DSPy programs, including foundational modules, data types, and mechanisms for tool and adapter integration.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_modules",
+                "label": "Core Modules",
+                "type": "module",
+                "link": "core_modules",
+                "title": "Core Module Primitives",
+                "description": "Defines the foundational `BaseModule` for parameter management and the `Module` class for program logic, LM interaction, and execution."
+            },
+            {
+                "id": "data_types_and_interfaces",
+                "label": "Data Types & Interfaces",
+                "type": "module",
+                "link": "data_types_and_interfaces",
+                "title": "Data Types and Interfaces",
+                "description": "Provides core data structures and interfaces for interacting with Language Models (LMs), including request/response formats, streaming events, and configuration options."
+            },
+            {
+                "id": "tool_and_adapter_integration",
+                "label": "Tool & Adapter Integration",
+                "type": "module",
+                "link": "tool_and_adapter_integration",
+                "title": "Tool and Adapter Integration",
+                "description": "Offers mechanisms for integrating external tools and defining custom adapters to interface with LMs, supporting multimodal interactions and structured data."
+            },
+            {
+                "id": "prediction_modules",
+                "label": "Prediction Modules",
+                "type": "module",
+                "link": "prediction_modules",
+                "title": "Prediction Modules",
+                "description": "Provides various advanced prediction strategies and techniques, including aggregation methods, multi-turn reasoning agents, and program-of-thought execution."
+            },
+            {
+                "id": "retrieval_modules",
+                "label": "Retrieval Modules",
+                "type": "module",
+                "link": "retrieval_modules",
+                "title": "Retrieval Modules",
+                "description": "Offers various retrieval mechanisms, including local and remote ColBERTv2 implementations, Databricks Vector Search, and Weaviate, to fetch relevant passages."
+            },
+            {
+                "id": "program_optimization_and_evaluation",
+                "label": "Program Optimization & Evaluation",
+                "type": "module",
+                "link": "program_optimization_and_evaluation",
+                "title": "Program Optimization and Evaluation",
+                "description": "Encompasses modules for automated prompt engineering, few-shot example selection, program refinement, and evaluation metrics."
+            }
+        ],
+        "edges": [
+            {
+                "source": "core_modules",
+                "target": "data_types_and_interfaces",
+                "label": "uses data types",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_modules",
+                "target": "tool_and_adapter_integration",
+                "label": "integrates tools/adapters",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "core_modules",
+                "label": "builds upon",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules",
+                "target": "retrieval_modules",
+                "label": "uses for RAG",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_optimization_and_evaluation",
+                "target": "core_modules",
+                "label": "optimizes programs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_optimization_and_evaluation",
+                "target": "prediction_modules",
+                "label": "evaluates/optimizes",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "foundational_components",
+                "label": "Foundational Components",
+                "nodes": [
+                    "core_modules",
+                    "data_types_and_interfaces",
+                    "tool_and_adapter_integration"
+                ],
+                "title": "Foundational Components",
+                "description": "These modules establish the basic structure, data handling, and external integration capabilities for all DSPy programs.",
+                "role": "analytical"
+            },
+            {
+                "id": "program_execution_strategies",
+                "label": "Program Execution Strategies",
+                "nodes": [
+                    "prediction_modules",
+                    "retrieval_modules"
+                ],
+                "title": "Program Execution Strategies",
+                "description": "These modules provide the core mechanisms for generating predictions and retrieving information within DSPy programs.",
+                "role": "generative"
+            },
+            {
+                "id": "program_refinement",
+                "label": "Program Refinement",
+                "nodes": [
+                    "program_optimization_and_evaluation"
+                ],
+                "title": "Program Refinement",
+                "description": "This module focuses on improving the performance and efficiency of DSPy programs through various optimization and evaluation techniques.",
+                "role": "analytical"
+            }
+        ]
+    }
+}

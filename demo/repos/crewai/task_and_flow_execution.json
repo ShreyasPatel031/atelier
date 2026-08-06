@@ -1,0 +1,208 @@
+{
+  "title": "Task and Flow Execution",
+  "summary": "This module orchestrates the execution of tasks and complex flows, managing conditional logic, human feedback, persistence, and visualization of workflows.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "conditional_task",
+        "label": "Conditional Task",
+        "type": "component",
+        "link": null,
+        "title": "Conditional Task",
+        "description": "Defines a task that executes based on a condition evaluated against previous task output, enabling dynamic workflow branching."
+      },
+      {
+        "id": "hallucination_guardrail",
+        "label": "Hallucination Guardrail",
+        "type": "component",
+        "link": null,
+        "title": "Hallucination Guardrail",
+        "description": "A placeholder for a feature that would validate task outputs against hallucination criteria using an LLM, ensuring factual consistency."
+      },
+      {
+        "id": "flow_runtime",
+        "label": "Flow Runtime",
+        "type": "component",
+        "link": null,
+        "title": "Flow Runtime",
+        "description": "The core engine for executing flows, managing state, method calls, event handling, and persistence for complex workflows."
+      },
+      {
+        "id": "flow_dsl",
+        "label": "Flow DSL",
+        "type": "component",
+        "link": null,
+        "title": "Flow DSL",
+        "description": "Provides decorators and utilities for defining flow methods, conditions, human feedback points, and routing logic within a flow."
+      },
+      {
+        "id": "flow_persistence",
+        "label": "Flow Persistence",
+        "type": "component",
+        "link": null,
+        "title": "Flow Persistence",
+        "description": "Abstract base class and decorators for persisting flow state, enabling checkpointing, resuming, and handling human feedback across sessions."
+      },
+      {
+        "id": "flow_visualization",
+        "label": "Flow Visualization",
+        "type": "component",
+        "link": null,
+        "title": "Flow Visualization",
+        "description": "Generates interactive HTML visualizations of flow structures, aiding in understanding and debugging complex workflows."
+      },
+      {
+        "id": "llm_integration",
+        "label": "LLM Integration",
+        "type": "module",
+        "link": "llm_integration",
+        "title": "LLM Integration",
+        "description": "Manages interactions with various Large Language Models, providing a unified interface for different LLM providers."
+      },
+      {
+        "id": "memory_management",
+        "label": "Memory Management",
+        "type": "module",
+        "link": "memory_management",
+        "title": "Memory Management",
+        "description": "Handles the storage, retrieval, and analysis of conversational and operational memories for agents and flows."
+      },
+      {
+        "id": "event_system",
+        "label": "Event System",
+        "type": "module",
+        "link": "event_system",
+        "title": "Event System",
+        "description": "Manages the emission, listening, and processing of various events within the CrewAI framework, enabling reactive and observable behaviors."
+      },
+      {
+        "id": "general_utilities",
+        "label": "General Utilities",
+        "type": "module",
+        "link": "general_utilities",
+        "title": "General Utilities",
+        "description": "Provides common utility functions and helper classes used across the CrewAI framework for various purposes like serialization, streaming, and logging."
+      }
+    ],
+    "edges": [
+      {
+        "source": "flow_dsl",
+        "target": "flow_runtime",
+        "label": "defines flow structure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_persistence",
+        "target": "flow_runtime",
+        "label": "persists state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "conditional_task",
+        "label": "executes tasks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "hallucination_guardrail",
+        "label": "applies guardrails",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "llm_integration",
+        "label": "uses LLMs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "memory_management",
+        "label": "accesses memory",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "flow_visualization",
+        "label": "generates plots",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_runtime",
+        "target": "general_utilities",
+        "label": "uses utilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hallucination_guardrail",
+        "target": "llm_integration",
+        "label": "uses LLM for evaluation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "flow_orchestration",
+        "label": "Flow Orchestration",
+        "nodes": [
+          "flow_runtime",
+          "flow_dsl"
+        ],
+        "title": "Flow Orchestration",
+        "description": "Components responsible for defining, executing, and managing the lifecycle of complex AI agent flows.",
+        "role": "generative"
+      },
+      {
+        "id": "task_management",
+        "label": "Task Management",
+        "nodes": [
+          "conditional_task",
+          "hallucination_guardrail"
+        ],
+        "title": "Task Management",
+        "description": "Handles the definition and execution of individual tasks, including conditional logic and quality control.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_management",
+        "label": "Data Management",
+        "nodes": [
+          "flow_persistence",
+          "memory_management"
+        ],
+        "title": "Data Management",
+        "description": "Manages the persistence of flow states and the integration with external memory systems.",
+        "role": "data"
+      },
+      {
+        "id": "observability_and_tools",
+        "label": "Observability and Tools",
+        "nodes": [
+          "flow_visualization",
+          "event_system",
+          "general_utilities"
+        ],
+        "title": "Observability and Tools",
+        "description": "Provides tools for visualizing flow execution and integrating with external systems for logging and general utilities.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

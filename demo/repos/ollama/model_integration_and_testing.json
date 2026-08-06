@@ -1,0 +1,143 @@
+{
+    "title": "Model Integration and Testing",
+    "summary": "This module contains comprehensive integration tests for the model serving system, validating API functionality, model capabilities, performance, and concurrency under various conditions.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "api_and_basic_functionality_tests",
+                "label": "API & Basic Functionality Tests",
+                "type": "module",
+                "link": "api_and_basic_functionality_tests",
+                "title": "API & Basic Functionality Tests",
+                "description": "Validates core API endpoints and fundamental system behaviors, including Unicode handling and basic chat/generate operations."
+            },
+            {
+                "id": "model_capabilities_tests",
+                "label": "Model Capabilities Tests",
+                "type": "module",
+                "link": "model_capabilities_tests",
+                "title": "Model Capabilities Tests",
+                "description": "Verifies specific model capabilities such as audio processing, image generation, embeddings, quantization, tool calling, and multi-modal vision."
+            },
+            {
+                "id": "performance_and_concurrency_tests",
+                "label": "Performance & Concurrency Tests",
+                "type": "module",
+                "link": "performance_and_concurrency_tests",
+                "title": "Performance & Concurrency Tests",
+                "description": "Evaluates system performance, concurrency, and context handling under various load conditions and for different models."
+            },
+            {
+                "id": "library_model_tests",
+                "label": "Library Model Tests",
+                "type": "module",
+                "link": "library_model_tests",
+                "title": "Library Model Tests",
+                "description": "Focuses on testing the chat capabilities of various models available in the library, ensuring expected responses to specific prompts."
+            },
+            {
+                "id": "api_endpoints",
+                "label": "API Endpoints",
+                "type": "module",
+                "link": "api_endpoints",
+                "title": "API Endpoints",
+                "description": "The module providing the HTTP API for interacting with the model serving and management system."
+            },
+            {
+                "id": "model_serving_and_management",
+                "label": "Model Serving & Management",
+                "type": "module",
+                "link": "model_serving_and_management",
+                "title": "Model Serving & Management",
+                "description": "Manages the lifecycle of models, including loading, unloading, scheduling, and serving responses to various API requests."
+            },
+            {
+                "id": "model_creation_and_conversion",
+                "label": "Model Creation & Conversion",
+                "type": "module",
+                "link": "model_creation_and_conversion",
+                "title": "Model Creation & Conversion",
+                "description": "Handles the creation and conversion of models from various formats into the system's internal representation."
+            }
+        ],
+        "edges": [
+            {
+                "source": "api_and_basic_functionality_tests",
+                "target": "api_endpoints",
+                "label": "tests API calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_capabilities_tests",
+                "target": "api_endpoints",
+                "label": "tests API calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_capabilities_tests",
+                "target": "model_creation_and_conversion",
+                "label": "tests model creation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "performance_and_concurrency_tests",
+                "target": "api_endpoints",
+                "label": "tests API calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "performance_and_concurrency_tests",
+                "target": "model_serving_and_management",
+                "label": "tests model scheduling",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "library_model_tests",
+                "target": "api_endpoints",
+                "label": "tests API calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_endpoints",
+                "target": "model_serving_and_management",
+                "label": "requests model operations",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "test_suites",
+                "label": "Integration Test Suites",
+                "nodes": [
+                    "api_and_basic_functionality_tests",
+                    "model_capabilities_tests",
+                    "performance_and_concurrency_tests",
+                    "library_model_tests"
+                ],
+                "title": "Integration Test Suites",
+                "description": "A collection of test suites designed to validate various aspects of the model serving system, from basic API functionality to advanced model capabilities and performance under load.",
+                "role": "analytical"
+            },
+            {
+                "id": "system_under_test",
+                "label": "System Under Test",
+                "nodes": [
+                    "api_endpoints",
+                    "model_serving_and_management",
+                    "model_creation_and_conversion"
+                ],
+                "title": "System Under Test",
+                "description": "The core components of the model serving system that are being validated by the integration tests, including API interfaces, model lifecycle management, and model creation processes.",
+                "role": "surface"
+            }
+        ]
+    }
+}

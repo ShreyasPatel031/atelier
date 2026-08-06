@@ -1,0 +1,90 @@
+{
+    "title": "Scripted Analysis & Benchmarking",
+    "summary": "This module provides command-line scripts for benchmarking persona steering performance and analyzing Sparse Autoencoder (SAE) features, offering insights into model behavior and efficiency.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "benchmarking_scripts",
+                "label": "Benchmarking Scripts",
+                "type": "module",
+                "link": "benchmarking_scripts",
+                "title": "Benchmarking Scripts",
+                "description": "Scripts for evaluating the performance of persona steering mechanisms under various conditions, focusing on latency and response times."
+            },
+            {
+                "id": "ssv_analysis_scripts",
+                "label": "SSV Analysis Scripts",
+                "type": "module",
+                "link": "ssv_analysis_scripts",
+                "title": "SSV Analysis Scripts",
+                "description": "Scripts dedicated to analyzing Sparse SAE Vectors (SSVs), including clustering features and generating corpus-based interpretations for model understanding."
+            },
+            {
+                "id": "persona_steering_and_generation",
+                "label": "Persona Steering & Generation",
+                "type": "module",
+                "link": "persona_steering_and_generation",
+                "title": "Persona Steering and Generation",
+                "description": "Core module responsible for defining, generating, and applying persona steering vectors to influence language model behavior."
+            },
+            {
+                "id": "sae_experimentation_and_analysis",
+                "label": "SAE Experimentation & Analysis",
+                "type": "module",
+                "link": "sae_experimentation_and_analysis",
+                "title": "SAE Experimentation and Analysis",
+                "description": "Module encompassing tools and workflows for conducting experiments with Sparse Autoencoders (SAEs) and analyzing their features."
+            }
+        ],
+        "edges": [
+            {
+                "source": "benchmarking_scripts",
+                "target": "persona_steering_and_generation",
+                "label": "benchmarks steering performance",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ssv_analysis_scripts",
+                "target": "sae_experimentation_and_analysis",
+                "label": "analyzes SAE features",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "performance_evaluation",
+                "label": "Performance Evaluation",
+                "nodes": [
+                    "benchmarking_scripts"
+                ],
+                "title": "Performance Evaluation",
+                "description": "Scripts focused on measuring and assessing the efficiency and responsiveness of persona steering functionalities.",
+                "role": null
+            },
+            {
+                "id": "feature_analysis",
+                "label": "Feature Analysis",
+                "nodes": [
+                    "ssv_analysis_scripts"
+                ],
+                "title": "Feature Analysis",
+                "description": "Scripts designed for in-depth analysis and interpretation of Sparse SAE Vectors to understand their impact on model behavior.",
+                "role": null
+            },
+            {
+                "id": "dependent_modules",
+                "label": "Dependent Modules",
+                "nodes": [
+                    "persona_steering_and_generation",
+                    "sae_experimentation_and_analysis"
+                ],
+                "title": "Dependent Modules",
+                "description": "Key modules that provide the underlying functionalities and data for the scripted analysis and benchmarking processes.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,143 @@
+{
+    "title": "Model Serving and Management",
+    "summary": "This module orchestrates the entire lifecycle of AI models, from handling API requests for inference and management to scheduling model loading, managing metadata, and facilitating model creation and conversion.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "api_endpoints",
+                "label": "API Endpoints",
+                "type": "module",
+                "link": "api_endpoints",
+                "title": "API Endpoints",
+                "description": "Defines and manages all HTTP API endpoints for interacting with the model serving and management system, routing requests to appropriate handlers."
+            },
+            {
+                "id": "model_scheduling_and_caching",
+                "label": "Model Scheduling and Caching",
+                "type": "module",
+                "link": "model_scheduling_and_caching",
+                "title": "Model Scheduling and Caching",
+                "description": "Manages the loading, unloading, and caching of AI models to optimize resource utilization and response times, handling model lifecycle and memory."
+            },
+            {
+                "id": "model_creation_and_conversion",
+                "label": "Model Creation and Conversion",
+                "type": "module",
+                "link": "model_creation_and_conversion",
+                "title": "Model Creation and Conversion",
+                "description": "Handles the creation of new models from various source files and manages quantization, template application, and format conversions."
+            },
+            {
+                "id": "model_metadata_and_prompting",
+                "label": "Model Metadata and Prompting",
+                "type": "module",
+                "link": "model_metadata_and_prompting",
+                "title": "Model Metadata and Prompting",
+                "description": "Manages model-related metadata, including templates, system prompts, and capabilities, and handles prompt rendering for various models."
+            },
+            {
+                "id": "low_level_model_operations",
+                "label": "Low-Level Model Operations",
+                "type": "module",
+                "link": "low_level_model_operations",
+                "title": "Low-Level Model Operations",
+                "description": "Provides core functionalities for model creation, quantization, MLX runner management, and image generation at a lower level."
+            }
+        ],
+        "edges": [
+            {
+                "source": "api_endpoints",
+                "target": "model_scheduling_and_caching",
+                "label": "requests model inference",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_endpoints",
+                "target": "model_creation_and_conversion",
+                "label": "requests model creation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_endpoints",
+                "target": "model_metadata_and_prompting",
+                "label": "queries model info",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_scheduling_and_caching",
+                "target": "model_metadata_and_prompting",
+                "label": "retrieves model config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_creation_and_conversion",
+                "target": "model_metadata_and_prompting",
+                "label": "updates model metadata",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_creation_and_conversion",
+                "target": "low_level_model_operations",
+                "label": "delegates model processing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_scheduling_and_caching",
+                "target": "low_level_model_operations",
+                "label": "utilizes MLX runner/cache",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_services",
+                "label": "Core Model Services",
+                "nodes": [
+                    "model_scheduling_and_caching",
+                    "model_metadata_and_prompting"
+                ],
+                "title": "Core Model Services",
+                "description": "These modules handle the fundamental aspects of model operation, including efficient scheduling, caching, and managing model configurations and prompting strategies.",
+                "role": null
+            },
+            {
+                "id": "model_lifecycle",
+                "label": "Model Lifecycle Management",
+                "nodes": [
+                    "model_creation_and_conversion"
+                ],
+                "title": "Model Lifecycle Management",
+                "description": "This module is responsible for the creation, conversion, and initial setup of models within the system, preparing them for serving.",
+                "role": null
+            },
+            {
+                "id": "interfaces",
+                "label": "External Interfaces",
+                "nodes": [
+                    "api_endpoints"
+                ],
+                "title": "External Interfaces",
+                "description": "This module provides the public-facing API endpoints through which users and other services interact with the model serving system.",
+                "role": null
+            },
+            {
+                "id": "underlying_mechanisms",
+                "label": "Underlying Mechanisms",
+                "nodes": [
+                    "low_level_model_operations"
+                ],
+                "title": "Underlying Mechanisms",
+                "description": "This module contains the low-level implementations for model creation, quantization, and MLX-specific runtime optimizations that support the higher-level services.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,88 @@
+{
+    "title": "Hugging Face Model Architectures",
+    "summary": "This module provides a comprehensive collection of model implementations, including core architectures for various tasks, modular components for flexible model construction, and utilities for model fusion and optimization.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_impl",
+                "label": "Core Model Implementations",
+                "type": "module",
+                "link": "core_implementations",
+                "title": "Comprehensive Model Architectures",
+                "description": "Provides a wide array of complete, ready-to-use model implementations for diverse tasks like NLP, vision, and audio."
+            },
+            {
+                "id": "modular_impl",
+                "label": "Modular Model Components",
+                "type": "module",
+                "link": "modular_implementations",
+                "title": "Flexible Model Building Blocks",
+                "description": "Offers modular components and specialized architectures for constructing custom models or extending existing ones, often with MoE or multi-modal capabilities."
+            },
+            {
+                "id": "fusion_specs",
+                "label": "Model Fusion Specifications",
+                "type": "module",
+                "link": "model_fusion",
+                "title": "Structural Model Optimization",
+                "description": "Defines specifications and utilities for optimizing model structures, such as fusing layers and converting weights for improved efficiency."
+            }
+        ],
+        "edges": [
+            {
+                "source": "modular_impl",
+                "target": "core_impl",
+                "label": "Can form parts of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_impl",
+                "target": "fusion_specs",
+                "label": "Can be optimized by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "modular_impl",
+                "target": "fusion_specs",
+                "label": "Can be optimized by",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "complete_architectures",
+                "label": "Complete Architectures",
+                "nodes": [
+                    "core_impl"
+                ],
+                "title": "Ready-to-Use Model Architectures",
+                "description": "Full implementations of various models for direct application in tasks like language modeling, object detection, and conditional generation.",
+                "role": null
+            },
+            {
+                "id": "modular_components",
+                "label": "Modular Components",
+                "nodes": [
+                    "modular_impl"
+                ],
+                "title": "Flexible Model Building Blocks",
+                "description": "Individual components and specialized architectures that allow for flexible construction, customization, and extension of models.",
+                "role": null
+            },
+            {
+                "id": "optimization_utilities",
+                "label": "Optimization Utilities",
+                "nodes": [
+                    "fusion_specs"
+                ],
+                "title": "Model Structure & Weight Optimization",
+                "description": "Tools and specifications for optimizing the internal structure of models, including layer fusion and efficient weight conversion.",
+                "role": null
+            }
+        ]
+    }
+}

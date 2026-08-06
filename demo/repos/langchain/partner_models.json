@@ -1,0 +1,285 @@
+{
+  "title": "Partner LLM Integrations",
+  "summary": "This module provides interfaces and utilities for integrating with various partner-specific Large Language Models (LLMs), including Anthropic, Groq, HuggingFace, Mistral AI, Ollama, and OpenAI, handling message conversion, tool calling, and prompt caching.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_language_models",
+        "label": "Base Language Models",
+        "type": "component",
+        "link": null,
+        "title": "Base Language Models",
+        "description": "Defines the foundational interfaces and abstract classes for all language models within the system, including LLMs and chat models."
+      },
+      {
+        "id": "anthropic_llm",
+        "label": "Anthropic LLM",
+        "type": "component",
+        "link": null,
+        "title": "AnthropicLLM",
+        "description": "A legacy LLM class for interacting with Anthropic's text completion API, handling prompt formatting and streaming."
+      },
+      {
+        "id": "huggingface_chat_model",
+        "label": "HuggingFace Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "ChatHuggingFace",
+        "description": "A chat model wrapper for various Hugging Face LLMs (Endpoint, Hub, Pipeline, TextGenInference), providing a unified interface for chat interactions, streaming, and tool binding."
+      },
+      {
+        "id": "ollama_llm",
+        "label": "Ollama LLM",
+        "type": "component",
+        "link": null,
+        "title": "OllamaLLM",
+        "description": "An LLM class for interacting with Ollama models, supporting various generation parameters, streaming, and reasoning modes."
+      },
+      {
+        "id": "chat_openai_codex",
+        "label": "ChatGPT Codex",
+        "type": "component",
+        "link": null,
+        "title": "ChatGPT-Authenticated Codex Chat Model",
+        "description": "An experimental ChatOpenAI variant that routes requests to the ChatGPT Codex backend, authenticated via OAuth. It forces specific wire-level fields and handles system prompts by lifting them into the top-level 'instructions' field."
+      },
+      {
+        "id": "chat_open_router",
+        "label": "OpenRouter Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "OpenRouter Chat Model Integration",
+        "description": "Integrates with the OpenRouter API, providing access to various chat models. It handles API key management, request parameters, streaming, and structured output binding."
+      },
+      {
+        "id": "message_handling",
+        "label": "Message Handling",
+        "type": "component",
+        "link": null,
+        "title": "Message Handling",
+        "description": "Manages the creation, translation, and utility operations for various message types used in language model interactions."
+      },
+      {
+        "id": "anthropic_tool_conversion",
+        "label": "Anthropic Tool Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Tool Conversion",
+        "description": "Functions to convert XML tool definitions into a format usable by Anthropic models and generate system messages for tool descriptions."
+      },
+      {
+        "id": "groq_message_conversion",
+        "label": "Groq Message Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Groq Message Conversion",
+        "description": "Utility functions for converting message chunks and full messages between Groq's API format and LangChain's BaseMessage types, handling tool calls and usage metadata."
+      },
+      {
+        "id": "mistral_openai_format_conversion",
+        "label": "Mistral OpenAI Format Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Mistral OpenAI Format Conversion",
+        "description": "Converts output schemas into an OpenAI-compatible response format for Mistral AI models, supporting JSON schema and function calling."
+      },
+      {
+        "id": "output_parsers",
+        "label": "Output Parsers",
+        "type": "component",
+        "link": null,
+        "title": "Output Parsers",
+        "description": "Provides tools for parsing and structuring the raw output from language models into more usable formats, such as lists, JSON, or Pydantic objects."
+      },
+      {
+        "id": "openai_moderation_middleware",
+        "label": "OpenAI Moderation Middleware",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Moderation for Agent Traffic",
+        "description": "A middleware that moderates agent traffic (user input, model output, tool results) using OpenAI's moderation endpoint. It can be configured to error, end, or replace content upon violation."
+      },
+      {
+        "id": "login_chatgpt",
+        "label": "ChatGPT OAuth Login",
+        "type": "component",
+        "link": null,
+        "title": "ChatGPT OAuth Login (Browser)",
+        "description": "Initiates the ChatGPT OAuth 2.0 Authorization Code Flow with PKCE, starting a local callback server and optionally opening a browser for user authentication. It persists the obtained tokens for subsequent use."
+      },
+      {
+        "id": "custom_tool_decorator",
+        "label": "Custom Tool Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Decorator for Custom OpenAI Tools",
+        "description": "A decorator that transforms a Python function into a custom OpenAI tool, allowing for metadata and schema definition. It supports both synchronous and asynchronous functions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_language_models",
+        "target": "anthropic_llm",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_language_models",
+        "target": "huggingface_chat_model",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_language_models",
+        "target": "ollama_llm",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_language_models",
+        "target": "chat_openai_codex",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_language_models",
+        "target": "chat_open_router",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "message_handling",
+        "target": "anthropic_llm",
+        "label": "formats messages for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "message_handling",
+        "target": "groq_message_conversion",
+        "label": "converts messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "message_handling",
+        "target": "mistral_openai_format_conversion",
+        "label": "converts messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_llm",
+        "target": "anthropic_tool_conversion",
+        "label": "uses tool conversion",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_llm",
+        "target": "output_parsers",
+        "label": "generates output for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_chat_model",
+        "target": "output_parsers",
+        "label": "generates output for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_llm",
+        "target": "output_parsers",
+        "label": "generates output for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_openai_codex",
+        "target": "output_parsers",
+        "label": "generates output for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_open_router",
+        "target": "output_parsers",
+        "label": "generates output for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "login_chatgpt",
+        "target": "chat_openai_codex",
+        "label": "authenticates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "chat_openai_codex",
+        "label": "moderates traffic for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "custom_tool_decorator",
+        "target": "chat_openai_codex",
+        "label": "defines tools for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "llm_providers",
+        "label": "LLM Providers",
+        "nodes": [
+          "anthropic_llm",
+          "huggingface_chat_model",
+          "ollama_llm",
+          "chat_openai_codex",
+          "chat_open_router"
+        ],
+        "title": "LLM Providers",
+        "description": "Integrations with various third-party Large Language Model services.",
+        "role": "generative"
+      },
+      {
+        "id": "core_abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "base_language_models",
+          "message_handling",
+          "output_parsers"
+        ],
+        "title": "Core Abstractions",
+        "description": "Foundational interfaces and utilities for language model interaction.",
+        "role": "analytical"
+      },
+      {
+        "id": "utility_components",
+        "label": "Utility Components",
+        "nodes": [
+          "anthropic_tool_conversion",
+          "groq_message_conversion",
+          "mistral_openai_format_conversion",
+          "openai_moderation_middleware",
+          "login_chatgpt",
+          "custom_tool_decorator"
+        ],
+        "title": "Utility Components",
+        "description": "Helper functions and middleware for enhancing LLM interactions, including authentication and moderation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

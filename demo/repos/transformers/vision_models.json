@@ -1,0 +1,294 @@
+{
+  "title": "Vision Models Overview",
+  "summary": "This module provides a comprehensive collection of vision and multimodal models for tasks such as object detection, image and video segmentation, conditional generation, and vision-language understanding.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "object_detection_models",
+        "label": "Object Detection Models",
+        "type": "component",
+        "link": null,
+        "title": "Object Detection Models",
+        "description": "A collection of models designed to identify and localize objects within images, including various DETR-based architectures and specialized document analysis models."
+      },
+      {
+        "id": "segmentation_models",
+        "label": "Segmentation Models",
+        "type": "component",
+        "link": null,
+        "title": "Segmentation Models",
+        "description": "Models for image and video segmentation, covering instance, semantic, panoptic, and universal segmentation tasks, often with prompt-based capabilities."
+      },
+      {
+        "id": "multimodal_vl_models",
+        "label": "Multimodal Vision-Language Models",
+        "type": "component",
+        "link": null,
+        "title": "Multimodal Vision-Language Models",
+        "description": "Models that integrate vision and language modalities for tasks like image captioning, visual question answering, and joint representation learning."
+      },
+      {
+        "id": "conditional_generation_models",
+        "label": "Conditional Generation Models",
+        "type": "component",
+        "link": null,
+        "title": "Conditional Generation Models",
+        "description": "Models capable of generating text or other outputs conditionally based on visual inputs, including OCR, formula recognition, and general image-to-text tasks."
+      },
+      {
+        "id": "video_processing_models",
+        "label": "Video Processing Models",
+        "type": "component",
+        "link": null,
+        "title": "Video Processing Models",
+        "description": "Models specifically designed to process video data for tasks like object tracking, segmentation, and video-text understanding."
+      },
+      {
+        "id": "vision_encoder",
+        "label": "Vision Encoder",
+        "type": "component",
+        "link": null,
+        "title": "Vision Encoder",
+        "description": "Extracts visual features from input images or video frames, forming the backbone for image-based tasks."
+      },
+      {
+        "id": "text_encoder",
+        "label": "Text Encoder",
+        "type": "component",
+        "link": null,
+        "title": "Text Encoder",
+        "description": "Processes textual inputs to generate embeddings, used for text-conditioned tasks and multimodal integration."
+      },
+      {
+        "id": "language_model",
+        "label": "Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Language Model",
+        "description": "Generates text based on processed multimodal inputs or performs causal language modeling."
+      },
+      {
+        "id": "q_former",
+        "label": "Q-Former",
+        "type": "component",
+        "link": null,
+        "title": "Q-Former",
+        "description": "A query transformer that processes visual features and text prompts to generate multimodal representations."
+      },
+      {
+        "id": "image_to_text_projection",
+        "label": "Image-to-Text Projection",
+        "type": "component",
+        "link": null,
+        "title": "Image-to-Text Projection",
+        "description": "Projects image features into the text embedding space for multimodal integration and alignment."
+      },
+      {
+        "id": "object_detection_heads",
+        "label": "Object Detection Heads",
+        "type": "component",
+        "link": null,
+        "title": "Object Detection Heads",
+        "description": "Predicts class labels and bounding box coordinates from the model's output features."
+      },
+      {
+        "id": "mask_decoder",
+        "label": "Mask Decoder",
+        "type": "component",
+        "link": null,
+        "title": "Mask Decoder",
+        "description": "Generates segmentation masks based on decoded features and prompt embeddings."
+      },
+      {
+        "id": "prompt_encoder",
+        "label": "Prompt Encoder",
+        "type": "component",
+        "link": null,
+        "title": "Prompt Encoder",
+        "description": "Encodes various types of prompts (points, boxes, masks) into embeddings for segmentation tasks."
+      },
+      {
+        "id": "memory_mechanisms",
+        "label": "Memory Mechanisms",
+        "type": "component",
+        "link": null,
+        "title": "Memory Mechanisms",
+        "description": "Components for temporal consistency in video models, including memory attention and memory encoding."
+      },
+      {
+        "id": "data_processing",
+        "label": "Data Processing",
+        "type": "module",
+        "link": "data_processing",
+        "title": "Data Processing",
+        "description": "Handles preprocessing and postprocessing of image and video data for various models."
+      }
+    ],
+    "edges": [
+      {
+        "source": "vision_encoder",
+        "target": "object_detection_models",
+        "label": "visual features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vision_encoder",
+        "target": "segmentation_models",
+        "label": "visual features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vision_encoder",
+        "target": "multimodal_vl_models",
+        "label": "visual features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vision_encoder",
+        "target": "conditional_generation_models",
+        "label": "visual features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vision_encoder",
+        "target": "video_processing_models",
+        "label": "visual features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_encoder",
+        "target": "multimodal_vl_models",
+        "label": "text embeddings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_encoder",
+        "target": "conditional_generation_models",
+        "label": "text prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_encoder",
+        "target": "segmentation_models",
+        "label": "text prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "q_former",
+        "target": "multimodal_vl_models",
+        "label": "multimodal representations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_to_text_projection",
+        "target": "multimodal_vl_models",
+        "label": "aligned embeddings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "object_detection_models",
+        "target": "object_detection_heads",
+        "label": "features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "segmentation_models",
+        "target": "mask_decoder",
+        "label": "features",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_encoder",
+        "target": "mask_decoder",
+        "label": "prompt embeddings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "video_processing_models",
+        "target": "memory_mechanisms",
+        "label": "temporal data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_processing",
+        "target": "vision_encoder",
+        "label": "processed images",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multimodal_vl_models",
+        "target": "language_model",
+        "label": "multimodal context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conditional_generation_models",
+        "target": "language_model",
+        "label": "visual context",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_models",
+        "label": "Core Vision Models",
+        "nodes": [
+          "object_detection_models",
+          "segmentation_models",
+          "multimodal_vl_models",
+          "conditional_generation_models",
+          "video_processing_models"
+        ],
+        "title": "Core Vision Models",
+        "description": "The primary models for various vision tasks, including object detection, segmentation, and multimodal understanding.",
+        "role": "analytical"
+      },
+      {
+        "id": "shared_components",
+        "label": "Shared Architectural Components",
+        "nodes": [
+          "vision_encoder",
+          "text_encoder",
+          "language_model",
+          "q_former",
+          "image_to_text_projection",
+          "object_detection_heads",
+          "mask_decoder",
+          "prompt_encoder",
+          "memory_mechanisms"
+        ],
+        "title": "Shared Architectural Components",
+        "description": "Reusable building blocks and mechanisms utilized across multiple vision and multimodal models.",
+        "role": "generative"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "data_processing"
+        ],
+        "title": "External Dependencies",
+        "description": "Modules or components that provide essential services like data preprocessing to the vision models.",
+        "role": "data"
+      }
+    ]
+  }
+}

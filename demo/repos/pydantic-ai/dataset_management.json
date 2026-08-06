@@ -1,0 +1,87 @@
+{
+  "title": "Dataset Management",
+  "summary": "This module provides tools for defining, generating, and managing datasets used in evaluation and testing. It supports structured data generation and execution of evaluation tasks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "dataset_definition",
+        "label": "Define Dataset Schema",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Definition",
+        "description": "Defines the structure of a dataset, including input, output, and metadata types, along with optional evaluators."
+      },
+      {
+        "id": "dataset_generation",
+        "label": "Generate Dataset",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Generation",
+        "description": "Uses an LLM to generate synthetic test cases based on a defined dataset schema, ensuring compliance with specified types and schemas."
+      },
+      {
+        "id": "task_execution",
+        "label": "Execute Evaluation Task",
+        "type": "component",
+        "link": null,
+        "title": "Execute Evaluation Task",
+        "description": "Manages the execution of a single evaluation task, including tracking its duration and output, within a controlled context."
+      },
+      {
+        "id": "model_integration",
+        "label": "AI Model Integration",
+        "type": "module",
+        "link": "model_integration",
+        "title": "AI Model Integration",
+        "description": "Provides interfaces for interacting with various AI models, used here for generating dataset content."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dataset_definition",
+        "target": "dataset_generation",
+        "label": "schema definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_integration",
+        "target": "dataset_generation",
+        "label": "LLM for generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_generation",
+        "target": "task_execution",
+        "label": "generated test cases",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dataset_lifecycle",
+        "label": "Dataset Lifecycle",
+        "nodes": [
+          "dataset_definition",
+          "dataset_generation"
+        ],
+        "title": "Dataset Lifecycle Management",
+        "description": "Handles the creation and structuring of evaluation datasets.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_runtime",
+        "label": "Evaluation Runtime",
+        "nodes": [
+          "task_execution"
+        ],
+        "title": "Evaluation Task Runtime",
+        "description": "Manages the execution context for individual evaluation tasks.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

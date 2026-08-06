@@ -1,0 +1,70 @@
+{
+  "repo_name": "ollama",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/ollama",
+  "repo_size_mb": 448940.5625,
+  "total_files": 0,
+  "total_code_files": 818,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 7.061086893081665,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 31.106108903884888,
+      "tokens_used": 14905,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 48.319260120391846,
+      "tokens_used": 840039,
+      "files_created": 30,
+      "files_created_list": [
+        "model_integration_and_testing.json",
+        "cli_commands.json",
+        "core_application.json",
+        "performance_and_concurrency_tests.json",
+        "tool_registry_and_websearch.json",
+        "image_generation_engine.json",
+        "configuration_management.json",
+        "first_module_tree.json",
+        "api_and_basic_functionality_tests.json",
+        "model_capabilities_tests.json",
+        "metadata.json",
+        "library_model_tests.json",
+        "model_creation_and_quantization.json",
+        "command_line_interface.json",
+        "module_tree.json",
+        "ui_and_frontend.json",
+        "overview.json",
+        "model_metadata_and_prompting.json",
+        "mlx_runner_and_cache_management.json",
+        "model_scheduling_and_caching.json",
+        "api_endpoints.json",
+        "system_utilities.json",
+        "runner_entrypoint.json",
+        "neural_network_components.json",
+        "sync_issues.json",
+        "model_creation_and_conversion.json",
+        "low_level_model_operations.json",
+        "integration_launchers.json",
+        "model_serving_and_management.json",
+        "server_infrastructure.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 86.72477912902832,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/ollama/docs/overview.json",
+  "total_duration": 86.72482490539551,
+  "total_tokens": 854944,
+  "estimated_cost_usd": 0.1525,
+  "total_llm_calls": 34,
+  "total_files_created": 30,
+  "start_time": 1781381545.745048,
+  "end_time": 1781381632.469873
+}

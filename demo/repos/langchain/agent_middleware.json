@@ -1,0 +1,522 @@
+{
+  "title": "Agent Middleware",
+  "summary": "This module provides a collection of middleware components designed to enhance and modify the behavior of agents, offering functionalities like tool call limits, PII detection, summarization, and tool emulation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "create_agent",
+        "label": "Create Agent",
+        "type": "component",
+        "link": null,
+        "title": "Agent Creation",
+        "description": "Initializes and configures an agent graph, integrating various middleware components and tools."
+      },
+      {
+        "id": "subagent_transformer",
+        "label": "Subagent Transformer",
+        "type": "component",
+        "link": null,
+        "title": "Subagent Promotion",
+        "description": "Promotes nested named agents into typed handles for independent consumption and monitoring."
+      },
+      {
+        "id": "model_node",
+        "label": "Model Node (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Model Execution",
+        "description": "Handles synchronous model requests, applying middleware processing before and after model invocation."
+      },
+      {
+        "id": "amodel_node",
+        "label": "Model Node (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Model Execution",
+        "description": "Handles asynchronous model requests, applying middleware processing before and after model invocation."
+      },
+      {
+        "id": "tool_node",
+        "label": "Tool Node",
+        "type": "component",
+        "link": null,
+        "title": "Tool Execution",
+        "description": "Executes tools and adds their responses to the messages list, potentially wrapped by middleware."
+      },
+      {
+        "id": "model_call_limit_middleware",
+        "label": "Model Call Limit Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Model Call Limiter",
+        "description": "Tracks and enforces limits on the number of model calls, with configurable exit behaviors."
+      },
+      {
+        "id": "model_fallback_middleware",
+        "label": "Model Fallback Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Model Fallback Handler",
+        "description": "Automatically retries failed model calls with alternative models in sequence until success."
+      },
+      {
+        "id": "model_retry_middleware",
+        "label": "Model Retry Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Model Retry Mechanism",
+        "description": "Automatically retries failed model calls with configurable backoff on specific exceptions."
+      },
+      {
+        "id": "pii_middleware",
+        "label": "PII Middleware",
+        "type": "component",
+        "link": null,
+        "title": "PII Detection and Handling",
+        "description": "Detects and handles Personally Identifiable Information (PII) in conversations using various strategies like redaction or blocking."
+      },
+      {
+        "id": "shell_tool_middleware",
+        "label": "Shell Tool Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Persistent Shell Tool",
+        "description": "Registers a persistent shell tool for agents, allowing command execution within a controlled environment."
+      },
+      {
+        "id": "summarization_middleware",
+        "label": "Summarization Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Conversation Summarizer",
+        "description": "Summarizes conversation history when token limits are approached, preserving context continuity."
+      },
+      {
+        "id": "todo_list_middleware",
+        "label": "Todo List Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Todo List Management",
+        "description": "Provides agents with a 'write_todos' tool to create and manage structured task lists for complex operations."
+      },
+      {
+        "id": "tool_call_limit_middleware",
+        "label": "Tool Call Limit Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Tool Call Limiter",
+        "description": "Tracks and enforces limits on the number of tool calls, with configurable exit behaviors."
+      },
+      {
+        "id": "llm_tool_emulator",
+        "label": "LLM Tool Emulator",
+        "type": "component",
+        "link": null,
+        "title": "Tool Emulation",
+        "description": "Emulates specified tools using an LLM instead of executing them, useful for testing."
+      },
+      {
+        "id": "tool_retry_middleware",
+        "label": "Tool Retry Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Tool Retry Mechanism",
+        "description": "Automatically retries failed tool calls with configurable backoff on specific exceptions."
+      },
+      {
+        "id": "llm_tool_selector_middleware",
+        "label": "LLM Tool Selector Middleware",
+        "type": "component",
+        "link": null,
+        "title": "LLM Tool Selector",
+        "description": "Uses an LLM to select relevant tools before calling the main model, reducing token usage and improving focus."
+      },
+      {
+        "id": "context_editing_middleware",
+        "label": "Context Editing Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Context Editor",
+        "description": "Automatically prunes tool results to manage context size, applying edits when token counts exceed thresholds."
+      },
+      {
+        "id": "filesystem_file_search_middleware",
+        "label": "Filesystem File Search Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Filesystem Search",
+        "description": "Provides Glob and Grep search tools over local filesystem files for agents."
+      },
+      {
+        "id": "human_in_the_loop_middleware",
+        "label": "Human-in-the-Loop Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Human Intervention",
+        "description": "Enables human intervention in agent execution, allowing for approval, editing, or rejection of tool calls."
+      },
+      {
+        "id": "provider_tool_search_middleware",
+        "label": "Provider Tool Search Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Provider Tool Search",
+        "description": "Defers selected tools behind provider-native tool search, reducing request payload size."
+      },
+      {
+        "id": "codex_sandbox_execution_policy",
+        "label": "Codex Sandbox Execution Policy",
+        "type": "component",
+        "link": null,
+        "title": "Codex Sandbox",
+        "description": "Launches the shell through the Codex CLI sandbox for enhanced security and syscall restrictions."
+      },
+      {
+        "id": "docker_execution_policy",
+        "label": "Docker Execution Policy",
+        "type": "component",
+        "link": null,
+        "title": "Docker Sandbox",
+        "description": "Runs the shell inside a dedicated Docker container for strong isolation between sessions."
+      },
+      {
+        "id": "detect_credit_card",
+        "label": "Detect Credit Card",
+        "type": "component",
+        "link": null,
+        "title": "Credit Card Detection",
+        "description": "Detects credit card numbers in content using Luhn validation."
+      },
+      {
+        "id": "output_tool_binding",
+        "label": "Output Tool Binding",
+        "type": "component",
+        "link": null,
+        "title": "Structured Output Tool Binding",
+        "description": "Manages metadata for structured responses generated via tool calls, including schema and tool implementation."
+      },
+      {
+        "id": "provider_strategy_binding",
+        "label": "Provider Strategy Binding",
+        "type": "component",
+        "link": null,
+        "title": "Provider Strategy Binding",
+        "description": "Manages metadata for native structured output, including schema and parsing logic for provider-enforced JSON."
+      },
+      {
+        "id": "write_todos",
+        "label": "Write Todos (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Todo Writing",
+        "description": "Synchronously creates and manages a structured task list for the current work session."
+      },
+      {
+        "id": "awrite_todos",
+        "label": "Write Todos (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Todo Writing",
+        "description": "Asynchronously creates and manages a structured task list for the current work session."
+      },
+      {
+        "id": "pii_stream_transformer",
+        "label": "PII Stream Transformer",
+        "type": "component",
+        "link": null,
+        "title": "PII Stream Redaction",
+        "description": "Mutates streamed content-block-delta text to redact PII in flight, ensuring scrubbed text for consumers."
+      }
+    ],
+    "edges": [
+      {
+        "source": "create_agent",
+        "target": "subagent_transformer",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "model_node",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "amodel_node",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "tool_node",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "model_call_limit_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "model_fallback_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "model_retry_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "pii_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "shell_tool_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "summarization_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "todo_list_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "tool_call_limit_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "llm_tool_emulator",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "tool_retry_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "llm_tool_selector_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "context_editing_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "filesystem_file_search_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "human_in_the_loop_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "provider_tool_search_middleware",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_node",
+        "target": "tool_node",
+        "label": "calls tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "amodel_node",
+        "target": "tool_node",
+        "label": "calls tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool_middleware",
+        "target": "codex_sandbox_execution_policy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool_middleware",
+        "target": "docker_execution_policy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_middleware",
+        "target": "detect_credit_card",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_middleware",
+        "target": "pii_stream_transformer",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list_middleware",
+        "target": "write_todos",
+        "label": "exposes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list_middleware",
+        "target": "awrite_todos",
+        "label": "exposes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "output_tool_binding",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent",
+        "target": "provider_strategy_binding",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_orchestration",
+        "label": "Agent Orchestration",
+        "nodes": [
+          "create_agent",
+          "subagent_transformer"
+        ],
+        "title": "Agent Orchestration",
+        "description": "Components responsible for creating and managing the overall agent workflow and graph execution.",
+        "role": "generative"
+      },
+      {
+        "id": "model_interaction",
+        "label": "Model Interaction",
+        "nodes": [
+          "model_node",
+          "amodel_node"
+        ],
+        "title": "Model Interaction",
+        "description": "Components handling direct communication with language models, including synchronous and asynchronous calls.",
+        "role": "generative"
+      },
+      {
+        "id": "tool_management",
+        "label": "Tool Management",
+        "nodes": [
+          "tool_node",
+          "llm_tool_emulator",
+          "llm_tool_selector_middleware",
+          "provider_tool_search_middleware",
+          "output_tool_binding",
+          "provider_strategy_binding"
+        ],
+        "title": "Tool Management",
+        "description": "Components related to the execution, selection, and emulation of tools within the agent's workflow.",
+        "role": "generative"
+      },
+      {
+        "id": "middleware_functions",
+        "label": "Middleware Functions",
+        "nodes": [
+          "model_call_limit_middleware",
+          "model_fallback_middleware",
+          "model_retry_middleware",
+          "pii_middleware",
+          "shell_tool_middleware",
+          "summarization_middleware",
+          "todo_list_middleware",
+          "tool_call_limit_middleware",
+          "tool_retry_middleware",
+          "context_editing_middleware",
+          "filesystem_file_search_middleware",
+          "human_in_the_loop_middleware"
+        ],
+        "title": "Middleware Functions",
+        "description": "Various middleware components that intercept and modify agent behavior, such as limiting calls, retrying, and handling PII.",
+        "role": "analytical"
+      },
+      {
+        "id": "security_and_execution",
+        "label": "Security and Execution Policies",
+        "nodes": [
+          "codex_sandbox_execution_policy",
+          "docker_execution_policy",
+          "detect_credit_card",
+          "pii_stream_transformer"
+        ],
+        "title": "Security and Execution Policies",
+        "description": "Components defining and enforcing security policies for tool execution, such as sandboxing and PII detection.",
+        "role": "analytical"
+      },
+      {
+        "id": "todo_actions",
+        "label": "Todo Actions",
+        "nodes": [
+          "write_todos",
+          "awrite_todos"
+        ],
+        "title": "Todo Actions",
+        "description": "Specific actions for managing todo lists within the agent's capabilities.",
+        "role": "generative"
+      }
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+{
+    "title": "Data and Utilities",
+    "summary": "This module encompasses datasets, data loading, streaming capabilities, asynchronous execution, and general utility functions for DSPy programs.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "datasets",
+                "label": "Datasets and Data Loading",
+                "type": "module",
+                "link": "datasets",
+                "title": "Datasets and Data Loading",
+                "description": "Provides utilities for loading, processing, and managing various datasets, including specialized datasets like AlfWorld, GSM8K, and MATH, and general data loaders for common formats."
+            },
+            {
+                "id": "streaming_and_async",
+                "label": "Streaming and Asynchronous Utilities",
+                "type": "module",
+                "link": "streaming_and_async",
+                "title": "Streaming and Asynchronous Utilities",
+                "description": "Provides utilities for streaming program outputs and managing asynchronous execution within DSPy, enabling real-time feedback and non-blocking operations."
+            },
+            {
+                "id": "general_utilities",
+                "label": "General Utilities",
+                "type": "module",
+                "link": "general_utilities",
+                "title": "General Utilities",
+                "description": "Provides a collection of general-purpose utilities, including text tokenization, configuration management, file downloading, callback wrappers, and dummy models for testing."
+            },
+            {
+                "id": "documentation_and_hooks",
+                "label": "Documentation and Hooks",
+                "type": "module",
+                "link": "documentation_and_hooks",
+                "title": "Documentation and Hooks",
+                "description": "Manages the generation of API documentation and integrates various hooks to fetch and display live statistics on the website."
+            }
+        ],
+        "edges": [
+            {
+                "source": "datasets",
+                "target": "general_utilities",
+                "label": "uses text processing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "streaming_and_async",
+                "target": "general_utilities",
+                "label": "uses async wrappers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_and_hooks",
+                "target": "general_utilities",
+                "label": "uses file downloader",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_management",
+                "label": "Data Management",
+                "nodes": [
+                    "datasets"
+                ],
+                "title": "Data Management",
+                "description": "Handles all aspects of data, from loading various datasets to managing their structure and access within DSPy programs.",
+                "role": null
+            },
+            {
+                "id": "execution_control",
+                "label": "Execution Control",
+                "nodes": [
+                    "streaming_and_async"
+                ],
+                "title": "Execution Control",
+                "description": "Manages how DSPy programs execute, offering streaming capabilities and asynchronous processing for enhanced responsiveness and efficiency.",
+                "role": null
+            },
+            {
+                "id": "core_utilities",
+                "label": "Core Utilities",
+                "nodes": [
+                    "general_utilities"
+                ],
+                "title": "Core Utilities",
+                "description": "A collection of fundamental helper functions and tools that support various operations across the DSPy framework, including configuration and text processing.",
+                "role": null
+            },
+            {
+                "id": "system_support",
+                "label": "System Support",
+                "nodes": [
+                    "documentation_and_hooks"
+                ],
+                "title": "System Support",
+                "description": "Provides infrastructure for documentation generation and integrates system-level hooks for fetching external data and managing website content.",
+                "role": null
+            }
+        ]
+    }
+}

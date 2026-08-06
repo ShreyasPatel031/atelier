@@ -1,0 +1,228 @@
+{
+    "title": "AI Core Module",
+    "summary": "The AI Core module provides the foundational components for building and managing AI agents, integrating with various models and external tools, and ensuring robust execution and evaluation.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "agent_framework",
+                "label": "Agent Framework",
+                "type": "module",
+                "link": "agent_framework",
+                "title": "Agent Framework",
+                "description": "Defines the core abstractions for AI agents, managing their lifecycle, interactions, and tool orchestration."
+            },
+            {
+                "id": "capabilities_and_tools",
+                "label": "Capabilities & Tools",
+                "type": "module",
+                "link": "capabilities_and_tools",
+                "title": "Capabilities and Tools",
+                "description": "Manages the definition, registration, and execution of various capabilities and tools that agents can use to interact with external systems."
+            },
+            {
+                "id": "model_integration",
+                "label": "Model Integration",
+                "type": "module",
+                "link": "model_integration",
+                "title": "Model Integration",
+                "description": "Provides a unified interface for interacting with various AI models, handling requests, streaming responses, and managing model-specific configurations."
+            },
+            {
+                "id": "providers_and_embeddings",
+                "label": "Providers & Embeddings",
+                "type": "module",
+                "link": "providers_and_embeddings",
+                "title": "Providers and Embeddings",
+                "description": "Offers interfaces for integrating with diverse AI model providers and generating text embeddings, abstracting away provider-specific details."
+            },
+            {
+                "id": "utilities",
+                "label": "Utilities",
+                "type": "module",
+                "link": "utilities",
+                "title": "Utilities",
+                "description": "Contains general-purpose utilities such as concurrency management, direct model interaction, prompt formatting, and runtime context management."
+            },
+            {
+                "id": "durable_execution",
+                "label": "Durable Execution",
+                "type": "module",
+                "link": "durable_execution",
+                "title": "Durable Execution",
+                "description": "Integrates AI agents with durable execution frameworks like DBOS, Prefect, and Temporal, enabling robust and fault-tolerant workflows."
+            },
+            {
+                "id": "evaluation_and_testing",
+                "label": "Evaluation & Testing",
+                "type": "module",
+                "link": "evaluation_and_testing",
+                "title": "Evaluation and Testing",
+                "description": "Provides tools for defining, generating, and managing datasets, evaluating model outputs, and performing online evaluations and testing."
+            },
+            {
+                "id": "graph_and_mcp",
+                "label": "Graph & MCP",
+                "type": "module",
+                "link": "graph_and_mcp",
+                "title": "Graph and MCP",
+                "description": "Defines core components for building and executing directed graphs, and functionalities for interacting with Model Context Protocol (MCP) servers."
+            },
+            {
+                "id": "documentation_and_ui",
+                "label": "Documentation & UI",
+                "type": "module",
+                "link": "documentation_and_ui",
+                "title": "Documentation and UI",
+                "description": "Manages documentation generation, CLI tools, and user interface integrations for Pydantic AI agents."
+            }
+        ],
+        "edges": [
+            {
+                "source": "agent_framework",
+                "target": "model_integration",
+                "label": "uses models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework",
+                "target": "capabilities_and_tools",
+                "label": "orchestrates tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework",
+                "target": "utilities",
+                "label": "relies on utilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_and_tools",
+                "target": "model_integration",
+                "label": "may use models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_integration",
+                "target": "providers_and_embeddings",
+                "label": "abstracts providers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_integration",
+                "target": "utilities",
+                "label": "uses concurrency/helpers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "agent_framework",
+                "label": "wraps agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "capabilities_and_tools",
+                "label": "wraps toolsets",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_and_testing",
+                "target": "agent_framework",
+                "label": "evaluates agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_and_testing",
+                "target": "model_integration",
+                "label": "evaluates models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_and_mcp",
+                "target": "model_integration",
+                "label": "integrates with MCP models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_and_mcp",
+                "target": "capabilities_and_tools",
+                "label": "provides MCP toolsets",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_and_ui",
+                "target": "agent_framework",
+                "label": "provides UI for agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_and_ui",
+                "target": "utilities",
+                "label": "uses CLI utilities",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_ai_components",
+                "label": "Core AI Components",
+                "nodes": [
+                    "agent_framework",
+                    "capabilities_and_tools",
+                    "model_integration",
+                    "providers_and_embeddings"
+                ],
+                "title": "Core AI Components",
+                "description": "The fundamental building blocks for defining, running, and interacting with AI agents and models.",
+                "role": "analytical"
+            },
+            {
+                "id": "supporting_infrastructure",
+                "label": "Supporting Infrastructure",
+                "nodes": [
+                    "utilities",
+                    "graph_and_mcp"
+                ],
+                "title": "Supporting Infrastructure",
+                "description": "Modules providing essential utilities, graph execution capabilities, and Model Context Protocol integration.",
+                "role": "analytical"
+            },
+            {
+                "id": "advanced_features_and_extensions",
+                "label": "Advanced Features & Extensions",
+                "nodes": [
+                    "durable_execution",
+                    "evaluation_and_testing"
+                ],
+                "title": "Advanced Features and Extensions",
+                "description": "Modules enabling robust, fault-tolerant execution and comprehensive evaluation of AI systems.",
+                "role": "generative"
+            },
+            {
+                "id": "user_facing_and_dev_tools",
+                "label": "User-Facing & Dev Tools",
+                "nodes": [
+                    "documentation_and_ui"
+                ],
+                "title": "User-Facing and Developer Tools",
+                "description": "Components for user interaction, documentation, and developer utilities.",
+                "role": "surface"
+            }
+        ]
+    }
+}

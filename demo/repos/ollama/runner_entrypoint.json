@@ -1,0 +1,78 @@
+{
+  "title": "Runner Entrypoint",
+  "summary": "This module defines the main entry point for the command-line runner, handling argument parsing and execution of the core runner logic.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_args",
+        "label": "Command Line Arguments",
+        "type": "component",
+        "link": null,
+        "title": "Command Line Arguments",
+        "description": "The raw arguments passed to the executable from the command line."
+      },
+      {
+        "id": "runner_execute",
+        "label": "Execute Runner Logic",
+        "type": "component",
+        "link": null,
+        "title": "Execute Runner Logic",
+        "description": "Invokes the main runner function with parsed command-line arguments."
+      },
+      {
+        "id": "error_handling",
+        "label": "Handle Execution Errors",
+        "type": "component",
+        "link": null,
+        "title": "Handle Execution Errors",
+        "description": "Captures and reports any errors encountered during the runner's execution to standard error."
+      },
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "module",
+        "link": "cli_commands",
+        "title": "CLI Commands Module",
+        "description": "This module contains the definitions and implementations for various command-line interface commands."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_args",
+        "target": "runner_execute",
+        "label": "parsed arguments",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runner_execute",
+        "target": "error_handling",
+        "label": "execution result",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runner_execute",
+        "target": "cli_commands",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "entrypoint",
+        "label": "Main Entrypoint",
+        "nodes": [
+          "cli_args",
+          "runner_execute",
+          "error_handling"
+        ],
+        "title": "Main Entrypoint",
+        "description": "The primary function that initializes and orchestrates the command-line runner's execution flow.",
+        "role": "surface"
+      }
+    ]
+  }
+}

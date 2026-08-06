@@ -1,0 +1,56 @@
+{
+  "title": "GPU Management",
+  "summary": "This module provides utilities for managing and orchestrating GPU resources, including probing available GPUs and handling GPU-specific execution flags.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "gpu_probe_command",
+        "label": "GPU Probe Command",
+        "type": "component",
+        "link": null,
+        "title": "GPU Probe Command",
+        "description": "Handles the command-line interface for initiating a GPU probe, checking for a 'gpu_run' flag, and delegating to the core probe logic."
+      },
+      {
+        "id": "run_gpu_probe",
+        "label": "Execute GPU Probe",
+        "type": "component",
+        "link": null,
+        "title": "Execute GPU Probe",
+        "description": "Performs the actual GPU probing operations, gathering information about available GPUs and their status."
+      }
+    ],
+    "edges": [
+      {
+        "source": "gpu_probe_command",
+        "target": "run_gpu_probe",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "command_interface",
+        "label": "Command Interface",
+        "nodes": [
+          "gpu_probe_command"
+        ],
+        "title": "Command Line Interface",
+        "description": "Entry points for interacting with GPU management functionalities via command-line arguments.",
+        "role": "surface"
+      },
+      {
+        "id": "core_logic",
+        "label": "Core Logic",
+        "nodes": [
+          "run_gpu_probe"
+        ],
+        "title": "Core GPU Logic",
+        "description": "Internal functions responsible for the actual GPU detection and status reporting.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

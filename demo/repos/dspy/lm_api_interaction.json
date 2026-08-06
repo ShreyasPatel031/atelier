@@ -1,0 +1,278 @@
+{
+  "title": "LM API Interaction",
+  "summary": "This module provides synchronous and asynchronous functions for interacting with Language Model APIs, primarily via LiteLLM, handling request formatting, caching, and retry logic.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "litellm_completion",
+        "label": "LiteLLM Completion (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous LiteLLM Completion",
+        "description": "Handles synchronous API calls to language models using LiteLLM, including caching and retry mechanisms. It can also manage streaming completions."
+      },
+      {
+        "id": "alitellm_completion",
+        "label": "LiteLLM Completion (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous LiteLLM Completion",
+        "description": "Manages asynchronous API calls to language models via LiteLLM, supporting caching, retries, and asynchronous streaming completions."
+      },
+      {
+        "id": "litellm_responses_completion",
+        "label": "LiteLLM Responses (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous LiteLLM Responses",
+        "description": "Facilitates synchronous API calls for LiteLLM's 'responses' endpoint, converting chat requests and applying caching and retry policies."
+      },
+      {
+        "id": "alitellm_responses_completion",
+        "label": "LiteLLM Responses (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous LiteLLM Responses",
+        "description": "Enables asynchronous API calls for LiteLLM's 'responses' endpoint, handling request conversion, caching, and retry logic."
+      },
+      {
+        "id": "litellm_text_completion",
+        "label": "LiteLLM Text Completion (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous LiteLLM Text Completion",
+        "description": "Performs synchronous text completion requests, extracting model and provider details, constructing prompts, and applying API keys and bases."
+      },
+      {
+        "id": "alitellm_text_completion",
+        "label": "LiteLLM Text Completion (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous LiteLLM Text Completion",
+        "description": "Executes asynchronous text completion requests, parsing model information, building prompts, and managing API credentials."
+      },
+      {
+        "id": "to_openai_responses_request",
+        "label": "Format for OpenAI Responses API",
+        "type": "component",
+        "link": null,
+        "title": "Convert to OpenAI Responses API Format",
+        "description": "Transforms a normalized DSPy language model request into the specific format required by the OpenAI Responses API, including tool choices and messages."
+      },
+      {
+        "id": "to_openai_text_request",
+        "label": "Format for OpenAI Text API",
+        "type": "component",
+        "link": null,
+        "title": "Convert to OpenAI Text Completion Format",
+        "description": "Converts a normalized DSPy language model request into the format expected by the OpenAI text completion API, handling model and prompt construction."
+      },
+      {
+        "id": "async_stream_completion",
+        "label": "Async Stream Completion Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Stream Completion Wrapper",
+        "description": "A wrapper function designed to handle asynchronous streaming completions, ensuring proper execution within an async context."
+      },
+      {
+        "id": "base_lm_clients",
+        "label": "Base LM Clients",
+        "type": "module",
+        "link": "base_lm_clients",
+        "title": "Base Language Model Clients",
+        "description": "Provides foundational interfaces and implementations for various language model providers, including local and cloud-based options."
+      },
+      {
+        "id": "caching_and_utilities",
+        "label": "Caching and Utilities",
+        "type": "module",
+        "link": "caching_and_utilities",
+        "title": "Caching and Utility Functions",
+        "description": "Offers utilities for caching API responses, managing LiteLLM logging, and handling disk serialization and embedding computations."
+      },
+      {
+        "id": "lm_request_data_type",
+        "label": "LMRequest Data Type",
+        "type": "external",
+        "link": null,
+        "title": "Language Model Request Data Type",
+        "description": "Represents the standardized data structure for language model requests within DSPy, defining parameters like model, messages, and configuration."
+      }
+    ],
+    "edges": [
+      {
+        "source": "lm_request_data_type",
+        "target": "to_openai_responses_request",
+        "label": "LMRequest input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_request_data_type",
+        "target": "to_openai_text_request",
+        "label": "LMRequest input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_responses_request",
+        "target": "litellm_responses_completion",
+        "label": "formatted request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_responses_request",
+        "target": "alitellm_responses_completion",
+        "label": "formatted request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_text_request",
+        "target": "litellm_text_completion",
+        "label": "formatted request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_text_request",
+        "target": "alitellm_text_completion",
+        "label": "formatted request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alitellm_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_responses_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alitellm_responses_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_text_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alitellm_text_completion",
+        "target": "caching_and_utilities",
+        "label": "uses cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_stream_completion",
+        "target": "alitellm_completion",
+        "label": "async stream",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "litellm_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "alitellm_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "litellm_responses_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "alitellm_responses_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "litellm_text_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm_clients",
+        "target": "alitellm_text_completion",
+        "label": "LM client",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "sync_api_calls",
+        "label": "Synchronous API Calls",
+        "nodes": [
+          "litellm_completion",
+          "litellm_responses_completion",
+          "litellm_text_completion"
+        ],
+        "title": "Synchronous Language Model API Calls",
+        "description": "Functions for making blocking, synchronous requests to various language model APIs, handling immediate responses.",
+        "role": "generative"
+      },
+      {
+        "id": "async_api_calls",
+        "label": "Asynchronous API Calls",
+        "nodes": [
+          "alitellm_completion",
+          "alitellm_responses_completion",
+          "alitellm_text_completion",
+          "async_stream_completion"
+        ],
+        "title": "Asynchronous Language Model API Calls",
+        "description": "Functions for making non-blocking, asynchronous requests to language model APIs, enabling concurrent operations and streaming.",
+        "role": "generative"
+      },
+      {
+        "id": "request_formatting",
+        "label": "Request Formatting",
+        "nodes": [
+          "to_openai_responses_request",
+          "to_openai_text_request"
+        ],
+        "title": "Language Model Request Formatting",
+        "description": "Utilities for converting internal DSPy language model requests into the specific formats required by external API providers like OpenAI.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

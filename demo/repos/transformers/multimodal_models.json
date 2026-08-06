@@ -1,0 +1,85 @@
+{
+  "title": "Multimodal Models",
+  "summary": "The multimodal_models module provides implementations for models that process and generate content across multiple modalities, such as combining vision and text or audio.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "dia_conditional_generation",
+        "label": "DiaForConditionalGeneration",
+        "type": "component",
+        "link": null,
+        "title": "DiaForConditionalGeneration",
+        "description": "A model for conditional generation, specifically designed for audio outputs, leveraging a DiaModel for its core architecture and a dense layer for logits."
+      },
+      {
+        "id": "idefics_vision_text2text",
+        "label": "IdeficsForVisionText2Text",
+        "type": "component",
+        "link": null,
+        "title": "IdeficsForVisionText2Text",
+        "description": "A multimodal model that integrates vision and text inputs to perform text generation tasks, utilizing an IdeficsModel and a decoupled linear layer for output."
+      },
+      {
+        "id": "text_models",
+        "label": "Text Models",
+        "type": "module",
+        "link": "text_models",
+        "title": "Text Models",
+        "description": "This module contains various transformer-based models primarily designed for processing and generating text, covering a wide range of NLP tasks."
+      },
+      {
+        "id": "vision_models",
+        "label": "Vision Models",
+        "type": "module",
+        "link": "vision_models",
+        "title": "Vision Models",
+        "description": "This module encompasses models specialized in computer vision tasks, including object detection, image segmentation, and image generation."
+      },
+      {
+        "id": "audio_models",
+        "label": "Audio Models",
+        "type": "module",
+        "link": "audio_models",
+        "title": "Audio Models",
+        "description": "This module provides models focused on audio processing, such as speech recognition, audio classification, and speech-to-text/text-to-speech tasks."
+      }
+    ],
+    "edges": [
+      {
+        "source": "idefics_vision_text2text",
+        "target": "vision_models",
+        "label": "uses vision components",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "idefics_vision_text2text",
+        "target": "text_models",
+        "label": "uses text components",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dia_conditional_generation",
+        "target": "audio_models",
+        "label": "generates audio",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_multimodal_models",
+        "label": "Core Multimodal Models",
+        "nodes": [
+          "dia_conditional_generation",
+          "idefics_vision_text2text"
+        ],
+        "title": "Core Multimodal Models",
+        "description": "Central implementations for models that integrate and process multiple data modalities.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

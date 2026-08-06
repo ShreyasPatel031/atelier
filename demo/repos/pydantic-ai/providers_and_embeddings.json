@@ -1,0 +1,499 @@
+{
+  "title": "Providers and Embeddings Module",
+  "summary": "This module provides interfaces for integrating with various AI model providers and generating text embeddings. It includes a high-level Embedder class and specific provider implementations for different LLM services.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "embedder",
+        "label": "Embedder",
+        "type": "component",
+        "link": null,
+        "title": "Embedder Class",
+        "description": "A high-level interface for generating text embeddings using various model providers. It manages model inference, settings, and OpenTelemetry instrumentation."
+      },
+      {
+        "id": "embedding_model_wrapper",
+        "label": "WrapperEmbeddingModel",
+        "type": "component",
+        "link": null,
+        "title": "Wrapper Embedding Model",
+        "description": "A base class for creating custom embedding model wrappers that modify behavior (e.g., caching, logging) while delegating to an underlying model."
+      },
+      {
+        "id": "test_embedding_model",
+        "label": "TestEmbeddingModel",
+        "type": "component",
+        "link": null,
+        "title": "Test Embedding Model",
+        "description": "A mock embedding model for testing purposes, returning deterministic embeddings and tracking settings."
+      },
+      {
+        "id": "provider_base",
+        "label": "Provider (Abstract)",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Provider Class",
+        "description": "An abstract base class for AI model providers, defining common properties and methods for client management and model profiling."
+      },
+      {
+        "id": "alibaba_provider",
+        "label": "AlibabaProvider",
+        "type": "component",
+        "link": null,
+        "title": "Alibaba Cloud Provider",
+        "description": "Integrates with Alibaba Cloud Model Studio (DashScope) OpenAI-compatible API."
+      },
+      {
+        "id": "anthropic_provider",
+        "label": "AnthropicProvider",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic API Provider",
+        "description": "Connects to the Anthropic API for Claude models, supporting various client types."
+      },
+      {
+        "id": "azure_provider",
+        "label": "AzureProvider",
+        "type": "component",
+        "link": null,
+        "title": "Azure OpenAI Provider",
+        "description": "Provides integration with Azure OpenAI API, supporting different model profiles and API versions."
+      },
+      {
+        "id": "bedrock_embedding_handlers",
+        "label": "Bedrock Embedding Handlers",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Embedding Handlers",
+        "description": "Specific handlers for different embedding models on AWS Bedrock, including Cohere, Nova, and Titan."
+      },
+      {
+        "id": "cerebras_provider",
+        "label": "CerebrasProvider",
+        "type": "component",
+        "link": null,
+        "title": "Cerebras API Provider",
+        "description": "Integrates with the Cerebras AI API, supporting various models and handling specific model settings."
+      },
+      {
+        "id": "cohere_provider",
+        "label": "CohereProvider",
+        "type": "component",
+        "link": null,
+        "title": "Cohere API Provider",
+        "description": "Connects to the Cohere API for chat and embedding models."
+      },
+      {
+        "id": "deepseek_provider",
+        "label": "DeepSeekProvider",
+        "type": "component",
+        "link": null,
+        "title": "DeepSeek API Provider",
+        "description": "Integrates with the DeepSeek API, providing OpenAI-compatible access to DeepSeek models."
+      },
+      {
+        "id": "fireworks_provider",
+        "label": "FireworksProvider",
+        "type": "component",
+        "link": null,
+        "title": "Fireworks AI Provider",
+        "description": "Connects to the Fireworks AI API, which offers an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "github_provider",
+        "label": "GitHubProvider",
+        "type": "component",
+        "link": null,
+        "title": "GitHub Models Provider",
+        "description": "Integrates with GitHub Models API, providing access to various AI models through an OpenAI-compatible API."
+      },
+      {
+        "id": "grok_provider",
+        "label": "GrokProvider",
+        "type": "component",
+        "link": null,
+        "title": "Grok API Provider",
+        "description": "Connects to the Grok API, offering an OpenAI-compatible interface for xAI models."
+      },
+      {
+        "id": "groq_provider",
+        "label": "GroqProvider",
+        "type": "component",
+        "link": null,
+        "title": "Groq API Provider",
+        "description": "Integrates with the Groq API, supporting various models and handling specific model profiles."
+      },
+      {
+        "id": "heroku_provider",
+        "label": "HerokuProvider",
+        "type": "component",
+        "link": null,
+        "title": "Heroku API Provider",
+        "description": "Connects to the Heroku API, providing an OpenAI-compatible interface."
+      },
+      {
+        "id": "huggingface_provider",
+        "label": "HuggingFaceProvider",
+        "type": "component",
+        "link": null,
+        "title": "Hugging Face Provider",
+        "description": "Integrates with Hugging Face models, supporting various model families and inference clients."
+      },
+      {
+        "id": "litellm_provider",
+        "label": "LiteLLMProvider",
+        "type": "component",
+        "link": null,
+        "title": "LiteLLM API Provider",
+        "description": "Acts as a proxy for LiteLLM, routing requests to various model providers through a unified OpenAI-compatible interface."
+      },
+      {
+        "id": "mistral_provider",
+        "label": "MistralProvider",
+        "type": "component",
+        "link": null,
+        "title": "Mistral API Provider",
+        "description": "Connects to the Mistral AI API for chat models."
+      },
+      {
+        "id": "moonshotai_provider",
+        "label": "MoonshotAIProvider",
+        "type": "component",
+        "link": null,
+        "title": "MoonshotAI Platform Provider",
+        "description": "Integrates with the MoonshotAI platform (Kimi models) via an OpenAI-compatible API."
+      },
+      {
+        "id": "nebius_provider",
+        "label": "NebiusProvider",
+        "type": "component",
+        "link": null,
+        "title": "Nebius AI Studio Provider",
+        "description": "Connects to Nebius AI Studio API, providing an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "ollama_provider",
+        "label": "OllamaProvider",
+        "type": "component",
+        "link": null,
+        "title": "Ollama Provider",
+        "description": "Integrates with local or remote Ollama API, offering an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "openai_provider",
+        "label": "OpenAIProvider",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI API Provider",
+        "description": "Connects to the OpenAI API for chat and embedding models."
+      },
+      {
+        "id": "ovhcloud_provider",
+        "label": "OVHcloudProvider",
+        "type": "component",
+        "link": null,
+        "title": "OVHcloud AI Endpoints Provider",
+        "description": "Integrates with OVHcloud AI Endpoints, providing an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "sambanova_provider",
+        "label": "SambaNovaProvider",
+        "type": "component",
+        "link": null,
+        "title": "SambaNova AI Provider",
+        "description": "Connects to SambaNova AI models via an OpenAI-compatible API."
+      },
+      {
+        "id": "together_provider",
+        "label": "TogetherProvider",
+        "type": "component",
+        "link": null,
+        "title": "Together AI Provider",
+        "description": "Integrates with Together AI API, offering an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "vercel_provider",
+        "label": "VercelProvider",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Gateway Provider",
+        "description": "Connects to Vercel AI Gateway API, providing an OpenAI-compatible interface for various models."
+      },
+      {
+        "id": "xai_provider",
+        "label": "XaiProvider",
+        "type": "component",
+        "link": null,
+        "title": "xAI API Provider",
+        "description": "Integrates with the xAI API (native xAI SDK) for Grok models."
+      },
+      {
+        "id": "usage_mapping",
+        "label": "Usage Mapping Functions",
+        "type": "component",
+        "link": null,
+        "title": "Usage Mapping Functions",
+        "description": "Functions to map embedding model responses from various providers (Cohere, Google, OpenAI, VoyageAI) to a standardized RequestUsage format."
+      }
+    ],
+    "edges": [
+      {
+        "source": "embedder",
+        "target": "embedding_model_wrapper",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "test_embedding_model",
+        "label": "uses for testing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "bedrock_embedding_handlers",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "usage_mapping",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "alibaba_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "anthropic_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "azure_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "cerebras_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "cohere_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "deepseek_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "fireworks_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "github_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "grok_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "groq_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "heroku_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "huggingface_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "litellm_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "mistral_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "moonshotai_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "nebius_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "ollama_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "openai_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "ovhcloud_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "sambanova_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "together_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "vercel_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "provider_base",
+        "target": "xai_provider",
+        "label": "extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "embedding_interfaces",
+        "label": "Embedding Interfaces",
+        "nodes": [
+          "embedder",
+          "embedding_model_wrapper",
+          "test_embedding_model"
+        ],
+        "title": "Embedding Interfaces",
+        "description": "Core components for defining and using embedding models.",
+        "role": "analytical"
+      },
+      {
+        "id": "bedrock_embeddings",
+        "label": "Bedrock Embeddings",
+        "nodes": [
+          "bedrock_embedding_handlers"
+        ],
+        "title": "AWS Bedrock Embedding Handlers",
+        "description": "Specialized handlers for integrating with various embedding models available on AWS Bedrock.",
+        "role": "analytical"
+      },
+      {
+        "id": "usage_metrics",
+        "label": "Usage Metrics",
+        "nodes": [
+          "usage_mapping"
+        ],
+        "title": "Usage Metrics Mapping",
+        "description": "Functions responsible for standardizing usage data from different embedding providers.",
+        "role": "analytical"
+      },
+      {
+        "id": "llm_providers",
+        "label": "LLM Providers",
+        "nodes": [
+          "provider_base",
+          "alibaba_provider",
+          "anthropic_provider",
+          "azure_provider",
+          "cerebras_provider",
+          "cohere_provider",
+          "deepseek_provider",
+          "fireworks_provider",
+          "github_provider",
+          "grok_provider",
+          "groq_provider",
+          "heroku_provider",
+          "huggingface_provider",
+          "litellm_provider",
+          "mistral_provider",
+          "moonshotai_provider",
+          "nebius_provider",
+          "ollama_provider",
+          "openai_provider",
+          "ovhcloud_provider",
+          "sambanova_provider",
+          "together_provider",
+          "vercel_provider",
+          "xai_provider"
+        ],
+        "title": "Large Language Model Providers",
+        "description": "Implementations for connecting to various Large Language Model (LLM) services.",
+        "role": "surface"
+      }
+    ]
+  }
+}

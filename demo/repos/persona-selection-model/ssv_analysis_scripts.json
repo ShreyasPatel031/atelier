@@ -1,0 +1,99 @@
+{
+  "title": "SSV Analysis Scripts",
+  "summary": "This module provides scripts for analyzing Sparse SAE Vectors (SSVs), including clustering features and generating corpus-based interpretations for better understanding of model behavior.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "ssv_cluster_causal",
+        "label": "Cluster SSV Features & Causal Analysis",
+        "type": "component",
+        "link": null,
+        "title": "SSV Feature Clustering and Causal Analysis",
+        "description": "Clusters Sparse SAE Vector (SSV) features, performs causal steering experiments, and evaluates the impact of feature clusters on model output."
+      },
+      {
+        "id": "ssv_corpus_interp",
+        "label": "Corpus-based SSV Interpretation",
+        "type": "component",
+        "link": null,
+        "title": "Corpus-based SSV Feature Interpretation",
+        "description": "Extracts and interprets SSV features using a corpus, generating human-readable explanations and scoring their detection accuracy."
+      },
+      {
+        "id": "sae_experiment_runner",
+        "label": "SAE Experiment Runner",
+        "type": "module",
+        "link": "sae_experiment_runner",
+        "title": "SAE Experiment Runner",
+        "description": "Manages and executes various Sparse Autoencoder (SAE) experiments, including ablation and reconstruction."
+      },
+      {
+        "id": "sae_optimization_scripts",
+        "label": "SAE Optimization Scripts",
+        "type": "module",
+        "link": "sae_optimization_scripts",
+        "title": "SAE Optimization Scripts",
+        "description": "Contains scripts for optimizing Sparse Autoencoder (SAE) parameters and configurations."
+      },
+      {
+        "id": "persona_schemas",
+        "label": "Persona Schemas",
+        "type": "module",
+        "link": "persona_schemas",
+        "title": "Persona Schemas",
+        "description": "Defines data structures and schemas for persona-related artifacts and configurations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "ssv_cluster_causal",
+        "target": "sae_experiment_runner",
+        "label": "uses SAE loading",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssv_cluster_causal",
+        "target": "persona_schemas",
+        "label": "uses persona config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssv_corpus_interp",
+        "target": "sae_experiment_runner",
+        "label": "uses SAE loading",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssv_corpus_interp",
+        "target": "persona_schemas",
+        "label": "uses persona config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_optimization_scripts",
+        "target": "ssv_cluster_causal",
+        "label": "optimizes SSV inputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "ssv_analysis",
+        "label": "SSV Analysis",
+        "nodes": [
+          "ssv_cluster_causal",
+          "ssv_corpus_interp"
+        ],
+        "title": "Sparse SAE Vector Analysis",
+        "description": "Scripts dedicated to analyzing and interpreting Sparse Autoencoder Vectors (SSVs) for model understanding.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

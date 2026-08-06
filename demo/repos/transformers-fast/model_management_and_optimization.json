@@ -1,0 +1,278 @@
+{
+    "title": "Model Management & Optimization",
+    "summary": "This module provides tools for converting pre-trained models from various frameworks into the Hugging Face format and optimizing them through quantization techniques to reduce size and improve inference speed.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "original_model_source",
+                "label": "Original Model Checkpoint",
+                "type": "external",
+                "link": null,
+                "title": "Source Model Weights",
+                "description": "Pre-trained model weights and configurations from external machine learning frameworks (e.g., TensorFlow, Fairseq, native PyTorch)."
+            },
+            {
+                "id": "conversion_logic",
+                "label": "Framework-Specific Conversion",
+                "type": "component",
+                "link": null,
+                "title": "Model Conversion Logic",
+                "description": "Scripts and utilities that parse original model checkpoints, extract weights, and transform them to align with Hugging Face model architectures and naming conventions."
+            },
+            {
+                "id": "hf_model_config",
+                "label": "Hugging Face Model Config",
+                "type": "component",
+                "link": null,
+                "title": "Hugging Face Configuration",
+                "description": "The configuration object (`PretrainedConfig`) defining the architecture and hyperparameters of the Hugging Face model, generated or loaded during conversion."
+            },
+            {
+                "id": "hf_processor_config",
+                "label": "Hugging Face Processor Config",
+                "type": "component",
+                "link": null,
+                "title": "Hugging Face Processor Configuration",
+                "description": "The configuration object for the associated data processor (tokenizer, image processor, feature extractor), ensuring correct data preparation for the model."
+            },
+            {
+                "id": "hf_model_instance",
+                "label": "Instantiated HF Model",
+                "type": "component",
+                "link": "model_architectures",
+                "title": "Hugging Face Model Instance",
+                "description": "A concrete instance of a Hugging Face `PreTrainedModel` class, initialized with the appropriate configuration and populated with converted weights."
+            },
+            {
+                "id": "quantization_config",
+                "label": "Quantization Parameters",
+                "type": "component",
+                "link": null,
+                "title": "Quantization Settings",
+                "description": "Defines the specific parameters and methods for model quantization, such as bit-width, data types (e.g., FP8, Int4), and target layers."
+            },
+            {
+                "id": "quantization_engine",
+                "label": "Apply Quantization Techniques",
+                "type": "component",
+                "link": null,
+                "title": "Model Quantization Engine",
+                "description": "Applies various quantization algorithms (e.g., BitNet, bitsandbytes, FP-Quant) to the model's weights and activations, reducing its size and improving inference speed."
+            },
+            {
+                "id": "validation_engine",
+                "label": "Validate Model Integrity",
+                "type": "component",
+                "link": null,
+                "title": "Model Validation",
+                "description": "Performs checks and comparisons (e.g., numerical fidelity, output consistency) to ensure that the converted or quantized model retains its functionality and performance."
+            },
+            {
+                "id": "optimized_model_output",
+                "label": "Optimized Model Artifacts",
+                "type": "external",
+                "link": null,
+                "title": "Ready-for-Deployment Model",
+                "description": "The final model, potentially converted and/or quantized, along with its configuration and processor, ready for local deployment or sharing."
+            },
+            {
+                "id": "save_local",
+                "label": "Save to Local Storage",
+                "type": "component",
+                "link": null,
+                "title": "Local Model Saving",
+                "description": "Persists the processed model, configuration, and processor to a specified directory on the local file system."
+            },
+            {
+                "id": "push_to_hub",
+                "label": "Publish to Hugging Face Hub",
+                "type": "component",
+                "link": null,
+                "title": "Hugging Face Hub Upload",
+                "description": "Uploads the model artifacts to the Hugging Face Model Hub, making them publicly or privately accessible for wider use and collaboration."
+            },
+            {
+                "id": "external_frameworks",
+                "label": "External ML Frameworks",
+                "type": "external",
+                "link": null,
+                "title": "Source Frameworks",
+                "description": "Represents the diverse machine learning frameworks (e.g., TensorFlow, Fairseq, native PyTorch, Flax) from which models are converted."
+            },
+            {
+                "id": "external_quant_libs",
+                "label": "External Quantization Libraries",
+                "type": "external",
+                "link": null,
+                "title": "Quantization Dependencies",
+                "description": "Third-party libraries (e.g., bitsandbytes, torchao, Qutlass) that provide the underlying algorithms and optimized kernels for various quantization techniques."
+            }
+        ],
+        "edges": [
+            {
+                "source": "original_model_source",
+                "target": "conversion_logic",
+                "label": "Provides weights from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_frameworks",
+                "target": "conversion_logic",
+                "label": "Defines source format for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "conversion_logic",
+                "target": "hf_model_config",
+                "label": "Generates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "conversion_logic",
+                "target": "hf_processor_config",
+                "label": "Generates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hf_model_config",
+                "target": "hf_model_instance",
+                "label": "Configures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hf_processor_config",
+                "target": "hf_model_instance",
+                "label": "Configures associated processor",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "conversion_logic",
+                "target": "hf_model_instance",
+                "label": "Populates with converted weights",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hf_model_instance",
+                "target": "quantization_engine",
+                "label": "Feeds model for optimization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "quantization_config",
+                "target": "quantization_engine",
+                "label": "Guides optimization process",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_quant_libs",
+                "target": "quantization_engine",
+                "label": "Provides core algorithms for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "quantization_engine",
+                "target": "hf_model_instance",
+                "label": "Modifies model weights",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hf_model_instance",
+                "target": "validation_engine",
+                "label": "Provides model for testing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "validation_engine",
+                "target": "optimized_model_output",
+                "label": "Confirms readiness of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimized_model_output",
+                "target": "save_local",
+                "label": "Is saved by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimized_model_output",
+                "target": "push_to_hub",
+                "label": "Is published by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "save_local",
+                "target": "push_to_hub",
+                "label": "Can be followed by",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_ingestion_standardization",
+                "label": "Model Ingestion & Standardization",
+                "nodes": [
+                    "original_model_source",
+                    "conversion_logic",
+                    "hf_model_config",
+                    "hf_processor_config"
+                ],
+                "title": "Model Ingestion & Standardization",
+                "description": "This group handles the process of taking pre-trained models from various external frameworks and converting them into the standardized Hugging Face format, including generating necessary configurations.",
+                "role": "generative"
+            },
+            {
+                "id": "model_optimization_core",
+                "label": "Model Optimization Core",
+                "nodes": [
+                    "hf_model_instance",
+                    "quantization_config",
+                    "quantization_engine",
+                    "validation_engine"
+                ],
+                "title": "Model Optimization Core",
+                "description": "Focuses on enhancing model efficiency by applying various quantization techniques to reduce model size and accelerate inference, followed by validation to ensure performance integrity.",
+                "role": "analytical"
+            },
+            {
+                "id": "output_deployment",
+                "label": "Output & Deployment",
+                "nodes": [
+                    "optimized_model_output",
+                    "save_local",
+                    "push_to_hub"
+                ],
+                "title": "Output & Deployment",
+                "description": "Manages the final stages of the model lifecycle, including saving the optimized model artifacts locally and publishing them to the Hugging Face Model Hub for broader accessibility.",
+                "role": "surface"
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "external_frameworks",
+                    "external_quant_libs"
+                ],
+                "title": "External Dependencies",
+                "description": "Represents the external machine learning frameworks and specialized quantization libraries that provide foundational support and algorithms for the module's operations.",
+                "role": "data"
+            }
+        ]
+    }
+}

@@ -1,0 +1,136 @@
+{
+    "title": "Evaluation and Testing",
+    "summary": "This module provides a comprehensive framework for evaluating and testing AI models and agents, including dataset management, various evaluators, and online evaluation capabilities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "dataset_management",
+                "label": "Dataset Management",
+                "type": "module",
+                "link": "dataset_management",
+                "title": "Dataset Management Module",
+                "description": "Tools for defining, generating, and managing datasets used in evaluation and testing, supporting structured data generation and task execution."
+            },
+            {
+                "id": "evaluators",
+                "label": "Evaluators",
+                "type": "module",
+                "link": "evaluators",
+                "title": "Evaluators Module",
+                "description": "Provides various evaluators for assessing model outputs, including LLM-based judges, content checks, and statistical evaluators for report generation."
+            },
+            {
+                "id": "online_evaluation",
+                "label": "Online Evaluation",
+                "type": "module",
+                "link": "online_evaluation",
+                "title": "Online Evaluation Module",
+                "description": "Tools for performing online evaluation of AI models and agents, allowing real-time assessment of performance and behavior, with OpenTelemetry integration."
+            },
+            {
+                "id": "testing_utilities",
+                "label": "Testing Utilities",
+                "type": "module",
+                "link": "testing_utilities",
+                "title": "Testing Utilities Module",
+                "description": "Various utilities for testing, including VCR cassette management, test file uploads to providers, and verification of cloud service integrations."
+            },
+            {
+                "id": "model_integration",
+                "label": "Model Integration",
+                "type": "module",
+                "link": "model_integration",
+                "title": "Model Integration Module",
+                "description": "Handles interactions with various AI models, providing a unified interface for making model requests and managing streamed responses."
+            },
+            {
+                "id": "agent_framework",
+                "label": "Agent Framework",
+                "type": "module",
+                "link": "agent_framework",
+                "title": "Agent Framework Module",
+                "description": "Provides the core framework for defining, running, and managing AI agents, handling user prompts, orchestrating tool calls, and managing agent lifecycle."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dataset_management",
+                "target": "evaluators",
+                "label": "provides data for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dataset_management",
+                "target": "model_integration",
+                "label": "uses LLMs for generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluators",
+                "target": "model_integration",
+                "label": "uses LLMs for judging",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "online_evaluation",
+                "target": "evaluators",
+                "label": "dispatches evaluations to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "online_evaluation",
+                "target": "agent_framework",
+                "label": "integrates with agent runs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "testing_utilities",
+                "target": "model_integration",
+                "label": "tests model interactions",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "evaluation_core",
+                "label": "Evaluation Core",
+                "nodes": [
+                    "dataset_management",
+                    "evaluators",
+                    "online_evaluation"
+                ],
+                "title": "Core Evaluation Components",
+                "description": "The central modules responsible for defining evaluation datasets, running various assessment metrics, and performing real-time online evaluations.",
+                "role": "analytical"
+            },
+            {
+                "id": "testing_support",
+                "label": "Testing Support",
+                "nodes": [
+                    "testing_utilities"
+                ],
+                "title": "Testing Support Utilities",
+                "description": "Provides auxiliary tools and scripts for testing the system, including VCR cassette management and cloud service integration verification.",
+                "role": "analytical"
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "model_integration",
+                    "agent_framework"
+                ],
+                "title": "External Module Dependencies",
+                "description": "Modules from other parts of the system that are crucial for the functionality of the evaluation and testing framework.",
+                "role": "data"
+            }
+        ]
+    }
+}

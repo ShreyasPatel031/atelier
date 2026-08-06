@@ -1,0 +1,114 @@
+{
+  "title": "DBOS Integration",
+  "summary": "This module integrates Pydantic-AI agents with the DBOS durable execution framework, enabling agents to run as durable workflows and steps.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "dbos_agent",
+        "label": "DBOSAgent",
+        "type": "module",
+        "link": "dbos_integration",
+        "title": "DBOSAgent",
+        "description": "Wraps an existing agent to enable durable execution with DBOS, offloading model requests and tool calls to DBOS steps."
+      },
+      {
+        "id": "dbos_mcp_toolset_base",
+        "label": "DBOSMCPToolsetBase",
+        "type": "module",
+        "link": "dbos_integration",
+        "title": "DBOSMCPToolsetBase",
+        "description": "A base class for wrapping MCP toolsets to integrate their operations (get_tools, call_tool, get_instructions) as DBOS steps."
+      },
+      {
+        "id": "abstract_agent",
+        "label": "AbstractAgent",
+        "type": "external",
+        "link": null,
+        "title": "AbstractAgent",
+        "description": "The base class for all agents, defining the core interface for agent operations."
+      },
+      {
+        "id": "abstract_toolset",
+        "label": "AbstractToolset",
+        "type": "external",
+        "link": null,
+        "title": "AbstractToolset",
+        "description": "The base class for all toolsets, defining the interface for managing and calling tools."
+      },
+      {
+        "id": "dbos_framework",
+        "label": "DBOS Framework",
+        "type": "external",
+        "link": null,
+        "title": "DBOS Framework",
+        "description": "The external Durable OS framework that provides durable execution capabilities."
+      },
+      {
+        "id": "model_integration",
+        "label": "Model Integration",
+        "type": "module",
+        "link": "model_integration",
+        "title": "Model Integration",
+        "description": "Handles interactions with various AI models, including request and response processing."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dbos_agent",
+        "target": "abstract_agent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dbos_agent",
+        "target": "dbos_framework",
+        "label": "uses workflows/steps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dbos_agent",
+        "target": "model_integration",
+        "label": "wraps models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dbos_agent",
+        "target": "dbos_mcp_toolset_base",
+        "label": "wraps toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dbos_mcp_toolset_base",
+        "target": "abstract_toolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dbos_mcp_toolset_base",
+        "target": "dbos_framework",
+        "label": "uses steps",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dbos_wrappers",
+        "label": "DBOS Wrappers",
+        "nodes": [
+          "dbos_agent",
+          "dbos_mcp_toolset_base"
+        ],
+        "title": "DBOS Wrappers",
+        "description": "Components responsible for adapting Pydantic-AI entities to be compatible with the DBOS durable execution environment.",
+        "role": "generative"
+      }
+    ]
+  }
+}

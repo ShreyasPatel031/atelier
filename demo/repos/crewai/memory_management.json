@@ -1,0 +1,62 @@
+{
+  "title": "Memory Analysis and Consolidation",
+  "summary": "This module provides functions for analyzing memory content to determine its scope, categories, and importance for storage, and for consolidating new memory with existing records.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "analyze_for_save",
+        "label": "Analyze for Save",
+        "type": "component",
+        "link": null,
+        "title": "Analyze Memory for Saving",
+        "description": "Infers the scope, categories, importance, and metadata for a new memory entry using an LLM, returning a MemoryAnalysis object. Handles LLM failures by returning safe defaults."
+      },
+      {
+        "id": "analyze_for_consolidation",
+        "label": "Analyze for Consolidation",
+        "type": "component",
+        "link": null,
+        "title": "Analyze Memory for Consolidation",
+        "description": "Determines how to consolidate new memory content with existing similar records (insert, update, or delete) using an LLM. Returns a ConsolidationPlan, defaulting to inserting new content on failure."
+      },
+      {
+        "id": "llm_integration",
+        "label": "LLM Integration",
+        "type": "module",
+        "link": "llm_integration",
+        "title": "LLM Integration",
+        "description": "Handles interactions with various Large Language Models (LLMs) for processing and generating text."
+      }
+    ],
+    "edges": [
+      {
+        "source": "llm_integration",
+        "target": "analyze_for_save",
+        "label": "LLM calls for analysis",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_integration",
+        "target": "analyze_for_consolidation",
+        "label": "LLM calls for consolidation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "memory_analysis",
+        "label": "Memory Analysis",
+        "nodes": [
+          "analyze_for_save",
+          "analyze_for_consolidation"
+        ],
+        "title": "Memory Analysis Functions",
+        "description": "Functions responsible for analyzing memory content to extract relevant metadata and determine consolidation strategies.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

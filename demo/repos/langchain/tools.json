@@ -1,0 +1,133 @@
+{
+  "title": "Tools Module",
+  "summary": "This module defines the base classes and utilities for creating and managing tools that agents can use to interact with the world, including input parsing, execution, and error handling.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_tool",
+        "label": "BaseTool",
+        "type": "module",
+        "link": "base_tool",
+        "title": "BaseTool Class",
+        "description": "The foundational class for all LangChain tools, providing a standardized interface for tool definition, input validation, execution, and error handling."
+      },
+      {
+        "id": "tool_schema_conversion",
+        "label": "Tool Schema Conversion",
+        "type": "component",
+        "link": null,
+        "title": "Tool Schema Conversion",
+        "description": "Infers and generates Pydantic schemas for tool arguments, ensuring proper type validation and structure for tool inputs."
+      },
+      {
+        "id": "retriever_tool_functionality",
+        "label": "Retriever Tool Functionality",
+        "type": "component",
+        "link": null,
+        "title": "Retriever Tool Functionality",
+        "description": "Provides asynchronous functions for retriever-based tools, enabling them to fetch and format documents based on a query."
+      },
+      {
+        "id": "legacy_tool_imports",
+        "label": "Legacy Tool Imports",
+        "type": "external",
+        "link": null,
+        "title": "Legacy Tool Imports",
+        "description": "Handles backward-compatible imports for tools from older LangChain versions, redirecting to `langchain-community` for modern usage."
+      },
+      {
+        "id": "runnables",
+        "label": "Runnables",
+        "type": "module",
+        "link": "runnables",
+        "title": "Runnables Module",
+        "description": "Provides the core `Runnable` interface, which `BaseTool` extends to enable chaining and composition of operations."
+      },
+      {
+        "id": "callbacks_and_tracing",
+        "label": "Callbacks and Tracing",
+        "type": "module",
+        "link": "callbacks_and_tracing",
+        "title": "Callbacks and Tracing Module",
+        "description": "Manages callback mechanisms and tracing for monitoring and debugging tool execution."
+      },
+      {
+        "id": "data_handling",
+        "label": "Data Handling",
+        "type": "module",
+        "link": "data_handling",
+        "title": "Data Handling Module",
+        "description": "Provides utilities for document loading and formatting, used by retriever tools to process search results."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_tool",
+        "target": "runnables",
+        "label": "extends RunnableSerializable",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_tool",
+        "target": "callbacks_and_tracing",
+        "label": "uses CallbackManager",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_schema_conversion",
+        "target": "base_tool",
+        "label": "generates args_schema for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retriever_tool_functionality",
+        "target": "base_tool",
+        "label": "implements _arun for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retriever_tool_functionality",
+        "target": "data_handling",
+        "label": "formats documents from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "legacy_tool_imports",
+        "target": "base_tool",
+        "label": "provides access to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_definition",
+        "label": "Tool Definition & Core Logic",
+        "nodes": [
+          "base_tool",
+          "tool_schema_conversion"
+        ],
+        "title": "Tool Definition and Core Logic",
+        "description": "Encapsulates the fundamental structure and operational logic for all tools within the system.",
+        "role": "analytical"
+      },
+      {
+        "id": "tool_execution_support",
+        "label": "Tool Execution Support",
+        "nodes": [
+          "retriever_tool_functionality",
+          "legacy_tool_imports"
+        ],
+        "title": "Tool Execution Support",
+        "description": "Components that facilitate the execution and integration of tools, including asynchronous operations and legacy compatibility.",
+        "role": "generative"
+      }
+    ]
+  }
+}

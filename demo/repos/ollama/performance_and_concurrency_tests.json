@@ -1,0 +1,248 @@
+{
+  "title": "Performance and Concurrency Tests",
+  "summary": "This module contains integration tests focused on evaluating the performance, concurrency, and context handling capabilities of the model serving system under various load conditions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "multi_model_stress_test",
+        "label": "Multi-Model Stress Test",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Model Stress Test",
+        "description": "Tests the system's ability to handle multiple models concurrently, dynamically adjusting the number of loaded models based on available VRAM to simulate thrashing scenarios."
+      },
+      {
+        "id": "concurrent_chat_test",
+        "label": "Concurrent Chat Test",
+        "type": "component",
+        "link": null,
+        "title": "Concurrent Chat Test",
+        "description": "Evaluates the system's performance when handling multiple simultaneous chat requests to a single model, focusing on concurrency and response times."
+      },
+      {
+        "id": "parallel_chat_history_test",
+        "label": "Parallel Chat with History Test",
+        "type": "component",
+        "link": null,
+        "title": "Parallel Chat with History Test",
+        "description": "Assesses the system's capacity to manage multiple parallel chat sessions, each maintaining its own conversational history, and adjusts timeouts based on GPU utilization."
+      },
+      {
+        "id": "chat_history_test",
+        "label": "Chat with History Test",
+        "type": "component",
+        "link": null,
+        "title": "Chat with History Test",
+        "description": "Verifies the correct handling of conversational history in a single chat session, ensuring context is maintained across multiple turns."
+      },
+      {
+        "id": "context_exhaustion_test",
+        "label": "Context Exhaustion Test",
+        "type": "component",
+        "link": null,
+        "title": "Context Exhaustion Test",
+        "description": "Tests the model's behavior when the input context approaches or exceeds its maximum capacity, ensuring graceful handling of large prompts."
+      },
+      {
+        "id": "long_input_context_test",
+        "label": "Long Input Context Test",
+        "type": "component",
+        "link": null,
+        "title": "Long Input Context Test",
+        "description": "Validates the system's ability to process very long input prompts, checking for correct truncation or rejection behavior."
+      },
+      {
+        "id": "parallel_generate_history_test",
+        "label": "Parallel Generate with History Test",
+        "type": "component",
+        "link": null,
+        "title": "Parallel Generate with History Test",
+        "description": "Examines the system's performance when handling multiple parallel generate requests, each with its own context continuation, and adapts timeouts based on GPU usage."
+      },
+      {
+        "id": "generate_history_test",
+        "label": "Generate with History Test",
+        "type": "component",
+        "link": null,
+        "title": "Generate with History Test",
+        "description": "Confirms the proper continuation of generation context across multiple requests, specifically for the Generate API."
+      },
+      {
+        "id": "max_queue_test",
+        "label": "Max Queue Test",
+        "type": "component",
+        "link": null,
+        "title": "Max Queue Test",
+        "description": "Tests the server's request queuing mechanism by simulating a high volume of concurrent embedding requests while a generate request is active, verifying queue limits and error handling."
+      },
+      {
+        "id": "model_performance_test",
+        "label": "Model Performance Test",
+        "type": "component",
+        "link": null,
+        "title": "Model Performance Test",
+        "description": "Executes performance benchmarks for various models, including both Ollama engine and Llama runner chat models, to measure their speed and efficiency."
+      },
+      {
+        "id": "library_model_performance_test",
+        "label": "Library Model Performance Test",
+        "type": "component",
+        "link": null,
+        "title": "Library Model Performance Test",
+        "description": "Runs performance benchmarks specifically for models from the library, assessing their speed and resource utilization."
+      },
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "type": "module",
+        "link": "api_endpoints",
+        "title": "API Endpoints",
+        "description": "Handles incoming API requests for chat, generation, pulling, pushing, showing, and embedding models."
+      },
+      {
+        "id": "model_scheduling_and_caching",
+        "label": "Model Scheduling and Caching",
+        "type": "module",
+        "link": "model_scheduling_and_caching",
+        "title": "Model Scheduling and Caching",
+        "description": "Manages the loading, unloading, and caching of models to optimize resource utilization and response times."
+      }
+    ],
+    "edges": [
+      {
+        "source": "multi_model_stress_test",
+        "target": "api_endpoints",
+        "label": "generate requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_model_stress_test",
+        "target": "model_scheduling_and_caching",
+        "label": "model load/unload",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrent_chat_test",
+        "target": "api_endpoints",
+        "label": "chat requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parallel_chat_history_test",
+        "target": "api_endpoints",
+        "label": "chat requests with history",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_history_test",
+        "target": "api_endpoints",
+        "label": "sequential chat requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_exhaustion_test",
+        "target": "api_endpoints",
+        "label": "chat requests with large context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "long_input_context_test",
+        "target": "api_endpoints",
+        "label": "chat requests with long input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parallel_generate_history_test",
+        "target": "api_endpoints",
+        "label": "generate requests with history",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_history_test",
+        "target": "api_endpoints",
+        "label": "sequential generate requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "max_queue_test",
+        "target": "api_endpoints",
+        "label": "embedding/generate requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_performance_test",
+        "target": "api_endpoints",
+        "label": "model chat/generate requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "library_model_performance_test",
+        "target": "api_endpoints",
+        "label": "library model chat requests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "concurrency_tests",
+        "label": "Concurrency Tests",
+        "nodes": [
+          "multi_model_stress_test",
+          "concurrent_chat_test"
+        ],
+        "title": "Concurrency Test Suite",
+        "description": "Tests designed to evaluate the system's ability to handle multiple simultaneous requests and models.",
+        "role": "analytical"
+      },
+      {
+        "id": "context_handling_tests",
+        "label": "Context Handling Tests",
+        "nodes": [
+          "parallel_chat_history_test",
+          "chat_history_test",
+          "context_exhaustion_test",
+          "long_input_context_test",
+          "parallel_generate_history_test",
+          "generate_history_test"
+        ],
+        "title": "Context Handling Test Suite",
+        "description": "Tests focused on verifying the correct management and limits of conversational and generation context.",
+        "role": "analytical"
+      },
+      {
+        "id": "queue_and_resource_tests",
+        "label": "Queue and Resource Tests",
+        "nodes": [
+          "max_queue_test"
+        ],
+        "title": "Queue and Resource Management Tests",
+        "description": "Tests that examine the server's request queuing and resource allocation under heavy load.",
+        "role": "analytical"
+      },
+      {
+        "id": "performance_benchmarks",
+        "label": "Performance Benchmarks",
+        "nodes": [
+          "model_performance_test",
+          "library_model_performance_test"
+        ],
+        "title": "Performance Benchmark Suite",
+        "description": "Tests designed to measure and evaluate the raw performance of various models and the overall system.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

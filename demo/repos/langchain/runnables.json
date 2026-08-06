@@ -1,0 +1,202 @@
+{
+  "title": "Runnables Module",
+  "summary": "The runnables module provides a foundational interface for creating composable units of work, enabling declarative chain construction, and managing execution flow with features like batching, streaming, and configuration.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "runnable",
+        "label": "Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Base Runnable Interface",
+        "description": "Defines the core interface for composable units of work, supporting invocation, batching, streaming, and transformation. It provides methods for composition, configuration, and lifecycle management."
+      },
+      {
+        "id": "runnable_serializable",
+        "label": "RunnableSerializable",
+        "type": "component",
+        "link": null,
+        "title": "Serializable Runnable",
+        "description": "Extends the base Runnable to support serialization to JSON, enabling persistence and transferability of runnable definitions. It also introduces configurable fields and alternatives."
+      },
+      {
+        "id": "runnable_each_base",
+        "label": "RunnableEachBase",
+        "type": "component",
+        "link": null,
+        "title": "Runnable for Sequence Processing",
+        "description": "A runnable that applies another runnable to each element of an input sequence, effectively mapping a list of inputs to a list of outputs."
+      },
+      {
+        "id": "runnable_binding_base",
+        "label": "RunnableBindingBase",
+        "type": "component",
+        "link": null,
+        "title": "Runnable with Bound Arguments/Config",
+        "description": "A runnable that delegates calls to an underlying runnable, allowing for binding of arguments, configuration, and custom input/output types."
+      },
+      {
+        "id": "dynamic_runnable",
+        "label": "DynamicRunnable",
+        "type": "component",
+        "link": null,
+        "title": "Dynamically Configurable Runnable",
+        "description": "A serializable runnable that can be dynamically configured at runtime, typically created using configurable_fields or configurable_alternatives methods."
+      },
+      {
+        "id": "runnable_with_message_history",
+        "label": "RunnableWithMessageHistory",
+        "type": "module",
+        "link": "runnable_with_message_history",
+        "title": "Runnable with Message History",
+        "description": "Manages chat message history for another runnable, handling the loading and updating of conversation history based on session configuration."
+      },
+      {
+        "id": "runnable_passthrough",
+        "label": "RunnablePassthrough",
+        "type": "component",
+        "link": null,
+        "title": "Input Passthrough Runnable",
+        "description": "A runnable that passes inputs through unchanged, optionally adding additional keys to the output if the input is a dictionary."
+      },
+      {
+        "id": "hub_runnable",
+        "label": "HubRunnable",
+        "type": "component",
+        "link": null,
+        "title": "LangChain Hub Runnable",
+        "description": "Represents a runnable instance stored and pulled from the LangChain Hub, allowing for easy integration of shared runnables."
+      },
+      {
+        "id": "openai_functions_router",
+        "label": "OpenAIFunctionsRouter",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Functions Router",
+        "description": "A runnable that routes to specific functions based on OpenAI function call outputs, enabling dynamic execution paths."
+      },
+      {
+        "id": "config_wrapper",
+        "label": "Config Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Configuration Wrapper",
+        "description": "A utility wrapper for functions that handles StopIteration exceptions by converting them to RuntimeError, preventing issues in asynchronous contexts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "runnable",
+        "target": "runnable_serializable",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_serializable",
+        "target": "runnable_each_base",
+        "label": "base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_serializable",
+        "target": "runnable_binding_base",
+        "label": "base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_serializable",
+        "target": "dynamic_runnable",
+        "label": "base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_binding_base",
+        "target": "runnable_with_message_history",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_binding_base",
+        "target": "hub_runnable",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_binding_base",
+        "target": "openai_functions_router",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_passthrough",
+        "target": "runnable_serializable",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "config_wrapper",
+        "target": "runnable",
+        "label": "used by",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_interfaces",
+        "label": "Core Interfaces",
+        "nodes": [
+          "runnable",
+          "runnable_serializable"
+        ],
+        "title": "Core Runnable Interfaces",
+        "description": "Defines the fundamental building blocks and serialization capabilities for all runnables.",
+        "role": "analytical"
+      },
+      {
+        "id": "composition_and_binding",
+        "label": "Composition & Binding",
+        "nodes": [
+          "runnable_each_base",
+          "runnable_binding_base",
+          "dynamic_runnable",
+          "runnable_passthrough"
+        ],
+        "title": "Runnable Composition and Binding",
+        "description": "Components facilitating the composition of runnables and the binding of arguments or configurations.",
+        "role": "generative"
+      },
+      {
+        "id": "specialized_runnables",
+        "label": "Specialized Runnables",
+        "nodes": [
+          "runnable_with_message_history",
+          "hub_runnable",
+          "openai_functions_router"
+        ],
+        "title": "Specialized Runnable Implementations",
+        "description": "Specific runnable implementations for common patterns like message history, hub integration, and function routing.",
+        "role": "generative"
+      },
+      {
+        "id": "utilities",
+        "label": "Utilities",
+        "nodes": [
+          "config_wrapper"
+        ],
+        "title": "Helper Utilities",
+        "description": "Auxiliary components that support the functionality of runnables, such as configuration handling.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

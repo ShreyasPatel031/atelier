@@ -1,0 +1,113 @@
+{
+    "title": "Prompting and Parsing",
+    "summary": "This module provides tools for constructing prompts for language models and parsing their outputs into structured formats. It includes various prompt templates, output parsers, and text splitting strategies.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "prompts",
+                "label": "Prompt Templates",
+                "type": "module",
+                "link": "prompts",
+                "title": "Prompt Templates",
+                "description": "Classes and utilities for creating and managing prompts for language models, including string-based, chat-based, and few-shot templates."
+            },
+            {
+                "id": "output_parsers",
+                "label": "Output Parsers",
+                "type": "module",
+                "link": "output_parsers",
+                "title": "Output Parsers",
+                "description": "Tools for structuring language model responses into specific formats like lists, XML, JSON, or Pydantic objects, with error handling and retries."
+            },
+            {
+                "id": "text_splitters",
+                "label": "Text Splitters",
+                "type": "module",
+                "link": "text_splitters",
+                "title": "Text Splitters",
+                "description": "Strategies for splitting text into smaller, manageable chunks while preserving semantic structure and metadata, including token-based, HTML-aware, and JSON-aware methods."
+            },
+            {
+                "id": "language_models",
+                "label": "Language Models",
+                "type": "external",
+                "link": "language_model_interfaces",
+                "title": "Language Models",
+                "description": "External module providing interfaces for various language models (LLMs) and chat models that consume prompts and produce raw outputs."
+            },
+            {
+                "id": "data_handling",
+                "label": "Data Handling",
+                "type": "external",
+                "link": "data_handling",
+                "title": "Data Handling",
+                "description": "External module for loading and managing documents, which can then be processed by text splitters."
+            }
+        ],
+        "edges": [
+            {
+                "source": "prompts",
+                "target": "language_models",
+                "label": "generates input for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_models",
+                "target": "output_parsers",
+                "label": "produces output for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_handling",
+                "target": "text_splitters",
+                "label": "provides documents to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "text_splitters",
+                "target": "prompts",
+                "label": "pre-processes text for",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "input_preparation",
+                "label": "Input Preparation",
+                "nodes": [
+                    "prompts",
+                    "text_splitters"
+                ],
+                "title": "Input Preparation",
+                "description": "Components responsible for preparing and structuring input for language models, including prompt construction and text segmentation.",
+                "role": null
+            },
+            {
+                "id": "output_processing",
+                "label": "Output Processing",
+                "nodes": [
+                    "output_parsers"
+                ],
+                "title": "Output Processing",
+                "description": "Components dedicated to interpreting and transforming raw language model outputs into usable, structured data.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "language_models",
+                    "data_handling"
+                ],
+                "title": "External Dependencies",
+                "description": "Modules from other parts of the LangChain ecosystem that interact with prompting and parsing functionalities.",
+                "role": null
+            }
+        ]
+    }
+}

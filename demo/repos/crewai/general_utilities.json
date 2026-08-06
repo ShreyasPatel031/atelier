@@ -1,0 +1,202 @@
+{
+  "title": "General Utilities Module",
+  "summary": "This module provides a collection of general-purpose utility functions and classes for various tasks such as agent logging, data serialization, string manipulation, and task output management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "agent_logging",
+        "label": "Agent Logging and Summarization",
+        "type": "component",
+        "link": null,
+        "title": "Agent Logging and Summarization",
+        "description": "Provides utilities for displaying agent logs, including thoughts, tool usage, and final answers, and for summarizing conversation chunks."
+      },
+      {
+        "id": "data_serialization",
+        "label": "Data Serialization",
+        "type": "component",
+        "link": null,
+        "title": "Data Serialization",
+        "description": "Handles the serialization of various Python objects into JSON strings and the conversion of string paths to callable functions."
+      },
+      {
+        "id": "string_manipulation",
+        "label": "String Manipulation",
+        "type": "component",
+        "link": null,
+        "title": "String Manipulation",
+        "description": "Offers utility functions for common string operations, such as slugification for URL-safe text."
+      },
+      {
+        "id": "task_output_storage",
+        "label": "Task Output Storage",
+        "type": "component",
+        "link": null,
+        "title": "Task Output Storage",
+        "description": "Manages the storage, retrieval, and updating of task execution outputs, supporting features like replay and audit trails."
+      },
+      {
+        "id": "streaming_output_handling",
+        "label": "Streaming Output Handling",
+        "type": "component",
+        "link": null,
+        "title": "Streaming Output Handling",
+        "description": "Provides a base class for handling streaming outputs, allowing iteration over chunks and access to the final result."
+      },
+      {
+        "id": "guardrail_serialization",
+        "label": "Guardrail Serialization",
+        "type": "component",
+        "link": null,
+        "title": "Guardrail Serialization",
+        "description": "Serializes guardrail configurations for JSON checkpointing, ensuring proper handling of callable and non-callable guardrail values."
+      },
+      {
+        "id": "tool_param_sanitization",
+        "label": "Tool Parameter Sanitization",
+        "type": "component",
+        "link": null,
+        "title": "Tool Parameter Sanitization",
+        "description": "Sanitizes tool parameters for strict Bedrock Converse compatibility, aligning with Anthropic's grammar constraints."
+      },
+      {
+        "id": "tool_filter_creation",
+        "label": "Tool Filter Creation",
+        "type": "component",
+        "link": null,
+        "title": "Tool Filter Creation",
+        "description": "Creates static tool filter functions based on allow/block lists for controlling tool access."
+      },
+      {
+        "id": "security_configuration",
+        "label": "Security Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Security Configuration",
+        "description": "Manages security settings, including unique component fingerprints for identification and authentication."
+      },
+      {
+        "id": "crew_chat_runner",
+        "label": "Crew Chat Runner",
+        "type": "component",
+        "link": null,
+        "title": "Crew Chat Runner",
+        "description": "Facilitates running crew tools with messages, integrating with the core crew functionality."
+      },
+      {
+        "id": "printer_utility",
+        "label": "Printer Utility",
+        "type": "external",
+        "link": null,
+        "title": "Printer Utility",
+        "description": "A utility from crewai-core for handling colored console output formatting."
+      },
+      {
+        "id": "plus_api_payloads",
+        "label": "Plus API Payloads",
+        "type": "external",
+        "link": null,
+        "title": "Plus API Payloads",
+        "description": "Data structures for login and trace batch initialization used in the CrewAI Plus API."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_logging",
+        "target": "printer_utility",
+        "label": "uses for output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_serialization",
+        "target": "string_manipulation",
+        "label": "uses for path resolution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_output_storage",
+        "target": "data_serialization",
+        "label": "serializes task data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streaming_output_handling",
+        "target": "agent_logging",
+        "label": "provides stream chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "guardrail_serialization",
+        "target": "data_serialization",
+        "label": "serializes guardrail values",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_param_sanitization",
+        "target": "data_serialization",
+        "label": "sanitizes JSON schemas",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_chat_runner",
+        "target": "agent_logging",
+        "label": "logs crew activity",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_payloads",
+        "target": "security_configuration",
+        "label": "uses user identifiers",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_utilities",
+        "label": "Core Utilities",
+        "nodes": [
+          "agent_logging",
+          "data_serialization",
+          "string_manipulation",
+          "streaming_output_handling",
+          "guardrail_serialization",
+          "tool_param_sanitization",
+          "tool_filter_creation",
+          "crew_chat_runner"
+        ],
+        "title": "Core Utility Functions",
+        "description": "Contains fundamental utility functions for data handling, string operations, and logging within the CrewAI framework.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_management",
+        "label": "Data Management",
+        "nodes": [
+          "task_output_storage"
+        ],
+        "title": "Data Management Utilities",
+        "description": "Utilities focused on managing and persisting data, particularly task outputs.",
+        "role": "data"
+      },
+      {
+        "id": "security_and_api",
+        "label": "Security and API Integration",
+        "nodes": [
+          "security_configuration"
+        ],
+        "title": "Security and API Integration",
+        "description": "Components related to security configurations and integration with external APIs.",
+        "role": "surface"
+      }
+    ]
+  }
+}

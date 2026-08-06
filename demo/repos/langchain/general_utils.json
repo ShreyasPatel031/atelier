@@ -1,0 +1,133 @@
+{
+  "title": "General Utilities",
+  "summary": "This module provides a collection of general-purpose utility functions and classes, including tools for asynchronous iteration, HTML parsing, Pydantic model handling, and system information retrieval.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "async_iter_tee",
+        "label": "Asynchronous Iterator Tee",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Iterator Tee",
+        "description": "Splits a single asynchronous iterable into multiple independent iterators, buffering items until all child iterators have consumed them."
+      },
+      {
+        "id": "sync_iter_tee",
+        "label": "Synchronous Iterator Tee",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Iterator Tee",
+        "description": "Splits a single synchronous iterable into multiple independent iterators, buffering items until all child iterators have consumed them."
+      },
+      {
+        "id": "html_link_extractor",
+        "label": "HTML Link Extractor",
+        "type": "component",
+        "link": null,
+        "title": "HTML Link Extractor",
+        "description": "Extracts and normalizes sub-links from an HTML string, converting them to absolute paths and filtering based on various criteria."
+      },
+      {
+        "id": "pydantic_utils",
+        "label": "Pydantic Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Utilities",
+        "description": "Provides utility functions for Pydantic models, such as a wrapper for `__init__` to handle default values and a function to get the Pydantic major version."
+      },
+      {
+        "id": "validation_wrapper",
+        "label": "Validation Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Validation Wrapper",
+        "description": "A decorator that validates function arguments, ensuring that exactly one argument in specified groups is non-None."
+      },
+      {
+        "id": "system_info_printer",
+        "label": "System Information Printer",
+        "type": "component",
+        "link": null,
+        "title": "System Information Printer",
+        "description": "Prints detailed system and package information for debugging and environment analysis."
+      },
+      {
+        "id": "version_checker",
+        "label": "Version Consistency Checker",
+        "type": "component",
+        "link": null,
+        "title": "Version Consistency Checker",
+        "description": "Validates version consistency across `pyproject.toml`, `version.py`, and snapshot files within the project."
+      }
+    ],
+    "edges": [
+      {
+        "source": "async_iter_tee",
+        "target": "validation_wrapper",
+        "label": "uses internal validation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_iter_tee",
+        "target": "validation_wrapper",
+        "label": "uses internal validation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pydantic_utils",
+        "target": "validation_wrapper",
+        "label": "uses internal validation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "iteration_helpers",
+        "label": "Iteration Helpers",
+        "nodes": [
+          "async_iter_tee",
+          "sync_iter_tee"
+        ],
+        "title": "Iteration Helpers",
+        "description": "Provides utilities for handling both synchronous and asynchronous iterators, including teeing functionality.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_transformation",
+        "label": "Data Transformation",
+        "nodes": [
+          "html_link_extractor"
+        ],
+        "title": "Data Transformation",
+        "description": "Contains utilities for parsing and transforming data, such as extracting links from HTML.",
+        "role": "analytical"
+      },
+      {
+        "id": "model_and_validation",
+        "label": "Model and Validation",
+        "nodes": [
+          "pydantic_utils",
+          "validation_wrapper"
+        ],
+        "title": "Model and Validation Utilities",
+        "description": "Offers tools for working with Pydantic models and general argument validation.",
+        "role": "analytical"
+      },
+      {
+        "id": "system_diagnostics",
+        "label": "System Diagnostics",
+        "nodes": [
+          "system_info_printer",
+          "version_checker"
+        ],
+        "title": "System Diagnostics and Versioning",
+        "description": "Includes functions for printing system information and ensuring version consistency across project files.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

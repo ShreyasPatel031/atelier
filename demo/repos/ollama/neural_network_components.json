@@ -1,0 +1,86 @@
+{
+  "title": "Neural Network Components",
+  "summary": "This module implements core neural network layers and operations, focusing on recurrent mechanisms and gated delta networks for efficient model execution and state management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "gated_delta_network",
+        "label": "GatedDeltaNet.Forward",
+        "type": "component",
+        "link": null,
+        "title": "GatedDeltaNet Forward Pass",
+        "description": "Executes the forward pass of the GatedDeltaNet, processing input tensors through various linear projections, convolutions, and recurrent gated delta operations to produce an output tensor."
+      },
+      {
+        "id": "gated_delta_kernel_test",
+        "label": "TestGatedDeltaDelegatesToKernel",
+        "type": "component",
+        "link": null,
+        "title": "Gated Delta Kernel Delegation Test",
+        "description": "Verifies that the GatedDelta wrapper correctly delegates its operations to the underlying optimized MLX FastGatedDelta kernel, ensuring functional parity and correctness."
+      },
+      {
+        "id": "recurrent_cache_management",
+        "label": "Recurrent Cache Management",
+        "type": "external",
+        "link": "mlx_runner_and_cache_management",
+        "title": "Recurrent Cache Management",
+        "description": "Manages the recurrent state and history for neural network operations, including snapshotting and retrieval of past states to maintain conversational context."
+      },
+      {
+        "id": "mlx_operations",
+        "label": "MLX Core Operations",
+        "type": "external",
+        "link": null,
+        "title": "MLX Core Operations",
+        "description": "Provides fundamental MLX library functions for tensor manipulation, mathematical operations, and neural network primitives like convolutions and normalizations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "gated_delta_network",
+        "target": "mlx_operations",
+        "label": "uses tensor ops",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gated_delta_network",
+        "target": "recurrent_cache_management",
+        "label": "reads/writes cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gated_delta_kernel_test",
+        "target": "mlx_operations",
+        "label": "tests kernel",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_nn_logic",
+        "label": "Core Neural Network Logic",
+        "nodes": [
+          "gated_delta_network"
+        ],
+        "title": "Core Neural Network Logic",
+        "description": "Encapsulates the primary forward pass implementation for the GatedDeltaNet, handling input transformations and recurrent state updates.",
+        "role": "analytical"
+      },
+      {
+        "id": "testing_and_validation",
+        "label": "Testing and Validation",
+        "nodes": [
+          "gated_delta_kernel_test"
+        ],
+        "title": "Testing and Validation",
+        "description": "Contains unit tests to ensure the correctness and proper delegation of neural network kernel operations.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

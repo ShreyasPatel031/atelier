@@ -1,0 +1,103 @@
+{
+    "title": "System Utilities and Orchestration",
+    "summary": "This module provides foundational utilities and orchestration components for managing system resources, defining data schemas, and coordinating complex evaluation workflows.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "gpu_management",
+                "label": "GPU Management",
+                "type": "module",
+                "link": "gpu_management",
+                "title": "GPU Management",
+                "description": "Handles GPU resource probing and management, ensuring efficient utilization of hardware accelerators."
+            },
+            {
+                "id": "persona_schemas",
+                "label": "Persona Schemas",
+                "type": "module",
+                "link": "persona_schemas",
+                "title": "Persona Schemas",
+                "description": "Defines standardized data structures for persona traits, prompts, and evaluation rubrics, ensuring data consistency."
+            },
+            {
+                "id": "coherence_sweeps",
+                "label": "Coherence Sweeps",
+                "type": "module",
+                "link": "coherence_sweeps",
+                "title": "Coherence Sweeps",
+                "description": "Performs alpha sweeps to determine optimal scaling factors for persona traits based on coherence metrics."
+            },
+            {
+                "id": "evaluation_steps",
+                "label": "Persona Evaluation Steps",
+                "type": "module",
+                "link": "evaluation_steps",
+                "title": "Persona Evaluation Steps",
+                "description": "Orchestrates the multi-step process of generating, evaluating, and vectorizing persona artifacts."
+            },
+            {
+                "id": "persona_steering_and_generation",
+                "label": "Persona Steering & Generation",
+                "type": "module",
+                "link": "persona_steering_and_generation",
+                "title": "Persona Steering & Generation",
+                "description": "The overarching module responsible for creating and applying persona steering mechanisms."
+            }
+        ],
+        "edges": [
+            {
+                "source": "persona_schemas",
+                "target": "evaluation_steps",
+                "label": "defines artifact structure",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_steps",
+                "target": "persona_steering_and_generation",
+                "label": "generates persona vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "coherence_sweeps",
+                "target": "persona_steering_and_generation",
+                "label": "provides optimal alpha scales",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gpu_management",
+                "target": "persona_steering_and_generation",
+                "label": "allocates GPU resources",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_utilities",
+                "label": "Core Utilities",
+                "nodes": [
+                    "gpu_management",
+                    "persona_schemas"
+                ],
+                "title": "Core System Utilities",
+                "description": "Fundamental components for managing hardware resources and defining data structures across the system.",
+                "role": "analytical"
+            },
+            {
+                "id": "evaluation_orchestration",
+                "label": "Evaluation Orchestration",
+                "nodes": [
+                    "coherence_sweeps",
+                    "evaluation_steps"
+                ],
+                "title": "Persona Evaluation Orchestration",
+                "description": "Modules responsible for coordinating and executing complex persona evaluation workflows and parameter optimization.",
+                "role": "generative"
+            }
+        ]
+    }
+}

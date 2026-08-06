@@ -1,0 +1,48 @@
+{
+  "title": "Audio Processing Utilities",
+  "summary": "This module provides core utilities for processing audio data, including base classes for audio tokenizers and a number normalizer for speech-to-text applications.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "audio_tokenizer_base",
+        "label": "PreTrainedAudioTokenizerBase",
+        "type": "component",
+        "link": null,
+        "title": "PreTrainedAudioTokenizerBase",
+        "description": "An abstract base class defining the interface for audio tokenizers, including methods for encoding raw audio into discrete codebooks and decoding back to raw audio."
+      },
+      {
+        "id": "english_number_normalizer",
+        "label": "EnglishNumberNormalizer",
+        "type": "component",
+        "link": null,
+        "title": "EnglishNumberNormalizer",
+        "description": "A utility class for converting numerical values and currency symbols within English text into their spelled-out word forms, useful for speech synthesis and processing."
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "audio_tokenization",
+        "label": "Audio Tokenization",
+        "nodes": [
+          "audio_tokenizer_base"
+        ],
+        "title": "Audio Tokenization",
+        "description": "Defines the foundational interface for handling audio tokenization processes, including encoding and decoding audio data.",
+        "role": "analytical"
+      },
+      {
+        "id": "text_normalization",
+        "label": "Text Normalization",
+        "nodes": [
+          "english_number_normalizer"
+        ],
+        "title": "Text Normalization for Speech",
+        "description": "Provides utilities for normalizing numerical and symbolic text into spoken word forms, primarily for speech generation and understanding systems.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

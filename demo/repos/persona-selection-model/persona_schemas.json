@@ -1,0 +1,63 @@
+{
+  "title": "Persona Schemas",
+  "summary": "This module defines data structures for representing persona traits, including prompts, questions, and evaluation rubrics, ensuring consistency and validation for persona-related data.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "persona_trait_artifact",
+        "label": "PersonaTraitArtifact",
+        "type": "component",
+        "link": null,
+        "title": "PersonaTraitArtifact Data Model",
+        "description": "A Pydantic model defining the structure for a single persona trait, encapsulating contrast prompts, question lists, and a judge rubric for evaluation."
+      },
+      {
+        "id": "contrast_prompt_pair",
+        "label": "ContrastPromptPair",
+        "type": "component",
+        "link": null,
+        "title": "ContrastPromptPair",
+        "description": "A data structure representing a pair of positive and negative system prompts used for contrasting persona behaviors."
+      },
+      {
+        "id": "judge_rubric",
+        "label": "JudgeRubric",
+        "type": "component",
+        "link": null,
+        "title": "JudgeRubric",
+        "description": "A data structure defining the criteria and guidelines used by a judge to evaluate persona responses."
+      }
+    ],
+    "edges": [
+      {
+        "source": "persona_trait_artifact",
+        "target": "contrast_prompt_pair",
+        "label": "contains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_trait_artifact",
+        "target": "judge_rubric",
+        "label": "contains",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_models",
+        "label": "Data Models",
+        "nodes": [
+          "persona_trait_artifact",
+          "contrast_prompt_pair",
+          "judge_rubric"
+        ],
+        "title": "Core Data Models",
+        "description": "Defines the foundational data structures for representing persona-related information within the system.",
+        "role": "data"
+      }
+    ]
+  }
+}

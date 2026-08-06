@@ -1,0 +1,95 @@
+{
+    "title": "Core Utilities",
+    "summary": "This module provides foundational utilities for the LangChain ecosystem, encompassing API management, security, callbacks, tracing, data handling, and general-purpose helper functions.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "api_and_security",
+                "label": "API & Security",
+                "type": "module",
+                "link": "api_and_security",
+                "title": "API and Security Utilities",
+                "description": "Handles API management (beta warnings, deprecation) and critical security features like SSRF protection for URL validation and HTTP client requests."
+            },
+            {
+                "id": "callbacks_and_tracing",
+                "label": "Callbacks & Tracing",
+                "type": "module",
+                "link": "callbacks_and_tracing",
+                "title": "Callbacks and Tracing",
+                "description": "Provides core infrastructure for handling callbacks and tracing, enabling detailed monitoring and interaction with components during execution."
+            },
+            {
+                "id": "data_handling",
+                "label": "Data Handling",
+                "type": "module",
+                "link": "data_handling",
+                "title": "Data Handling Module",
+                "description": "Offers core functionalities for loading, indexing, and storing documents and vectors, including in-memory implementations and LangSmith integration."
+            },
+            {
+                "id": "general_utils",
+                "label": "General Utilities",
+                "type": "module",
+                "link": "general_utils",
+                "title": "General Utilities",
+                "description": "A collection of general-purpose utility functions and classes, including tools for asynchronous iteration, HTML parsing, Pydantic handling, and system information."
+            }
+        ],
+        "edges": [
+            {
+                "source": "callbacks_and_tracing",
+                "target": "api_and_security",
+                "label": "uses warnings/security",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_handling",
+                "target": "callbacks_and_tracing",
+                "label": "reports events to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utils",
+                "target": "data_handling",
+                "label": "supports data processing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utils",
+                "target": "api_and_security",
+                "label": "uses Pydantic utilities",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_infrastructure",
+                "label": "Core Infrastructure",
+                "nodes": [
+                    "api_and_security",
+                    "callbacks_and_tracing"
+                ],
+                "title": "Core Infrastructure",
+                "description": "Foundational components for managing API interactions, security, and providing observability through callbacks and tracing mechanisms.",
+                "role": "analytical"
+            },
+            {
+                "id": "data_management_and_helpers",
+                "label": "Data Management & Helpers",
+                "nodes": [
+                    "data_handling",
+                    "general_utils"
+                ],
+                "title": "Data Management and General Helpers",
+                "description": "Modules focused on efficient data loading, storage, and indexing, complemented by a suite of general-purpose utility functions for various tasks.",
+                "role": "data"
+            }
+        ]
+    }
+}

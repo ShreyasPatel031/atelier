@@ -1,0 +1,664 @@
+{
+  "title": "Image Processing Module",
+  "summary": "This module provides a comprehensive set of tools for image preprocessing and post-processing, including general utilities, backend implementations (Torchvision, PIL), and specialized processors for various vision models like DETR, YOLOS, Chameleon, and keypoint matching models. It handles tasks such as resizing, cropping, normalization, padding, and annotation management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "N_MIXIN",
+        "label": "Image Feature Extraction Mixin",
+        "type": "component",
+        "link": null,
+        "title": "ImageFeatureExtractionMixin",
+        "description": "Provides a collection of utility methods for common image feature preparation tasks like format conversion, resizing, cropping, and normalization across different image types (PIL, NumPy, PyTorch)."
+      },
+      {
+        "id": "N_CONVERT_RGB_UTIL",
+        "label": "Convert to RGB Utility",
+        "type": "component",
+        "link": null,
+        "title": "convert_to_rgb",
+        "description": "A standalone utility function to convert images to RGB format, primarily handling PIL Image objects and blending RGBA transparency."
+      },
+      {
+        "id": "N_TORCHVISION_BACKEND",
+        "label": "Torchvision Backend",
+        "type": "component",
+        "link": null,
+        "title": "TorchvisionBackend",
+        "description": "Implements GPU-accelerated batched image processing operations using the Torchvision library, including resizing, padding, rescaling, and normalization."
+      },
+      {
+        "id": "N_PIL_BACKEND",
+        "label": "PIL Backend (Inferred)",
+        "type": "component",
+        "link": null,
+        "title": "PilBackend",
+        "description": "An abstract base class for image processors that utilize the Pillow (PIL) library for image manipulation, providing core functionalities like resizing, padding, and format conversion."
+      },
+      {
+        "id": "N_CHAMELEON_TV",
+        "label": "Chameleon Image Processor (TV)",
+        "type": "component",
+        "link": null,
+        "title": "ChameleonImageProcessor",
+        "description": "Specialized image processor for the Chameleon model, leveraging Torchvision for efficient processing and including custom RGB conversion for transparency."
+      },
+      {
+        "id": "N_CHAMELEON_PIL",
+        "label": "Chameleon Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "ChameleonImageProcessorPil",
+        "description": "Specialized image processor for the Chameleon model, using PIL for image manipulation and providing custom RGB conversion for transparency."
+      },
+      {
+        "id": "N_COND_DETR_PIL",
+        "label": "Conditional DETR Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "ConditionalDetrImageProcessorPil",
+        "description": "Image processor for Conditional DETR models, handling preprocessing (resize, pad, normalize) and annotation preparation for object detection and segmentation, along with post-processing of model outputs."
+      },
+      {
+        "id": "N_DEFORM_DETR_PIL",
+        "label": "Deformable DETR Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "DeformableDetrImageProcessorPil",
+        "description": "Image processor for Deformable DETR models, managing image preprocessing and annotation for object detection and segmentation, and post-processing of model predictions."
+      },
+      {
+        "id": "N_DETR_PIL",
+        "label": "DETR Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "DetrImageProcessorPil",
+        "description": "Image processor for DETR models, providing preprocessing steps and annotation handling for object detection and segmentation, as well as post-processing of model results."
+      },
+      {
+        "id": "N_EFFICIENTLOFTR_PIL",
+        "label": "EfficientLoFTR Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "EfficientLoFTRImageProcessorPil",
+        "description": "Image processor for EfficientLoFTR, designed for keypoint matching tasks. It handles image pair preprocessing (resize, rescale, grayscale) and post-processing of matching results."
+      },
+      {
+        "id": "N_GROUNDINGDINO_PIL",
+        "label": "Grounding DINO Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "GroundingDinoImageProcessorPil",
+        "description": "Image processor for Grounding DINO models, performing image preprocessing and annotation handling for object detection, and post-processing of detection outputs."
+      },
+      {
+        "id": "N_IDEFICS2_PIL",
+        "label": "Idefics2 Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "Idefics2ImageProcessorPil",
+        "description": "Image processor for Idefics2, featuring image splitting into sub-images, custom resizing logic, and padding to prepare inputs for the model."
+      },
+      {
+        "id": "N_LIGHTGLUE_PIL",
+        "label": "LightGlue Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "LightGlueImageProcessorPil",
+        "description": "Image processor for LightGlue, specializing in keypoint matching. It preprocesses image pairs (resize, rescale, grayscale) and post-processes the keypoint matching outputs."
+      },
+      {
+        "id": "N_MLLAMA_PIL",
+        "label": "MLlama Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "MllamaImageProcessorPil",
+        "description": "Image processor for MLlama, implementing unique resizing to fit tiled canvases, aspect-ratio-aware padding, and splitting images into multiple tiles for model input."
+      },
+      {
+        "id": "N_NOUGAT_PIL",
+        "label": "Nougat Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "NougatImageProcessorPil",
+        "description": "Image processor for Nougat, focusing on document image processing. It includes functionalities like margin cropping, long axis alignment, thumbnail generation, and custom padding."
+      },
+      {
+        "id": "N_SUPERGLUE_PIL",
+        "label": "SuperGlue Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "SuperGlueImageProcessorPil",
+        "description": "Image processor for SuperGlue, dedicated to keypoint matching. It handles image pair preprocessing (resize, rescale, grayscale) and post-processing of matching results."
+      },
+      {
+        "id": "N_YOLOS_PIL",
+        "label": "YOLOS Image Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "YolosImageProcessorPil",
+        "description": "Image processor for YOLOS models, managing image preprocessing and annotation for object detection, and post-processing of detection outputs."
+      },
+      {
+        "id": "E_PIL",
+        "label": "PIL.Image",
+        "type": "external",
+        "link": null,
+        "title": "Python Imaging Library",
+        "description": "External library for opening, manipulating, and saving many different image file formats."
+      },
+      {
+        "id": "E_NUMPY",
+        "label": "NumPy",
+        "type": "external",
+        "link": null,
+        "title": "Numerical Python Library",
+        "description": "External library for numerical computing, providing support for large, multi-dimensional arrays and matrices, along with a collection of mathematical functions to operate on these arrays."
+      },
+      {
+        "id": "E_TORCH",
+        "label": "PyTorch",
+        "type": "external",
+        "link": null,
+        "title": "PyTorch Deep Learning Framework",
+        "description": "External open-source machine learning framework used for applications such as computer vision and natural language processing."
+      },
+      {
+        "id": "E_TORCHVISION_TF",
+        "label": "Torchvision Transforms",
+        "type": "external",
+        "link": null,
+        "title": "torchvision.transforms.functional",
+        "description": "External functional transforms from the Torchvision library, used for common image transformations."
+      },
+      {
+        "id": "E_ANNOTATIONS",
+        "label": "Annotation Data",
+        "type": "external",
+        "link": null,
+        "title": "AnnotationType",
+        "description": "Represents structured data for image annotations, such as bounding boxes, segmentation masks, and labels, used in object detection and segmentation tasks."
+      }
+    ],
+    "edges": [
+      {
+        "source": "N_TORCHVISION_BACKEND",
+        "target": "N_CONVERT_RGB_UTIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_TORCHVISION_BACKEND",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_TORCHVISION_BACKEND",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_TORCHVISION_BACKEND",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_TORCHVISION_BACKEND",
+        "target": "E_TORCHVISION_TF",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_PIL_BACKEND",
+        "target": "N_MIXIN",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_PIL_BACKEND",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_PIL_BACKEND",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_MIXIN",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_MIXIN",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_MIXIN",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CONVERT_RGB_UTIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_TV",
+        "target": "N_TORCHVISION_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_TV",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_TV",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_PIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_CHAMELEON_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_COND_DETR_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_COND_DETR_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_COND_DETR_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_COND_DETR_PIL",
+        "target": "E_ANNOTATIONS",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DEFORM_DETR_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DEFORM_DETR_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DEFORM_DETR_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DEFORM_DETR_PIL",
+        "target": "E_ANNOTATIONS",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DETR_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DETR_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DETR_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_DETR_PIL",
+        "target": "E_ANNOTATIONS",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_EFFICIENTLOFTR_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_EFFICIENTLOFTR_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_EFFICIENTLOFTR_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_EFFICIENTLOFTR_PIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_GROUNDINGDINO_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_GROUNDINGDINO_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_GROUNDINGDINO_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_GROUNDINGDINO_PIL",
+        "target": "E_ANNOTATIONS",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_IDEFICS2_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_IDEFICS2_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_LIGHTGLUE_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_LIGHTGLUE_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_LIGHTGLUE_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_LIGHTGLUE_PIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_MLLAMA_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_MLLAMA_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_NOUGAT_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_NOUGAT_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_NOUGAT_PIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_SUPERGLUE_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_SUPERGLUE_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_SUPERGLUE_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_SUPERGLUE_PIL",
+        "target": "E_PIL",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_YOLOS_PIL",
+        "target": "N_PIL_BACKEND",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_YOLOS_PIL",
+        "target": "E_NUMPY",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_YOLOS_PIL",
+        "target": "E_TORCH",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "N_YOLOS_PIL",
+        "target": "E_ANNOTATIONS",
+        "label": "processes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "G_CORE_UTILS",
+        "label": "Core Image Utilities",
+        "nodes": [
+          "N_MIXIN",
+          "N_CONVERT_RGB_UTIL"
+        ],
+        "title": "Core Image Utilities",
+        "description": "General-purpose functions and mixins for fundamental image manipulation tasks.",
+        "role": "generative"
+      },
+      {
+        "id": "G_BACKENDS",
+        "label": "Image Processing Backends",
+        "nodes": [
+          "N_TORCHVISION_BACKEND",
+          "N_PIL_BACKEND"
+        ],
+        "title": "Image Processing Backends",
+        "description": "The primary engines providing the interface and core functionalities for image processing, either GPU-accelerated or CPU-based.",
+        "role": "surface"
+      },
+      {
+        "id": "G_MODEL_SPECIFIC_OD_SEG",
+        "label": "Model-Specific Processors (Object Detection/Segmentation)",
+        "nodes": [
+          "N_COND_DETR_PIL",
+          "N_DEFORM_DETR_PIL",
+          "N_DETR_PIL",
+          "N_GROUNDINGDINO_PIL",
+          "N_YOLOS_PIL"
+        ],
+        "title": "Model-Specific Processors (Object Detection/Segmentation)",
+        "description": "Specialized image processors tailored for object detection and segmentation models, handling specific preprocessing and annotation requirements.",
+        "role": "analytical"
+      },
+      {
+        "id": "G_MODEL_SPECIFIC_KEYPOINT",
+        "label": "Model-Specific Processors (Keypoint Matching)",
+        "nodes": [
+          "N_EFFICIENTLOFTR_PIL",
+          "N_LIGHTGLUE_PIL",
+          "N_SUPERGLUE_PIL"
+        ],
+        "title": "Model-Specific Processors (Keypoint Matching)",
+        "description": "Image processors designed for models focused on keypoint detection and matching tasks, including image pair handling and specialized post-processing.",
+        "role": "analytical"
+      },
+      {
+        "id": "G_MODEL_SPECIFIC_OTHER",
+        "label": "Model-Specific Processors (Other Vision Tasks)",
+        "nodes": [
+          "N_CHAMELEON_TV",
+          "N_CHAMELEON_PIL",
+          "N_IDEFICS2_PIL",
+          "N_MLLAMA_PIL",
+          "N_NOUGAT_PIL"
+        ],
+        "title": "Model-Specific Processors (Other Vision Tasks)",
+        "description": "Image processors customized for various other vision models, each with unique preprocessing steps like image splitting, tiling, or document-specific transformations.",
+        "role": "analytical"
+      },
+      {
+        "id": "G_EXTERNAL",
+        "label": "External Libraries",
+        "nodes": [
+          "E_PIL",
+          "E_NUMPY",
+          "E_TORCH",
+          "E_TORCHVISION_TF",
+          "E_ANNOTATIONS"
+        ],
+        "title": "External Libraries",
+        "description": "Key external dependencies providing fundamental image manipulation, numerical computation, and deep learning functionalities.",
+        "role": "data"
+      }
+    ]
+  }
+}

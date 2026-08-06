@@ -1,0 +1,234 @@
+{
+  "title": "Tool and Adapter Integration",
+  "summary": "This module provides mechanisms for integrating external tools and defining custom adapters to interface with Language Models (LMs). It includes utilities for wrapping functions as tools, handling tool calls, and defining various data types for multimodal interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "make_tool_wrapper",
+        "label": "Create Tool Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Create Tool Wrapper",
+        "description": "Generates Python code to wrap a function, allowing it to be called as a tool within the DSPy framework, handling argument serialization and deserialization."
+      },
+      {
+        "id": "tool_call_bridge",
+        "label": "Bridge Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "Bridge Tool Calls",
+        "description": "Facilitates communication between the Python environment and the host environment for tool execution, handling JSON-RPC requests and responses for tool invocations."
+      },
+      {
+        "id": "base_adapter",
+        "label": "Base Adapter",
+        "type": "module",
+        "link": "base_adapter",
+        "title": "Base Adapter Class",
+        "description": "Provides the foundational interface for transforming DSPy signatures and inputs into LM calls and parsing LM outputs back into structured data. It manages prompt formatting, conversation history, and native LM features like function calling."
+      },
+      {
+        "id": "baml_adapter",
+        "label": "BAML Adapter",
+        "type": "component",
+        "link": null,
+        "title": "BAML Adapter",
+        "description": "An adapter that enhances the rendering of complex Pydantic models into a compact, human-readable schema for LMs, inspired by BAML's JSON formatter, improving token efficiency and LM comprehension."
+      },
+      {
+        "id": "two_step_adapter",
+        "label": "Two-Step Adapter",
+        "type": "component",
+        "link": null,
+        "title": "Two-Step Adapter",
+        "description": "Implements a two-stage process where a main LM generates a natural language response, and a smaller extraction model then parses structured data from that response, useful for reasoning models."
+      },
+      {
+        "id": "type_base",
+        "label": "Base Type",
+        "type": "component",
+        "link": null,
+        "title": "Base Type Class",
+        "description": "The foundational class for creating custom data types within DSPy signatures, enabling structured input/output for LMs and supporting multimodal interactions."
+      },
+      {
+        "id": "audio_type",
+        "label": "Audio Type",
+        "type": "component",
+        "link": null,
+        "title": "Audio Data Type",
+        "description": "Represents audio data within DSPy, supporting various formats and encoding methods for multimodal LM interactions."
+      },
+      {
+        "id": "citation_type",
+        "label": "Citation Type",
+        "type": "component",
+        "link": null,
+        "title": "Citation Data Type",
+        "description": "Manages citation information, allowing LMs to generate responses with references to provided documents or text segments."
+      },
+      {
+        "id": "code_type",
+        "label": "Code Type",
+        "type": "component",
+        "link": null,
+        "title": "Code Data Type",
+        "description": "Facilitates the handling of code snippets as input or output, useful for code generation, analysis, and execution tasks."
+      },
+      {
+        "id": "document_type",
+        "label": "Document Type",
+        "type": "component",
+        "link": null,
+        "title": "Document Data Type",
+        "description": "Encapsulates document content and metadata, enabling LMs to process and cite information from provided textual sources."
+      },
+      {
+        "id": "file_type",
+        "label": "File Type",
+        "type": "component",
+        "link": null,
+        "title": "File Data Type",
+        "description": "Represents file content, supporting various encoding and referencing methods for LMs to interact with external files."
+      },
+      {
+        "id": "image_type",
+        "label": "Image Type",
+        "type": "component",
+        "link": null,
+        "title": "Image Data Type",
+        "description": "Handles image data, including URLs and base64 encoded images, for multimodal LM interactions."
+      },
+      {
+        "id": "tool_type",
+        "label": "Tool Type",
+        "type": "component",
+        "link": null,
+        "title": "Tool Definition Type",
+        "description": "Defines a callable tool with its name, description, and arguments, enabling LMs to invoke external functions or services."
+      }
+    ],
+    "edges": [
+      {
+        "source": "make_tool_wrapper",
+        "target": "tool_call_bridge",
+        "label": "invokes via JS bridge",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_adapter",
+        "target": "baml_adapter",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_adapter",
+        "target": "two_step_adapter",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "audio_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "citation_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "code_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "document_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "file_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "image_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "type_base",
+        "target": "tool_type",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "base_adapter",
+        "label": "used by native function calling",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_runners",
+        "label": "Tool Runners",
+        "nodes": [
+          "make_tool_wrapper",
+          "tool_call_bridge"
+        ],
+        "title": "Tool Runners",
+        "description": "Components responsible for defining and executing external tools within the DSPy ecosystem.",
+        "role": "generative"
+      },
+      {
+        "id": "adapters",
+        "label": "Adapters",
+        "nodes": [
+          "base_adapter",
+          "baml_adapter",
+          "two_step_adapter"
+        ],
+        "title": "LM Adapters",
+        "description": "Classes that bridge DSPy signatures with Language Models, handling prompt formatting, response parsing, and native LM features.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_types",
+        "label": "Data Types",
+        "nodes": [
+          "type_base",
+          "audio_type",
+          "citation_type",
+          "code_type",
+          "document_type",
+          "file_type",
+          "image_type",
+          "tool_type"
+        ],
+        "title": "Custom Data Types",
+        "description": "Specialized data types for rich, multimodal interactions with Language Models, including audio, images, code, and structured documents.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "title": "UI and Frontend",
+  "summary": "This module handles the user interface, including rendering chat responses, managing UI state, and serving frontend assets. It interacts with the backend for chat operations and authentication.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "chat_response_codegen",
+        "label": "Chat Response Codegen",
+        "type": "component",
+        "link": null,
+        "title": "Chat Response Code Generation",
+        "description": "Generates TypeScript classes for chat responses from Go types, ensuring type safety and consistency between frontend and backend data structures."
+      },
+      {
+        "id": "display_stale_component",
+        "label": "Display Stale Component",
+        "type": "component",
+        "link": null,
+        "title": "Stale Model Display",
+        "description": "A React component that informs users when a newer model version is available and provides an option to update it, enhancing user experience and model currency."
+      },
+      {
+        "id": "use_chats_hook",
+        "label": "useChats Hook",
+        "type": "component",
+        "link": null,
+        "title": "Chat State Management Hook",
+        "description": "A React hook that manages the loading and streaming state of chats, optimizing UI updates and preventing unnecessary loading indicators based on recent activity."
+      },
+      {
+        "id": "server_chat_handler",
+        "label": "Server Chat Handler",
+        "type": "module",
+        "link": "server_infrastructure",
+        "title": "Chat Request Handler",
+        "description": "Processes incoming chat requests, manages chat history, handles model pulling, and streams responses back to the client, including tool execution and thinking states."
+      },
+      {
+        "id": "server_get_chat_handler",
+        "label": "Server Get Chat Handler",
+        "type": "module",
+        "link": "server_infrastructure",
+        "title": "Get Chat History Handler",
+        "description": "Retrieves a specific chat's history from the data store, reconstructs browser state if necessary, and prepares it for display in the frontend."
+      },
+      {
+        "id": "authentication_middleware",
+        "label": "Authentication Middleware",
+        "type": "module",
+        "link": "server_infrastructure",
+        "title": "Authentication Middleware",
+        "description": "Secures API endpoints by validating authentication tokens in incoming requests, ensuring only authorized access to server resources."
+      }
+    ],
+    "edges": [
+      {
+        "source": "server_chat_handler",
+        "target": "chat_response_codegen",
+        "label": "streams chat events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "server_get_chat_handler",
+        "target": "chat_response_codegen",
+        "label": "returns chat data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "display_stale_component",
+        "target": "server_chat_handler",
+        "label": "sends update model request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_chats_hook",
+        "target": "server_get_chat_handler",
+        "label": "fetches chat data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "authentication_middleware",
+        "target": "server_chat_handler",
+        "label": "authenticates requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "authentication_middleware",
+        "target": "server_get_chat_handler",
+        "label": "authenticates requests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "frontend_components",
+        "label": "Frontend Components",
+        "nodes": [
+          "display_stale_component",
+          "use_chats_hook"
+        ],
+        "title": "Frontend User Interface Components",
+        "description": "React components and hooks responsible for rendering the user interface and managing client-side state.",
+        "role": "generative"
+      },
+      {
+        "id": "backend_api_handlers",
+        "label": "Backend API Handlers",
+        "nodes": [
+          "server_chat_handler",
+          "server_get_chat_handler",
+          "authentication_middleware"
+        ],
+        "title": "Backend API Endpoints",
+        "description": "Go handlers that expose API endpoints for chat interactions and data retrieval, forming the interface between frontend and core logic.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_serialization",
+        "label": "Data Serialization",
+        "nodes": [
+          "chat_response_codegen"
+        ],
+        "title": "Data Serialization and Type Generation",
+        "description": "Handles the generation of client-side types for backend data structures, ensuring consistent data contracts.",
+        "role": "data"
+      }
+    ]
+  }
+}

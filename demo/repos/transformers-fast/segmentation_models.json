@@ -1,0 +1,17 @@
+{
+    "title": "Segmentation Models Overview",
+    "summary": "This module provides a comprehensive collection of models designed for various image and video segmentation tasks, including universal, instance, and text-guided segmentation, as well as video object tracking.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "universal_segmentation", "label": "Universal Segmentation Models", "type": "module", "link": "universal_segmentation", "title": "Universal Segmentation Models", "description": "Models capable of performing semantic, instance, and panoptic segmentation within a unified framework."},
+            {"id": "detr_based_segmentation", "label": "DETR-based Segmentation Models", "type": "module", "link": "detr_based_segmentation", "title": "DETR-based Segmentation Models", "description": "Segmentation models leveraging the DETR (DEtection TRansformer) architecture for various tasks like object detection and instance segmentation."},
+            {"id": "sam_based_segmentation", "label": "SAM-based Segmentation Models", "type": "module", "link": "sam_based_segmentation", "title": "SAM-based Segmentation Models", "description": "Models built upon the Segment Anything Model (SAM) architecture, extended for tasks like text-guided image segmentation and video object tracking."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "core_segmentation_approaches", "label": "Core Segmentation Approaches", "title": "Core Segmentation Approaches", "description": "Fundamental model architectures for diverse segmentation tasks.", "role": "analytical", "nodes": ["universal_segmentation", "detr_based_segmentation"]},
+            {"id": "specialized_segmentation_tasks", "label": "Specialized Segmentation Tasks", "title": "Specialized Segmentation Tasks", "description": "Models tailored for advanced and specialized segmentation applications.", "role": "generative", "nodes": ["sam_based_segmentation"]}
+        ]
+    }
+}

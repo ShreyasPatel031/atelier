@@ -1,0 +1,149 @@
+{
+  "title": "Model Metadata and Prompting",
+  "summary": "This module handles the retrieval and processing of model metadata, including capabilities and templating, and constructs prompts for various models based on user messages and model configurations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "model_metadata_retrieval",
+        "label": "Retrieve Model Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Model Metadata",
+        "description": "Fetches and parses model configuration and template information from various sources, including GGUF files and manifest files."
+      },
+      {
+        "id": "model_capability_checking",
+        "label": "Check Model Capabilities",
+        "type": "component",
+        "link": null,
+        "title": "Check Model Capabilities",
+        "description": "Determines and verifies the capabilities of a model (e.g., tools, vision, embedding, image generation) based on its metadata and configuration."
+      },
+      {
+        "id": "prompt_construction",
+        "label": "Construct Chat Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Construct Chat Prompt",
+        "description": "Assembles the final prompt string for chat models, incorporating system messages, user input, images, and handling truncation based on context limits."
+      },
+      {
+        "id": "template_rendering",
+        "label": "Render Prompt Template",
+        "type": "component",
+        "link": null,
+        "title": "Render Prompt Template",
+        "description": "Applies Go templates or GGUF chat templates to format messages into a model-specific prompt, including handling image placeholders and tool calls."
+      },
+      {
+        "id": "model_recommendations_cache",
+        "label": "Model Recommendations Cache",
+        "type": "component",
+        "link": null,
+        "title": "Model Recommendations Cache",
+        "description": "Manages a cache of recommended models, used for API route registration and retrieval."
+      },
+      {
+        "id": "model_show_cache",
+        "label": "Model Show Cache",
+        "type": "component",
+        "link": null,
+        "title": "Model Show Cache",
+        "description": "Caches model information for the 'show' API endpoint, refreshing when local manifest digests change."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Tokenize Prompt",
+        "type": "external",
+        "link": null,
+        "title": "Tokenize Prompt",
+        "description": "External component responsible for converting text into tokens, used for context length management during prompt construction."
+      }
+    ],
+    "edges": [
+      {
+        "source": "model_metadata_retrieval",
+        "target": "model_capability_checking",
+        "label": "model configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_metadata_retrieval",
+        "target": "template_rendering",
+        "label": "model templates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_capability_checking",
+        "target": "prompt_construction",
+        "label": "model capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "template_rendering",
+        "target": "prompt_construction",
+        "label": "rendered prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_construction",
+        "target": "tokenizer",
+        "label": "prompt for tokenization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenizer",
+        "target": "prompt_construction",
+        "label": "token count",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_recommendations_cache",
+        "target": "model_metadata_retrieval",
+        "label": "recommended model info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_show_cache",
+        "target": "model_metadata_retrieval",
+        "label": "model info requests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "metadata_management",
+        "label": "Metadata Management",
+        "nodes": [
+          "model_metadata_retrieval",
+          "model_capability_checking",
+          "model_recommendations_cache",
+          "model_show_cache"
+        ],
+        "title": "Metadata Management",
+        "description": "Handles the retrieval, caching, and capability assessment of model metadata.",
+        "role": "data"
+      },
+      {
+        "id": "prompt_generation",
+        "label": "Prompt Generation",
+        "nodes": [
+          "prompt_construction",
+          "template_rendering"
+        ],
+        "title": "Prompt Generation",
+        "description": "Manages the construction and rendering of chat prompts based on model templates and user input.",
+        "role": "generative"
+      }
+    ]
+  }
+}

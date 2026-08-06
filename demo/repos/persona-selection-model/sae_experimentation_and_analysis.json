@@ -1,0 +1,111 @@
+{
+    "title": "SAE Experimentation & Analysis",
+    "summary": "This module provides a comprehensive suite for experimenting with Sparse Autoencoders (SAEs), including running various experiments, analyzing causal impacts of features, and optimizing Sparse Steering Vectors (SSVs).",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "sae_experiment_runner",
+                "label": "SAE Experiment Runner",
+                "type": "module",
+                "link": "sae_experiment_runner",
+                "title": "SAE Experiment Runner",
+                "description": "Orchestrates a full suite of experiments for Sparse Autoencoders (SAEs), including data generation, encoding, attribution, auto-interpretation, validation, reconstruction analysis, and ablation studies."
+            },
+            {
+                "id": "sae_causality_analysis",
+                "label": "SAE Causality Analysis",
+                "type": "module",
+                "link": "sae_causality_analysis",
+                "title": "SAE Causality Analysis",
+                "description": "Provides tools for analyzing the causal impact of specific SAE features on model activations, including decoding sparse latent representations and applying causal intervention hooks."
+            },
+            {
+                "id": "sae_optimization_scripts",
+                "label": "SAE Optimization Scripts",
+                "type": "module",
+                "link": "sae_optimization_scripts",
+                "title": "SAE Optimization Scripts",
+                "description": "Provides scripts for optimizing Sparse Autoencoder (SAE) Sparse Steering Vectors (SSV) and evaluating their performance in steering language models."
+            },
+            {
+                "id": "ssv_analysis_scripts",
+                "label": "SSV Analysis Scripts",
+                "type": "module",
+                "link": "ssv_analysis_scripts",
+                "title": "SSV Analysis Scripts",
+                "description": "Provides scripts for analyzing Sparse SAE Vectors (SSVs), including clustering features and generating corpus-based interpretations for better understanding of model behavior."
+            }
+        ],
+        "edges": [
+            {
+                "source": "sae_experiment_runner",
+                "target": "sae_causality_analysis",
+                "label": "provides experimental data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sae_experiment_runner",
+                "target": "sae_optimization_scripts",
+                "label": "informs optimization targets",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sae_experiment_runner",
+                "target": "ssv_analysis_scripts",
+                "label": "provides SAE features",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sae_causality_analysis",
+                "target": "sae_optimization_scripts",
+                "label": "guides causal interventions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sae_optimization_scripts",
+                "target": "ssv_analysis_scripts",
+                "label": "generates optimized SSVs",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "experimentation_core",
+                "label": "Experimentation Core",
+                "nodes": [
+                    "sae_experiment_runner"
+                ],
+                "title": "SAE Experimentation Core",
+                "description": "The central component for orchestrating and running various Sparse Autoencoder experiments, from data generation to validation.",
+                "role": null
+            },
+            {
+                "id": "analysis_and_interpretation",
+                "label": "Analysis & Interpretation",
+                "nodes": [
+                    "sae_causality_analysis",
+                    "ssv_analysis_scripts"
+                ],
+                "title": "SAE Feature Analysis and Interpretation",
+                "description": "Modules dedicated to understanding the causal impact of SAE features and interpreting Sparse Steering Vectors through clustering and corpus analysis.",
+                "role": null
+            },
+            {
+                "id": "optimization_tools",
+                "label": "Optimization Tools",
+                "nodes": [
+                    "sae_optimization_scripts"
+                ],
+                "title": "SAE Optimization Tools",
+                "description": "Scripts and functionalities focused on optimizing Sparse Steering Vectors (SSVs) derived from SAEs to enhance model steering capabilities.",
+                "role": null
+            }
+        ]
+    }
+}

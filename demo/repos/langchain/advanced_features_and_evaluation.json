@@ -1,0 +1,120 @@
+{
+    "title": "Advanced Features and Evaluation",
+    "summary": "This module provides advanced functionalities for evaluating language model outputs, agent trajectories, and parsing results, alongside middleware for enhancing agent behavior.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "evaluation_module",
+                "label": "Evaluation Module",
+                "type": "module",
+                "link": "evaluation",
+                "title": "Evaluation Module",
+                "description": "Provides tools and chains for evaluating language model outputs, agent trajectories, and parsing results against various criteria and references."
+            },
+            {
+                "id": "agent_middleware_module",
+                "label": "Agent Middleware Module",
+                "type": "module",
+                "link": "agent_middleware",
+                "title": "Agent Middleware Module",
+                "description": "Offers a collection of middleware components to enhance and modify agent behavior, including tool call limits, PII detection, summarization, and tool emulation."
+            },
+            {
+                "id": "miscellaneous_utilities_module",
+                "label": "Miscellaneous Utilities Module",
+                "type": "module",
+                "link": "miscellaneous",
+                "title": "Miscellaneous Utilities Module",
+                "description": "Contains various utility functions for model initialization, serialization, logging, and testing infrastructure for LangChain components."
+            },
+            {
+                "id": "language_model_interfaces",
+                "label": "Language Model Interfaces",
+                "type": "external",
+                "link": "language_model_interfaces",
+                "title": "Language Model Interfaces",
+                "description": "Module defining the foundational interfaces for interacting with various language models (LLMs) and chat models."
+            },
+            {
+                "id": "agent_and_chain_orchestration",
+                "label": "Agent and Chain Orchestration",
+                "type": "external",
+                "link": "agent_and_chain_orchestration",
+                "title": "Agent and Chain Orchestration",
+                "description": "Module providing various agent implementations and utilities for building intelligent agents that can reason, act, and interact with tools and language models."
+            }
+        ],
+        "edges": [
+            {
+                "source": "evaluation_module",
+                "target": "language_model_interfaces",
+                "label": "evaluates outputs from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_module",
+                "target": "agent_and_chain_orchestration",
+                "label": "evaluates trajectories from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_middleware_module",
+                "target": "agent_and_chain_orchestration",
+                "label": "enhances behavior of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "miscellaneous_utilities_module",
+                "target": "language_model_interfaces",
+                "label": "initializes/tests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "miscellaneous_utilities_module",
+                "target": "agent_and_chain_orchestration",
+                "label": "tests components of",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_functionality",
+                "label": "Core Functionality",
+                "nodes": [
+                    "evaluation_module",
+                    "agent_middleware_module"
+                ],
+                "title": "Core Functionality",
+                "description": "The primary components offering advanced features for system evaluation and agent behavior modification.",
+                "role": "analytical"
+            },
+            {
+                "id": "supporting_utilities",
+                "label": "Supporting Utilities",
+                "nodes": [
+                    "miscellaneous_utilities_module"
+                ],
+                "title": "Supporting Utilities",
+                "description": "General-purpose tools that aid in the development, testing, and management of other modules.",
+                "role": "generative"
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "language_model_interfaces",
+                    "agent_and_chain_orchestration"
+                ],
+                "title": "External Dependencies",
+                "description": "Key modules from other parts of the system that are utilized by the advanced features and evaluation components.",
+                "role": "data"
+            }
+        ]
+    }
+}

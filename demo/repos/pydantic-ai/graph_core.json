@@ -1,0 +1,119 @@
+{
+  "title": "Graph Core",
+  "summary": "This module defines the core components for building and executing directed graphs, including nodes, graph definitions, and graph run management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_node",
+        "label": "BaseNode",
+        "type": "component",
+        "link": null,
+        "title": "BaseNode",
+        "description": "Abstract base class for all nodes in a graph, defining the `run` method and node identification logic."
+      },
+      {
+        "id": "graph",
+        "label": "Graph",
+        "type": "component",
+        "link": null,
+        "title": "Graph Definition",
+        "description": "Represents the definition of a graph, managing a collection of nodes and their connections. It provides methods for running, iterating, and visualizing the graph."
+      },
+      {
+        "id": "graph_run",
+        "label": "GraphRun",
+        "type": "component",
+        "link": null,
+        "title": "Graph Execution Instance",
+        "description": "Manages a single execution of a graph, tracking state, dependencies, and the sequence of node executions. It allows for asynchronous iteration over nodes."
+      },
+      {
+        "id": "path_builder",
+        "label": "PathBuilder",
+        "type": "component",
+        "link": null,
+        "title": "Path Construction Utility",
+        "description": "Provides a fluent interface for constructing complex execution paths within a graph using method chaining for transformations, mapping, and routing."
+      },
+      {
+        "id": "persistence",
+        "label": "State Persistence",
+        "type": "external",
+        "link": null,
+        "title": "Graph State Persistence",
+        "description": "Handles saving and loading the graph's state and node snapshots, allowing for durable and resumable graph executions. (Defined in 'persistence' module)"
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_node",
+        "target": "graph",
+        "label": "defines nodes for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph",
+        "target": "graph_run",
+        "label": "creates and manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph_run",
+        "target": "base_node",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph_run",
+        "target": "persistence",
+        "label": "uses for state management",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "path_builder",
+        "target": "graph",
+        "label": "constructs paths within",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "graph_definition",
+        "label": "Graph Definition",
+        "nodes": [
+          "base_node",
+          "graph"
+        ],
+        "title": "Graph Definition and Structure",
+        "description": "Components responsible for defining the structure and behavior of a graph, including its nodes and overall configuration.",
+        "role": "generative"
+      },
+      {
+        "id": "graph_execution",
+        "label": "Graph Execution",
+        "nodes": [
+          "graph_run"
+        ],
+        "title": "Graph Execution and Runtime Management",
+        "description": "Components that handle the actual running of a graph, managing its state, dependencies, and the flow of execution.",
+        "role": "analytical"
+      },
+      {
+        "id": "path_construction",
+        "label": "Path Construction",
+        "nodes": [
+          "path_builder"
+        ],
+        "title": "Fluent Path Building",
+        "description": "Utility for programmatically constructing complex execution paths and workflows within a graph.",
+        "role": "generative"
+      }
+    ]
+  }
+}

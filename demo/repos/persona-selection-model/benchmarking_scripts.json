@@ -1,0 +1,64 @@
+{
+  "title": "Benchmarking Scripts",
+  "summary": "This module provides scripts for benchmarking the performance of persona steering with varying alpha values and analyzing sparse autoencoder (SAE) activations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "bench_persona_steer_alphas",
+        "label": "Benchmark Persona Steering Alphas",
+        "type": "component",
+        "link": null,
+        "title": "Benchmark Persona Steering Alphas",
+        "description": "Executes a series of API calls to the persona steering endpoint with different alpha values to measure latency and response times."
+      },
+      {
+        "id": "persona_steering_api",
+        "label": "Persona Steering API",
+        "type": "external",
+        "link": "persona_steering_and_generation",
+        "title": "Persona Steering API",
+        "description": "The external API endpoint responsible for processing persona steering requests."
+      },
+      {
+        "id": "ssv_analysis_scripts",
+        "label": "SSV Analysis Scripts",
+        "type": "module",
+        "link": "ssv_analysis_scripts",
+        "title": "SSV Analysis Scripts",
+        "description": "Scripts for analyzing Sparse Autoencoder (SAE) activations, including clustering and corpus interpretation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "bench_persona_steer_alphas",
+        "target": "persona_steering_api",
+        "label": "sends requests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "benchmarking",
+        "label": "Benchmarking Tools",
+        "nodes": [
+          "bench_persona_steer_alphas"
+        ],
+        "title": "Benchmarking Tools",
+        "description": "Tools for performance measurement and analysis of various system components.",
+        "role": "analytical"
+      },
+      {
+        "id": "analysis",
+        "label": "Analysis Scripts",
+        "nodes": [
+          "ssv_analysis_scripts"
+        ],
+        "title": "Analysis Scripts",
+        "description": "Scripts dedicated to analyzing specific aspects of the system's behavior and data.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

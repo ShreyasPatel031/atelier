@@ -1,0 +1,219 @@
+{
+    "title": "Agent & Chain Orchestration",
+    "summary": "This module provides the core components for building intelligent agents and complex chains, enabling LLMs to reason, act, and interact with tools and external data sources.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "runnables",
+                "label": "Runnables",
+                "type": "module",
+                "link": "runnables",
+                "title": "Runnables Module",
+                "description": "Defines the foundational interface for composable units of work, enabling declarative chain construction and managing execution flow."
+            },
+            {
+                "id": "agents",
+                "label": "Agents",
+                "type": "module",
+                "link": "agents",
+                "title": "Agent Orchestration Module",
+                "description": "Provides various agent implementations and utilities for building intelligent agents that can reason, act, and interact with tools and language models."
+            },
+            {
+                "id": "chains",
+                "label": "Chains",
+                "type": "module",
+                "link": "chains",
+                "title": "Chains Module",
+                "description": "Offers a structured way to combine LLMs with other components, enabling complex sequences of operations for various NLP tasks like conversational AI, data extraction, and summarization."
+            },
+            {
+                "id": "tools",
+                "label": "Tools",
+                "type": "module",
+                "link": "tools",
+                "title": "Tools Module",
+                "description": "Defines base classes and utilities for creating and managing tools that agents can use to interact with the world, including input parsing, execution, and error handling."
+            },
+            {
+                "id": "language_model_interfaces",
+                "label": "Language Model Interfaces",
+                "type": "external",
+                "link": "language_model_interfaces",
+                "title": "Language Model Interfaces",
+                "description": "Provides the core interfaces for interacting with various language models (LLMs) and chat models."
+            },
+            {
+                "id": "prompting_and_parsing",
+                "label": "Prompting & Parsing",
+                "type": "external",
+                "link": "prompting_and_parsing",
+                "title": "Prompting and Parsing Module",
+                "description": "Handles prompt template creation, management, and output parsing for LLMs."
+            },
+            {
+                "id": "data_retrieval_and_memory",
+                "label": "Data Retrieval & Memory",
+                "type": "external",
+                "link": "data_retrieval_and_memory",
+                "title": "Data Retrieval and Memory Module",
+                "description": "Manages data retrieval mechanisms (like vector stores) and conversational memory for agents and chains."
+            },
+            {
+                "id": "callbacks_and_tracing",
+                "label": "Callbacks & Tracing",
+                "type": "external",
+                "link": "callbacks_and_tracing",
+                "title": "Callbacks and Tracing Module",
+                "description": "Provides infrastructure for handling callbacks and tracing within the LangChain ecosystem, enabling detailed monitoring and interaction during execution."
+            },
+            {
+                "id": "agent_middleware",
+                "label": "Agent Middleware",
+                "type": "module",
+                "link": "agent_middleware",
+                "title": "Agent Middleware Module",
+                "description": "A collection of middleware components designed to enhance and modify the behavior of agents, offering functionalities like tool call limits, PII detection, and summarization."
+            }
+        ],
+        "edges": [
+            {
+                "source": "runnables",
+                "target": "agents",
+                "label": "form agent execution graphs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "runnables",
+                "target": "chains",
+                "label": "compose complex workflows",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agents",
+                "target": "tools",
+                "label": "utilize for external interaction",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agents",
+                "target": "language_model_interfaces",
+                "label": "interact with LLMs via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agents",
+                "target": "prompting_and_parsing",
+                "label": "use for input/output formatting",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agents",
+                "target": "data_retrieval_and_memory",
+                "label": "access for context & knowledge",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chains",
+                "target": "language_model_interfaces",
+                "label": "orchestrate LLM calls via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chains",
+                "target": "prompting_and_parsing",
+                "label": "use for prompt construction & parsing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chains",
+                "target": "data_retrieval_and_memory",
+                "label": "integrate for data access",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tools",
+                "target": "prompting_and_parsing",
+                "label": "define schemas with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tools",
+                "target": "callbacks_and_tracing",
+                "label": "report execution to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agents",
+                "target": "callbacks_and_tracing",
+                "label": "report execution to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chains",
+                "target": "callbacks_and_tracing",
+                "label": "report execution to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_middleware",
+                "target": "agents",
+                "label": "modifies agent behavior",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_orchestration",
+                "label": "Core Orchestration",
+                "nodes": [
+                    "runnables",
+                    "agents",
+                    "chains"
+                ],
+                "title": "Core Orchestration Components",
+                "description": "These components form the backbone of intelligent applications, defining how LLMs interact with tools, data, and each other to achieve complex goals.",
+                "role": null
+            },
+            {
+                "id": "interaction_components",
+                "label": "Interaction Components",
+                "nodes": [
+                    "tools",
+                    "agent_middleware"
+                ],
+                "title": "Interaction and Enhancement Components",
+                "description": "These modules provide the means for agents to interact with the external world and enhance their behavior through various middleware functionalities.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "language_model_interfaces",
+                    "prompting_and_parsing",
+                    "data_retrieval_and_memory",
+                    "callbacks_and_tracing"
+                ],
+                "title": "Key External Dependencies",
+                "description": "These modules provide essential functionalities like LLM communication, prompt management, data access, and observability, which are critical for agents and chains.",
+                "role": null
+            }
+        ]
+    }
+}

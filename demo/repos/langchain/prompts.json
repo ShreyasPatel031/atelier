@@ -1,0 +1,268 @@
+{
+  "title": "Prompt Templates",
+  "summary": "This module provides various prompt template classes for constructing and managing prompts for language models, including string-based, chat-based, and few-shot templates.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_prompt_template",
+        "label": "BasePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "Base Prompt Template",
+        "description": "The foundational class for all prompt templates, defining common interfaces for input variables, partial variables, and formatting methods."
+      },
+      {
+        "id": "string_prompt_template",
+        "label": "StringPromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "String Prompt Template",
+        "description": "An abstract base class for prompt templates that produce a single string output, extending BasePromptTemplate."
+      },
+      {
+        "id": "chat_message_prompt_template",
+        "label": "ChatMessagePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "Chat Message Prompt Template",
+        "description": "A template for individual chat messages, allowing specification of role and content, used within chat-based prompt structures."
+      },
+      {
+        "id": "ai_message_prompt_template",
+        "label": "AIMessagePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "AI Message Prompt Template",
+        "description": "A specialized chat message template for messages originating from the AI, inheriting from a string-image message template."
+      },
+      {
+        "id": "system_message_prompt_template",
+        "label": "SystemMessagePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "System Message Prompt Template",
+        "description": "A specialized chat message template for system-level messages, not typically shown to the user."
+      },
+      {
+        "id": "few_shot_chat_message_prompt_template",
+        "label": "FewShotChatMessagePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "Few-Shot Chat Message Prompt Template",
+        "description": "A chat prompt template that incorporates few-shot examples, either fixed or dynamically selected, to guide the language model."
+      },
+      {
+        "id": "few_shot_prompt_with_templates",
+        "label": "FewShotPromptWithTemplates",
+        "type": "component",
+        "link": null,
+        "title": "Few-Shot Prompt with Templates",
+        "description": "A prompt template that includes few-shot examples, using separate prompt templates for examples, prefixes, and suffixes."
+      },
+      {
+        "id": "structured_prompt",
+        "label": "StructuredPrompt",
+        "type": "component",
+        "link": null,
+        "title": "Structured Prompt",
+        "description": "A chat prompt template designed for generating structured outputs, requiring a schema to define the expected output format."
+      },
+      {
+        "id": "chat_prompt_value_concrete",
+        "label": "ChatPromptValueConcrete",
+        "type": "component",
+        "link": null,
+        "title": "Chat Prompt Value Concrete",
+        "description": "A concrete representation of a chat prompt value, explicitly listing the types of messages it accepts for external schemas."
+      },
+      {
+        "id": "load_few_shot_prompt",
+        "label": "Load Few-Shot Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Load Few-Shot Prompt",
+        "description": "Utility function to load a few-shot prompt template from a configuration dictionary, handling example and sub-template loading."
+      },
+      {
+        "id": "load_prompt",
+        "label": "Load Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Load Prompt",
+        "description": "Utility function to load a generic prompt template from a configuration dictionary, supporting various template formats."
+      },
+      {
+        "id": "jinja2_formatter",
+        "label": "Jinja2 Formatter",
+        "type": "component",
+        "link": null,
+        "title": "Jinja2 Template Formatter",
+        "description": "Formats a template string using the Jinja2 templating engine, with security considerations for untrusted inputs."
+      },
+      {
+        "id": "mustache_formatter",
+        "label": "Mustache Formatter",
+        "type": "component",
+        "link": null,
+        "title": "Mustache Template Formatter",
+        "description": "Formats a template string using the Mustache templating engine."
+      },
+      {
+        "id": "base_message_prompt_template",
+        "label": "BaseMessagePromptTemplate",
+        "type": "component",
+        "link": null,
+        "title": "Base Message Prompt Template",
+        "description": "An abstract base class for prompt templates that produce a list of chat messages."
+      }
+    ],
+    "edges": [
+      {
+        "source": "string_prompt_template",
+        "target": "base_prompt_template",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "few_shot_prompt_with_templates",
+        "target": "string_prompt_template",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_message_prompt_template",
+        "target": "base_message_prompt_template",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ai_message_prompt_template",
+        "target": "chat_message_prompt_template",
+        "label": "specializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "system_message_prompt_template",
+        "target": "chat_message_prompt_template",
+        "label": "specializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "few_shot_chat_message_prompt_template",
+        "target": "base_message_prompt_template",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_prompt",
+        "target": "few_shot_chat_message_prompt_template",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_few_shot_prompt",
+        "target": "few_shot_prompt_with_templates",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_prompt",
+        "target": "string_prompt_template",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "jinja2_formatter",
+        "target": "string_prompt_template",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mustache_formatter",
+        "target": "string_prompt_template",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_prompt_template",
+        "target": "chat_prompt_value_concrete",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "base_templates",
+        "label": "Base Templates",
+        "nodes": [
+          "base_prompt_template",
+          "base_message_prompt_template"
+        ],
+        "title": "Base Prompt Templates",
+        "description": "Core abstract classes for defining prompt structures and their fundamental behaviors.",
+        "role": "analytical"
+      },
+      {
+        "id": "string_templates",
+        "label": "String-based Templates",
+        "nodes": [
+          "string_prompt_template",
+          "few_shot_prompt_with_templates"
+        ],
+        "title": "String-based Prompt Templates",
+        "description": "Templates that generate a single string output, often used for simpler prompts or as components of larger templates.",
+        "role": "generative"
+      },
+      {
+        "id": "chat_templates",
+        "label": "Chat-based Templates",
+        "nodes": [
+          "chat_message_prompt_template",
+          "ai_message_prompt_template",
+          "system_message_prompt_template",
+          "few_shot_chat_message_prompt_template",
+          "structured_prompt"
+        ],
+        "title": "Chat-based Prompt Templates",
+        "description": "Templates designed for conversational AI, handling individual messages and sequences of messages with roles.",
+        "role": "generative"
+      },
+      {
+        "id": "template_utilities",
+        "label": "Template Utilities",
+        "nodes": [
+          "load_few_shot_prompt",
+          "load_prompt",
+          "jinja2_formatter",
+          "mustache_formatter"
+        ],
+        "title": "Prompt Template Utilities",
+        "description": "Functions and components for loading and formatting prompt templates.",
+        "role": "analytical"
+      },
+      {
+        "id": "prompt_values",
+        "label": "Prompt Values",
+        "nodes": [
+          "chat_prompt_value_concrete"
+        ],
+        "title": "Prompt Value Representations",
+        "description": "Classes representing the concrete output values of prompt templates.",
+        "role": "data"
+      }
+    ]
+  }
+}

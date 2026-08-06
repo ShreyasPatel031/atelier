@@ -1,0 +1,86 @@
+{
+  "title": "CLI and README Tools",
+  "summary": "This module provides command-line interface (CLI) functionality for the Pydantic AI system and tools for maintaining the project's README documentation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_entrypoint",
+        "label": "CLI Entrypoint",
+        "type": "component",
+        "link": null,
+        "title": "CLI Entrypoint",
+        "description": "The main function that serves as the command-line interface for the Pydantic AI system, handling argument parsing and command execution."
+      },
+      {
+        "id": "readme_update_test",
+        "label": "README Update Test",
+        "type": "component",
+        "link": null,
+        "title": "README Update Test",
+        "description": "A test utility that verifies and updates the CLI help output section within the project's README file, ensuring documentation consistency."
+      },
+      {
+        "id": "file_system_access",
+        "label": "File System Access",
+        "type": "external",
+        "link": null,
+        "title": "File System Access",
+        "description": "Represents operations involving reading from and writing to the local file system, primarily for README updates."
+      },
+      {
+        "id": "cli_framework",
+        "label": "CLI Framework",
+        "type": "external",
+        "link": null,
+        "title": "CLI Framework",
+        "description": "An external or underlying framework responsible for parsing command-line arguments and managing CLI execution flow."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_entrypoint",
+        "target": "cli_framework",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "readme_update_test",
+        "target": "cli_entrypoint",
+        "label": "invokes CLI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "readme_update_test",
+        "target": "file_system_access",
+        "label": "reads/writes README",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_interface",
+        "label": "CLI Interface",
+        "nodes": [
+          "cli_entrypoint"
+        ],
+        "title": "Command Line Interface",
+        "description": "Components responsible for defining and executing command-line operations for the Pydantic AI system.",
+        "role": "surface"
+      },
+      {
+        "id": "documentation_maintenance",
+        "label": "Documentation Maintenance",
+        "nodes": [
+          "readme_update_test"
+        ],
+        "title": "Documentation Maintenance",
+        "description": "Utilities focused on ensuring the accuracy and consistency of project documentation, specifically the README file.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

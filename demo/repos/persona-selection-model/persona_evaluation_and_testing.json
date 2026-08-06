@@ -1,0 +1,205 @@
+{
+  "title": "Persona Evaluation and Testing",
+  "summary": "This module provides tools for evaluating and testing persona steering vectors, including sanity checks, steering ramp tests, A/B comparisons, and automated quality gates.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cmd_eval_answers",
+        "label": "Evaluate Answers",
+        "type": "component",
+        "link": null,
+        "title": "Evaluate Answers",
+        "description": "Generates model responses to evaluation questions using positive and negative system prompts, saving them for further analysis."
+      },
+      {
+        "id": "cmd_sanity_eval_projection",
+        "label": "Sanity Evaluate Projection",
+        "type": "component",
+        "link": null,
+        "title": "Sanity Evaluate Projection",
+        "description": "Performs a sanity check by evaluating positive/negative activations projected onto persona vectors, ensuring basic vector effectiveness."
+      },
+      {
+        "id": "cmd_steering_ramp",
+        "label": "Steering Ramp Test",
+        "type": "component",
+        "link": null,
+        "title": "Steering Ramp Test",
+        "description": "Conducts a 5-step steering demo, sweeping alpha values to observe the effect of persona vectors on model generation."
+      },
+      {
+        "id": "cmd_steering_ab",
+        "label": "Steering A/B Comparison",
+        "type": "component",
+        "link": null,
+        "title": "Steering A/B Comparison",
+        "description": "Compares model responses with and without persona steering, allowing for A/B testing of steering effectiveness."
+      },
+      {
+        "id": "cmd_validate",
+        "label": "Validate Persona Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Validate Persona Vectors",
+        "description": "Runs automated quality gates on extracted persona vectors, checking data sufficiency, separation, layer selection, and steering coherence."
+      },
+      {
+        "id": "main_cli",
+        "label": "Main CLI Entrypoint",
+        "type": "component",
+        "link": null,
+        "title": "Main CLI Entrypoint",
+        "description": "The primary command-line interface for executing various persona evaluation and testing commands."
+      },
+      {
+        "id": "gate_self_chat_main",
+        "label": "Self-Chat Gate Discovery",
+        "type": "component",
+        "link": null,
+        "title": "Self-Chat Gate Discovery",
+        "description": "Conducts self-chat experiments using Gemma and persona vectors to discover and analyze gate behavior in conversations."
+      },
+      {
+        "id": "run_extraction_rollouts",
+        "label": "Run Extraction Rollouts",
+        "type": "component",
+        "link": null,
+        "title": "Run Extraction Rollouts",
+        "description": "Executes the extraction rollout process to generate model responses based on persona prompts, without involving a judge."
+      },
+      {
+        "id": "persona_steering_and_generation",
+        "label": "Persona Steering and Generation",
+        "type": "external",
+        "link": "persona_steering_and_generation",
+        "title": "Persona Steering and Generation",
+        "description": "Parent module responsible for the overall management and creation of persona steering mechanisms and generation processes."
+      },
+      {
+        "id": "evaluation_steps",
+        "label": "Evaluation Steps",
+        "type": "module",
+        "link": "evaluation_steps",
+        "title": "Evaluation Steps",
+        "description": "A sub-module containing specific steps for persona evaluation, such as generating trait artifacts and processing rollouts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "main_cli",
+        "target": "cmd_eval_answers",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_cli",
+        "target": "cmd_sanity_eval_projection",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_cli",
+        "target": "cmd_steering_ramp",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_cli",
+        "target": "cmd_steering_ab",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "main_cli",
+        "target": "cmd_validate",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cmd_eval_answers",
+        "target": "cmd_sanity_eval_projection",
+        "label": "produces eval answers for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cmd_sanity_eval_projection",
+        "target": "cmd_validate",
+        "label": "provides sanity data for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_extraction_rollouts",
+        "target": "cmd_validate",
+        "label": "provides rollouts for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_steps",
+        "target": "run_extraction_rollouts",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_steering_and_generation",
+        "target": "main_cli",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_steering_and_generation",
+        "target": "gate_self_chat_main",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "nodes": [
+          "main_cli"
+        ],
+        "title": "Command Line Interface",
+        "description": "Entry points for various persona evaluation and testing operations via the command line.",
+        "role": "surface"
+      },
+      {
+        "id": "evaluation_routines",
+        "label": "Evaluation Routines",
+        "nodes": [
+          "cmd_eval_answers",
+          "cmd_sanity_eval_projection",
+          "cmd_steering_ramp",
+          "cmd_steering_ab",
+          "cmd_validate"
+        ],
+        "title": "Core Evaluation Routines",
+        "description": "Functions dedicated to assessing the performance and characteristics of persona vectors and steering.",
+        "role": "analytical"
+      },
+      {
+        "id": "experimentation_tools",
+        "label": "Experimentation Tools",
+        "nodes": [
+          "gate_self_chat_main",
+          "run_extraction_rollouts"
+        ],
+        "title": "Experimental and Testing Tools",
+        "description": "Components used for conducting experiments and generating data for persona analysis.",
+        "role": "generative"
+      }
+    ]
+  }
+}

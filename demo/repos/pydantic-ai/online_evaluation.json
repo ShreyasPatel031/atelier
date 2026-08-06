@@ -1,0 +1,159 @@
+{
+  "title": "Online Evaluation",
+  "summary": "This module provides tools for performing online evaluation of AI models and agents, allowing for real-time assessment of performance and behavior. It integrates with OpenTelemetry for event emission and supports various evaluation configurations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "online_eval_config",
+        "label": "OnlineEvalConfig",
+        "type": "component",
+        "link": null,
+        "title": "OnlineEvalConfig",
+        "description": "Manages cross-evaluator defaults and configuration for online evaluation, including sampling rates, OTel event emission, and error handling."
+      },
+      {
+        "id": "online_evaluation_capability",
+        "label": "OnlineEvaluation Capability",
+        "type": "component",
+        "link": null,
+        "title": "OnlineEvaluation Capability",
+        "description": "A capability that integrates online evaluators directly into agent runs, dispatching evaluations asynchronously after each completed run."
+      },
+      {
+        "id": "run_and_collect",
+        "label": "Run and Collect Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Run and Collect Evaluation",
+        "description": "Executes a single online evaluator, emits OpenTelemetry events, and collects the evaluation outcomes for batch processing."
+      },
+      {
+        "id": "online_wrapper",
+        "label": "Online Evaluation Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Online Evaluation Wrapper",
+        "description": "A decorator that attaches online evaluators to a function, capturing inputs, running the function, and dispatching evaluations in the background."
+      },
+      {
+        "id": "otel_context_subtree",
+        "label": "OTel Context Subtree",
+        "type": "component",
+        "link": null,
+        "title": "OpenTelemetry Context Subtree",
+        "description": "A context manager that captures and yields a SpanTree containing all OpenTelemetry spans collected during its execution, useful for tracing evaluation flows."
+      },
+      {
+        "id": "evaluators_module",
+        "label": "Evaluators",
+        "type": "module",
+        "link": "evaluators",
+        "title": "Evaluators Module",
+        "description": "Provides the core logic for defining and running various types of evaluation metrics and checks."
+      },
+      {
+        "id": "agent_framework_module",
+        "label": "Agent Framework",
+        "type": "module",
+        "link": "agent_framework",
+        "title": "Agent Framework Module",
+        "description": "Defines the structure and execution flow for AI agents, which can be augmented with capabilities like online evaluation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "online_eval_config",
+        "target": "online_evaluation_capability",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_eval_config",
+        "target": "online_wrapper",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_evaluation_capability",
+        "target": "run_and_collect",
+        "label": "dispatches evaluations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_wrapper",
+        "target": "run_and_collect",
+        "label": "dispatches evaluations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect",
+        "target": "evaluators_module",
+        "label": "uses Evaluator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_evaluation_capability",
+        "target": "agent_framework_module",
+        "label": "wraps agent runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect",
+        "target": "otel_context_subtree",
+        "label": "emits OTel events",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "configuration",
+        "label": "Configuration",
+        "nodes": [
+          "online_eval_config"
+        ],
+        "title": "Evaluation Configuration",
+        "description": "Components responsible for defining and managing the settings and defaults for online evaluations.",
+        "role": "analytical"
+      },
+      {
+        "id": "evaluation_execution",
+        "label": "Evaluation Execution",
+        "nodes": [
+          "run_and_collect",
+          "online_wrapper"
+        ],
+        "title": "Core Evaluation Logic",
+        "description": "Components that orchestrate and execute the actual evaluation process, including dispatching and collecting results.",
+        "role": "analytical"
+      },
+      {
+        "id": "integration_points",
+        "label": "Integration Points",
+        "nodes": [
+          "online_evaluation_capability"
+        ],
+        "title": "Module Integration",
+        "description": "Components that serve as interfaces for integrating online evaluation into other parts of the system, such as agent frameworks.",
+        "role": "surface"
+      },
+      {
+        "id": "observability",
+        "label": "Observability",
+        "nodes": [
+          "otel_context_subtree"
+        ],
+        "title": "Observability and Tracing",
+        "description": "Components related to capturing and managing OpenTelemetry traces and spans for monitoring evaluation processes.",
+        "role": "data"
+      }
+    ]
+  }
+}

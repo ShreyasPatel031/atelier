@@ -1,0 +1,287 @@
+{
+  "title": "API Endpoints",
+  "summary": "This module defines and manages all HTTP API endpoints for interacting with the model serving and management system, routing requests to appropriate handlers for various model operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "type": "module",
+        "link": null,
+        "title": "API Endpoints",
+        "description": "Manages all incoming API requests, routing them to appropriate handlers for model interaction and management."
+      },
+      {
+        "id": "chat_handler",
+        "label": "Chat Handler",
+        "type": "component",
+        "link": null,
+        "title": "Chat Handler",
+        "description": "Processes incoming chat requests, manages model loading and execution, and streams responses back to the client."
+      },
+      {
+        "id": "generate_handler",
+        "label": "Generate Handler",
+        "type": "component",
+        "link": null,
+        "title": "Generate Handler",
+        "description": "Handles text generation requests, including prompt processing, model execution, and streaming responses."
+      },
+      {
+        "id": "embed_handler",
+        "label": "Embed Handler",
+        "type": "component",
+        "link": null,
+        "title": "Embed Handler",
+        "description": "Generates embeddings for given text inputs using a specified model, handling input truncation and parallel processing."
+      },
+      {
+        "id": "pull_handler",
+        "label": "Pull Handler",
+        "type": "component",
+        "link": null,
+        "title": "Pull Handler",
+        "description": "Manages requests to pull models from a registry, handling model name normalization and streaming progress updates."
+      },
+      {
+        "id": "push_handler",
+        "label": "Push Handler",
+        "type": "component",
+        "link": null,
+        "title": "Push Handler",
+        "description": "Processes requests to push models to a registry, including model name resolution and streaming progress updates."
+      },
+      {
+        "id": "show_handler",
+        "label": "Show Handler",
+        "type": "component",
+        "link": null,
+        "title": "Show Handler",
+        "description": "Retrieves and displays detailed information about a specified model, including its configuration and metadata."
+      },
+      {
+        "id": "model_scheduler",
+        "label": "Model Scheduling",
+        "type": "module",
+        "link": "model_serving_and_management",
+        "title": "Model Scheduling and Caching",
+        "description": "Manages the loading, unloading, and scheduling of models for inference, optimizing resource utilization and response times."
+      },
+      {
+        "id": "model_creation",
+        "label": "Model Creation",
+        "type": "module",
+        "link": "model_serving_and_management",
+        "title": "Model Creation and Conversion",
+        "description": "Handles the creation of new models from various source files and manages quantization and template application."
+      },
+      {
+        "id": "model_metadata",
+        "label": "Model Metadata",
+        "type": "module",
+        "link": "model_serving_and_management",
+        "title": "Model Metadata and Prompting",
+        "description": "Manages model-related metadata, including templates, system prompts, and capabilities, and handles prompt rendering."
+      },
+      {
+        "id": "registry_api",
+        "label": "External Registry API",
+        "type": "external",
+        "link": null,
+        "title": "External Model Registry API",
+        "description": "Interacts with external model registries for pulling and pushing models, facilitating model distribution and versioning."
+      },
+      {
+        "id": "cloud_proxy",
+        "label": "Cloud Proxy",
+        "type": "external",
+        "link": null,
+        "title": "Cloud Proxy",
+        "description": "Routes requests for cloud-based models to the appropriate remote inference service, handling authentication and model name normalization."
+      },
+      {
+        "id": "model_list_cache",
+        "label": "Model List Cache",
+        "type": "component",
+        "link": null,
+        "title": "Model List Cache",
+        "description": "Caches the list of available models and their metadata to improve performance for API requests."
+      }
+    ],
+    "edges": [
+      {
+        "source": "api_endpoints",
+        "target": "chat_handler",
+        "label": "chat requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "generate_handler",
+        "label": "generation requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "embed_handler",
+        "label": "embedding requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "pull_handler",
+        "label": "pull requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "push_handler",
+        "label": "push requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "show_handler",
+        "label": "show requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_handler",
+        "target": "model_scheduler",
+        "label": "model inference",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_handler",
+        "target": "model_scheduler",
+        "label": "model inference",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embed_handler",
+        "target": "model_scheduler",
+        "label": "model inference",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pull_handler",
+        "target": "registry_api",
+        "label": "pull model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "push_handler",
+        "target": "registry_api",
+        "label": "push model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "show_handler",
+        "target": "model_metadata",
+        "label": "model info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "show_handler",
+        "target": "cloud_proxy",
+        "label": "cloud model info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_endpoints",
+        "target": "model_list_cache",
+        "label": "model list queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_scheduler",
+        "target": "model_metadata",
+        "label": "model config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_creation",
+        "target": "model_metadata",
+        "label": "update metadata",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "request_handling",
+        "label": "Request Handling",
+        "nodes": [
+          "api_endpoints"
+        ],
+        "title": "API Request Handling",
+        "description": "Components responsible for receiving, parsing, and routing incoming HTTP requests to the appropriate internal handlers.",
+        "role": "surface"
+      },
+      {
+        "id": "model_interaction",
+        "label": "Model Interaction",
+        "nodes": [
+          "chat_handler",
+          "generate_handler",
+          "embed_handler"
+        ],
+        "title": "Model Interaction Handlers",
+        "description": "Handlers that process requests directly related to interacting with models, such as chat, generation, and embedding.",
+        "role": "generative"
+      },
+      {
+        "id": "model_management",
+        "label": "Model Management",
+        "nodes": [
+          "pull_handler",
+          "push_handler",
+          "show_handler",
+          "model_creation"
+        ],
+        "title": "Model Management Handlers",
+        "description": "Handlers for managing the lifecycle of models, including pulling, pushing, showing details, and creation.",
+        "role": "analytical"
+      },
+      {
+        "id": "core_model_services",
+        "label": "Core Model Services",
+        "nodes": [
+          "model_scheduler",
+          "model_metadata",
+          "model_list_cache"
+        ],
+        "title": "Core Model Services",
+        "description": "Underlying services that manage model scheduling, metadata, and caching, supporting all model interaction and management.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_integrations",
+        "label": "External Integrations",
+        "nodes": [
+          "registry_api",
+          "cloud_proxy"
+        ],
+        "title": "External System Integrations",
+        "description": "Components that interface with external systems like model registries and cloud inference services.",
+        "role": "data"
+      }
+    ]
+  }
+}

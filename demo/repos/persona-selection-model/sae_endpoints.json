@@ -1,0 +1,77 @@
+{
+  "title": "SAE Endpoints",
+  "summary": "This module provides API endpoints for interacting with Sparse Autoencoder (SAE) functionalities, including comparing SAE activations and generating SAE snapshots.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "sae_compare_request",
+        "label": "SAE Compare Request",
+        "type": "component",
+        "link": null,
+        "title": "SAE Compare Request",
+        "description": "Handles incoming requests to compare SAE activations between two systems based on a given message."
+      },
+      {
+        "id": "sae_snapshot_request",
+        "label": "SAE Snapshot Request",
+        "type": "component",
+        "link": null,
+        "title": "SAE Snapshot Request",
+        "description": "Processes requests to generate a snapshot of SAE activations for a specific system and message."
+      },
+      {
+        "id": "sae_experiment_runner",
+        "label": "SAE Experiment Runner",
+        "type": "module",
+        "link": "sae_experiment_runner",
+        "title": "SAE Experiment Runner",
+        "description": "Manages the execution of various SAE experiments, including ablation, reconstruction, and comprehensive runs."
+      },
+      {
+        "id": "sae_causality_analysis",
+        "label": "SAE Causality Analysis",
+        "type": "module",
+        "link": "sae_causality_analysis",
+        "title": "SAE Causality Analysis",
+        "description": "Provides tools and methods for analyzing the causal effects of sparse directions from latent spaces within SAEs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "sae_compare_request",
+        "target": "sae_experiment_runner",
+        "label": "compares SAE activations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_snapshot_request",
+        "target": "sae_experiment_runner",
+        "label": "generates SAE snapshot",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_experiment_runner",
+        "target": "sae_causality_analysis",
+        "label": "provides experimental data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "nodes": [
+          "sae_compare_request",
+          "sae_snapshot_request"
+        ],
+        "title": "API Endpoints",
+        "description": "User-facing entry points for interacting with the SAE functionalities.",
+        "role": "surface"
+      }
+    ]
+  }
+}

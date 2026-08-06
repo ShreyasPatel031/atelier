@@ -1,0 +1,44 @@
+{
+    "title": "Token Classification & MLM",
+    "summary": "This module provides various model implementations for token classification and masked language modeling tasks across different modalities and architectures.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "masked_language_modeling",
+                "label": "Masked Language Modeling",
+                "type": "module",
+                "link": "masked_language_modeling",
+                "title": "Masked Language Modeling",
+                "description": "Implements models for masked language modeling, predicting masked tokens in a sequence."
+            },
+            {
+                "id": "token_classification",
+                "label": "Token Classification",
+                "type": "module",
+                "link": "token_classification",
+                "title": "Token Classification",
+                "description": "Provides models for assigning labels to individual tokens in a sequence, such as named entity recognition."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "language_model_tasks",
+                "label": "Language Model Tasks",
+                "title": "Language Model Tasks",
+                "description": "Group of sub-modules focusing on various language modeling tasks.",
+                "role": "analytical",
+                "nodes": ["masked_language_modeling"]
+            },
+            {
+                "id": "sequence_labeling",
+                "label": "Sequence Labeling",
+                "title": "Sequence Labeling",
+                "description": "Group of sub-modules designed for tasks that involve assigning labels to individual elements within a sequence.",
+                "role": "analytical",
+                "nodes": ["token_classification"]
+            }
+        ]
+    }
+}

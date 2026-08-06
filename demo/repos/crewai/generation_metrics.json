@@ -1,0 +1,71 @@
+{
+  "repo_name": "crewai",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/crewai",
+  "repo_size_mb": 448938.765625,
+  "total_files": 0,
+  "total_code_files": 1234,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 3.1157469749450684,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 45.206095933914185,
+      "tokens_used": 26119,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 72.48516774177551,
+      "tokens_used": 987408,
+      "files_created": 31,
+      "files_created_list": [
+        "llm_integration.json",
+        "project_and_skills.json",
+        "cli_commands.json",
+        "cli_utilities.json",
+        "task_and_flow_execution.json",
+        "tool_utilities.json",
+        "tool_adapters.json",
+        "first_module_tree.json",
+        "utilities_and_experimental.json",
+        "metadata.json",
+        "core_framework.json",
+        "agent_management.json",
+        "cli_and_tools.json",
+        "knowledge_sources.json",
+        "module_tree.json",
+        "overview.json",
+        "memory_management.json",
+        "general_utilities.json",
+        "rag_system.json",
+        "file_management.json",
+        "tool_definitions.json",
+        "a2a_core.json",
+        "event_system.json",
+        "sync_issues.json",
+        "a2a_authentication.json",
+        "hooks_and_callbacks.json",
+        "a2a_extensions_and_updates.json",
+        "experimental_features.json",
+        "a2a_and_events.json",
+        "testing_and_dev_tools.json",
+        "data_and_knowledge.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 121.17809391021729,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/crewai/docs/overview.json",
+  "total_duration": 121.17814087867737,
+  "total_tokens": 1013527,
+  "estimated_cost_usd": 0.1782,
+  "total_llm_calls": 30,
+  "total_files_created": 31,
+  "start_time": 1781381546.11578,
+  "end_time": 1781381667.293921
+}

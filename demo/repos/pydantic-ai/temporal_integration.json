@@ -1,0 +1,156 @@
+{
+  "title": "Temporal Integration",
+  "summary": "This module integrates Pydantic-AI agents with Temporal workflows, enabling durable execution of AI agents by offloading model requests and tool calls to Temporal activities.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "temporal_agent",
+        "label": "TemporalAgent",
+        "type": "component",
+        "link": null,
+        "title": "TemporalAgent",
+        "description": "Wraps an existing agent to enable its use within a Temporal workflow, offloading model requests and tool calls to Temporal activities for durable execution."
+      },
+      {
+        "id": "temporal_mcp_toolset_base",
+        "label": "TemporalMCPToolsetBase",
+        "type": "component",
+        "link": null,
+        "title": "TemporalMCPToolsetBase",
+        "description": "An abstract base class for Temporal-wrapped MCP toolsets, handling the serialization and deserialization of tool calls and instructions for Temporal activities."
+      },
+      {
+        "id": "temporal_run_context",
+        "label": "TemporalRunContext",
+        "type": "component",
+        "link": null,
+        "title": "TemporalRunContext",
+        "description": "A specialized RunContext for Temporal workflows, managing the serialization and deserialization of run context attributes for use in Temporal activities."
+      },
+      {
+        "id": "temporalize_toolset",
+        "label": "temporalize_toolset",
+        "type": "component",
+        "link": null,
+        "title": "temporalize_toolset function",
+        "description": "A function that wraps a given toolset with a Temporal-specific wrapper, converting its operations into Temporal activities for durable execution."
+      },
+      {
+        "id": "temporal_wrapper_toolset",
+        "label": "TemporalWrapperToolset",
+        "type": "component",
+        "link": null,
+        "title": "TemporalWrapperToolset",
+        "description": "An abstract base class for toolsets that are wrapped for Temporal, managing the lifecycle and activity execution of the wrapped toolset."
+      },
+      {
+        "id": "agent_framework",
+        "label": "Agent Framework",
+        "type": "module",
+        "link": "agent_framework",
+        "title": "Agent Framework",
+        "description": "Provides the core abstractions and components for building and managing AI agents, including agent definitions, execution graphs, and interaction patterns."
+      },
+      {
+        "id": "capabilities_and_tools",
+        "label": "Capabilities and Tools",
+        "type": "module",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities and Tools",
+        "description": "Manages the definition, discovery, and execution of tools and capabilities that AI agents can utilize to interact with external systems or perform specific actions."
+      },
+      {
+        "id": "model_integration",
+        "label": "Model Integration",
+        "type": "module",
+        "link": "model_integration",
+        "title": "Model Integration",
+        "description": "Handles the integration with various AI models, providing a unified interface for making model requests and managing streamed responses."
+      }
+    ],
+    "edges": [
+      {
+        "source": "temporal_agent",
+        "target": "agent_framework",
+        "label": "wraps AbstractAgent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporal_agent",
+        "target": "model_integration",
+        "label": "offloads model requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporal_agent",
+        "target": "temporal_run_context",
+        "label": "uses for context serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporal_agent",
+        "target": "temporalize_toolset",
+        "label": "uses to wrap toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "capabilities_and_tools",
+        "label": "wraps AbstractToolset",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "temporal_wrapper_toolset",
+        "label": "returns wrapped toolset",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporal_mcp_toolset_base",
+        "target": "temporal_wrapper_toolset",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporal_mcp_toolset_base",
+        "target": "temporal_run_context",
+        "label": "uses for context serialization",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "temporal_agent_components",
+        "label": "Temporal Agent Components",
+        "nodes": [
+          "temporal_agent",
+          "temporal_run_context"
+        ],
+        "title": "Temporal Agent Components",
+        "description": "Core components responsible for adapting AI agents for durable execution within Temporal workflows.",
+        "role": "analytical"
+      },
+      {
+        "id": "temporal_toolset_wrappers",
+        "label": "Temporal Toolset Wrappers",
+        "nodes": [
+          "temporal_mcp_toolset_base",
+          "temporalize_toolset",
+          "temporal_wrapper_toolset"
+        ],
+        "title": "Temporal Toolset Wrappers",
+        "description": "Components that wrap existing toolsets to enable their operations to be executed as Temporal activities.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

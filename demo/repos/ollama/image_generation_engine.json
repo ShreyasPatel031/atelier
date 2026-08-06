@@ -1,0 +1,219 @@
+{
+  "title": "Image Generation Engine",
+  "summary": "This module provides the core logic for image generation, including command-line utilities for various models and an HTTP handler for image completion requests.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_main_entrypoint",
+        "label": "CLI Main Entrypoint",
+        "type": "component",
+        "link": null,
+        "title": "CLI Main Entrypoint",
+        "description": "The primary command-line interface for the image generation engine, handling various flags for model selection, generation parameters, and utility functions."
+      },
+      {
+        "id": "zimage_model_generation",
+        "label": "Z-Image Model Generation",
+        "type": "component",
+        "link": null,
+        "title": "Z-Image Model Generation",
+        "description": "Handles image generation specifically for Z-Image models, processing prompts and configuration to produce an image."
+      },
+      {
+        "id": "flux2_model_generation",
+        "label": "FLUX.2 Model Generation",
+        "type": "component",
+        "link": null,
+        "title": "FLUX.2 Model Generation",
+        "description": "Manages image generation for FLUX.2 Klein models, including loading input images and applying generation configurations."
+      },
+      {
+        "id": "llm_image_processing",
+        "label": "LLM Image Processing",
+        "type": "component",
+        "link": null,
+        "title": "LLM Image Processing",
+        "description": "Processes image inputs for multimodal LLMs and orchestrates text generation with image context."
+      },
+      {
+        "id": "mlx_initialization",
+        "label": "MLX Initialization",
+        "type": "external",
+        "link": null,
+        "title": "MLX Initialization",
+        "description": "Initializes the MLX framework, setting up the necessary environment for GPU operations and restoring error handling."
+      },
+      {
+        "id": "http_completion_handler",
+        "label": "HTTP Completion Handler",
+        "type": "component",
+        "link": null,
+        "title": "HTTP Completion Handler",
+        "description": "An HTTP endpoint that receives image generation requests, decodes them, and dispatches them to the MLX thread for processing."
+      },
+      {
+        "id": "mlx_thread_executor",
+        "label": "MLX Thread Executor",
+        "type": "external",
+        "link": null,
+        "title": "MLX Thread Executor",
+        "description": "Executes MLX-related tasks in a dedicated thread to ensure proper GPU context management and prevent concurrency issues."
+      },
+      {
+        "id": "image_saving_utility",
+        "label": "Image Saving Utility",
+        "type": "component",
+        "link": null,
+        "title": "Image Saving Utility",
+        "description": "A utility function responsible for saving generated image arrays to specified output paths, typically in PNG format."
+      },
+      {
+        "id": "model_loading_utility",
+        "label": "Model Loading Utility",
+        "type": "component",
+        "link": null,
+        "title": "Model Loading Utility",
+        "description": "Loads various image generation models from specified paths, preparing them for inference."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_main_entrypoint",
+        "target": "mlx_initialization",
+        "label": "initializes MLX",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mlx_initialization",
+        "target": "zimage_model_generation",
+        "label": "provides MLX context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mlx_initialization",
+        "target": "flux2_model_generation",
+        "label": "provides MLX context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mlx_initialization",
+        "target": "llm_image_processing",
+        "label": "provides MLX context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_main_entrypoint",
+        "target": "zimage_model_generation",
+        "label": "invokes generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_main_entrypoint",
+        "target": "flux2_model_generation",
+        "label": "invokes generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_main_entrypoint",
+        "target": "llm_image_processing",
+        "label": "invokes generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zimage_model_generation",
+        "target": "image_saving_utility",
+        "label": "saves generated image",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flux2_model_generation",
+        "target": "image_saving_utility",
+        "label": "saves generated image",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_main_entrypoint",
+        "target": "model_loading_utility",
+        "label": "loads model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_loading_utility",
+        "target": "llm_image_processing",
+        "label": "provides loaded model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_completion_handler",
+        "target": "mlx_thread_executor",
+        "label": "dispatches request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mlx_thread_executor",
+        "target": "llm_image_processing",
+        "label": "executes image completion",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_interface",
+        "label": "CLI Interface",
+        "nodes": [
+          "cli_main_entrypoint"
+        ],
+        "title": "Command-Line Interface",
+        "description": "Handles command-line arguments and orchestrates the image generation process based on user input.",
+        "role": "surface"
+      },
+      {
+        "id": "image_generation_models",
+        "label": "Image Generation Models",
+        "nodes": [
+          "zimage_model_generation",
+          "flux2_model_generation",
+          "llm_image_processing"
+        ],
+        "title": "Image Generation Models",
+        "description": "Encapsulates the logic for different image generation models, including Z-Image, FLUX.2, and multimodal LLMs.",
+        "role": "generative"
+      },
+      {
+        "id": "server_api",
+        "label": "Server API",
+        "nodes": [
+          "http_completion_handler"
+        ],
+        "title": "Server API for Image Completion",
+        "description": "Provides an HTTP endpoint for external services to request image generation completions.",
+        "role": "surface"
+      },
+      {
+        "id": "core_utilities",
+        "label": "Core Utilities",
+        "nodes": [
+          "image_saving_utility",
+          "model_loading_utility"
+        ],
+        "title": "Core Utilities",
+        "description": "Helper functions for common tasks like model loading and image saving.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

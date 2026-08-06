@@ -1,0 +1,545 @@
+{
+  "title": "Evaluation Module",
+  "summary": "This module provides tools and chains for evaluating language model outputs, agent trajectories, and parsing results against various criteria and references.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "string_evaluator",
+        "label": "String Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "String Evaluator Interface",
+        "description": "An abstract base class for evaluators that grade, tag, or otherwise assess predictions relative to inputs and/or reference labels."
+      },
+      {
+        "id": "pairwise_string_evaluator",
+        "label": "Pairwise String Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Pairwise String Comparison",
+        "description": "An abstract base class for evaluators that compare the outputs of two models or two outputs of the same model."
+      },
+      {
+        "id": "agent_trajectory_evaluator",
+        "label": "Agent Trajectory Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Agent Trajectory Evaluation Interface",
+        "description": "An abstract base class for evaluators designed to assess the performance of agent trajectories, including intermediate steps and final predictions."
+      },
+      {
+        "id": "trajectory_eval_chain",
+        "label": "Trajectory Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Agent Trajectory Evaluation Chain",
+        "description": "Evaluates ReAct style agents by reasoning about the sequence of actions taken and their outcomes, often comparing against a reference."
+      },
+      {
+        "id": "labeled_pairwise_string_eval_chain",
+        "label": "Labeled Pairwise String Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Labeled Pairwise String Evaluation",
+        "description": "Compares two string outputs (e.g., from two models) with labeled preferences, requiring a reference for evaluation."
+      },
+      {
+        "id": "labeled_criteria_eval_chain",
+        "label": "Labeled Criteria Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Labeled Criteria Evaluation Chain",
+        "description": "Evaluates model outputs against predefined criteria, requiring a reference for accurate assessment."
+      },
+      {
+        "id": "json_validity_evaluator",
+        "label": "JSON Validity Evaluator",
+        "type": "module",
+        "link": "evaluation",
+        "title": "JSON Validity Check",
+        "description": "Checks if a given prediction string is a valid JSON format, returning a score and reasoning if invalid."
+      },
+      {
+        "id": "json_equality_evaluator",
+        "label": "JSON Equality Evaluator",
+        "type": "module",
+        "link": "evaluation",
+        "title": "JSON Equality Check",
+        "description": "Compares two JSON strings for equality after parsing, optionally using a custom comparison operator."
+      },
+      {
+        "id": "json_schema_evaluator",
+        "label": "JSON Schema Evaluator",
+        "type": "module",
+        "link": "evaluation",
+        "title": "JSON Schema Validation",
+        "description": "Validates a JSON prediction against a provided JSON schema, indicating whether it conforms to the schema."
+      },
+      {
+        "id": "cot_qa_eval_chain",
+        "label": "CoT QA Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Chain-of-Thought QA Evaluation",
+        "description": "Evaluates Question Answering systems using Chain-of-Thought reasoning for contextual accuracy."
+      },
+      {
+        "id": "qa_eval_chain",
+        "label": "QA Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Question Answering Evaluation Chain",
+        "description": "Evaluates the correctness of question answering outputs against a reference answer and input query."
+      },
+      {
+        "id": "labeled_score_string_eval_chain",
+        "label": "Labeled Score String Eval Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Labeled Score String Evaluation",
+        "description": "Scores model outputs on a scale (e.g., 1-10) based on specified criteria, requiring a reference for evaluation."
+      },
+      {
+        "id": "load_evaluators",
+        "label": "Load Evaluators",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Evaluator Loader",
+        "description": "Loads a list of evaluators based on their types, optionally configuring them with an LLM and additional parameters."
+      },
+      {
+        "id": "run_on_dataset",
+        "label": "Run on Dataset",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Dataset Evaluation Runner",
+        "description": "Executes a language model or chain on a given dataset, logs traces, and applies specified evaluators to the results."
+      },
+      {
+        "id": "arun_on_dataset",
+        "label": "Async Run on Dataset",
+        "type": "module",
+        "link": "evaluation",
+        "title": "Asynchronous Dataset Evaluation Runner",
+        "description": "Asynchronously executes a language model or chain on a dataset, logs traces, and applies evaluators to the results."
+      },
+      {
+        "id": "string_run_evaluator_chain",
+        "label": "String Run Evaluator Chain",
+        "type": "module",
+        "link": "evaluation",
+        "title": "String Run Evaluator Chain",
+        "description": "Evaluates a run and its associated example by mapping run outputs and example references to a string evaluator."
+      },
+      {
+        "id": "dataset_run_container",
+        "label": "Dataset Run Container",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Run Management",
+        "description": "Manages the state of an evaluation run on a dataset, including collecting metrics, running evaluators, and merging results."
+      },
+      {
+        "id": "arun_llm_or_chain",
+        "label": "Async Run LLM or Chain",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous LLM/Chain Execution",
+        "description": "Asynchronously executes a language model or chain for a given example, handling potential errors and returning the output."
+      },
+      {
+        "id": "labeled_score_string_config",
+        "label": "Labeled Score String Config",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Score String Configuration",
+        "description": "Configuration for a labeled score string evaluator, specifying its type."
+      },
+      {
+        "id": "labeled_criteria_config",
+        "label": "Labeled Criteria Config",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Criteria Configuration",
+        "description": "Configuration for a labeled criteria evaluator, including criteria and the LLM to use."
+      },
+      {
+        "id": "embedding_distance_config",
+        "label": "Embedding Distance Config",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Distance Configuration",
+        "description": "Configuration for an embedding distance evaluator, specifying embeddings and distance metric."
+      },
+      {
+        "id": "string_distance_config",
+        "label": "String Distance Config",
+        "type": "component",
+        "link": null,
+        "title": "String Distance Configuration",
+        "description": "Configuration for a string distance evaluator, including the distance metric and normalization options."
+      },
+      {
+        "id": "qa_config",
+        "label": "QA Config",
+        "type": "component",
+        "link": null,
+        "title": "QA Evaluator Configuration",
+        "description": "Configuration for a QA evaluator, specifying the prompt template and LLM."
+      },
+      {
+        "id": "context_qa_config",
+        "label": "Context QA Config",
+        "type": "component",
+        "link": null,
+        "title": "Context QA Evaluator Configuration",
+        "description": "Configuration for a context-based QA evaluator, specifying the prompt template and LLM."
+      },
+      {
+        "id": "cot_qa_config",
+        "label": "CoT QA Config",
+        "type": "component",
+        "link": null,
+        "title": "Chain-of-Thought QA Configuration",
+        "description": "Configuration for a Chain-of-Thought QA evaluator, specifying the prompt template and LLM."
+      },
+      {
+        "id": "json_validity_config",
+        "label": "JSON Validity Config",
+        "type": "component",
+        "link": null,
+        "title": "JSON Validity Configuration",
+        "description": "Configuration for a JSON validity evaluator."
+      },
+      {
+        "id": "exact_match_config",
+        "label": "Exact Match Config",
+        "type": "component",
+        "link": null,
+        "title": "Exact Match Configuration",
+        "description": "Configuration for an exact match string evaluator, including options for ignoring case, punctuation, and numbers."
+      },
+      {
+        "id": "regex_match_config",
+        "label": "Regex Match Config",
+        "type": "component",
+        "link": null,
+        "title": "Regex Match Configuration",
+        "description": "Configuration for a regex match string evaluator, allowing specification of regex flags."
+      }
+    ],
+    "edges": [
+      {
+        "source": "string_evaluator",
+        "target": "json_validity_evaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "string_evaluator",
+        "target": "json_equality_evaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "string_evaluator",
+        "target": "json_schema_evaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "string_evaluator",
+        "target": "qa_eval_chain",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pairwise_string_evaluator",
+        "target": "labeled_pairwise_string_eval_chain",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_trajectory_evaluator",
+        "target": "trajectory_eval_chain",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trajectory_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "labeled_pairwise_string_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "labeled_criteria_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_validity_evaluator",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_equality_evaluator",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_schema_evaluator",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cot_qa_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "labeled_score_string_eval_chain",
+        "target": "string_run_evaluator_chain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators",
+        "target": "run_on_dataset",
+        "label": "provides evaluators to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators",
+        "target": "arun_on_dataset",
+        "label": "provides evaluators to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_run_container",
+        "target": "run_on_dataset",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_run_container",
+        "target": "arun_on_dataset",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "arun_llm_or_chain",
+        "target": "dataset_run_container",
+        "label": "called by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "string_run_evaluator_chain",
+        "target": "dataset_run_container",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "labeled_score_string_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "labeled_criteria_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_distance_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "string_distance_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_qa_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cot_qa_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_validity_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "exact_match_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "regex_match_config",
+        "target": "load_evaluators",
+        "label": "configures",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "evaluator_interfaces",
+        "label": "Evaluator Interfaces",
+        "nodes": [
+          "string_evaluator",
+          "pairwise_string_evaluator",
+          "agent_trajectory_evaluator"
+        ],
+        "title": "Core Evaluator Interfaces",
+        "description": "Abstract base classes defining the contracts for different types of evaluators, such as string, pairwise string, and agent trajectory evaluators.",
+        "role": "analytical"
+      },
+      {
+        "id": "agent_evaluation",
+        "label": "Agent Evaluation",
+        "nodes": [
+          "trajectory_eval_chain"
+        ],
+        "title": "Agent Trajectory Evaluation",
+        "description": "Components specifically designed to evaluate the performance and reasoning of AI agents based on their execution trajectories.",
+        "role": "analytical"
+      },
+      {
+        "id": "comparison_evaluation",
+        "label": "Comparison Evaluation",
+        "nodes": [
+          "labeled_pairwise_string_eval_chain",
+          "labeled_criteria_eval_chain",
+          "labeled_score_string_eval_chain"
+        ],
+        "title": "Comparison-Based Evaluation",
+        "description": "Evaluators that compare two outputs or assess outputs against specific criteria, often requiring a reference for ground truth.",
+        "role": "analytical"
+      },
+      {
+        "id": "parsing_evaluation",
+        "label": "Parsing Evaluation",
+        "nodes": [
+          "json_validity_evaluator",
+          "json_equality_evaluator",
+          "json_schema_evaluator"
+        ],
+        "title": "Parsing and Schema Evaluation",
+        "description": "Evaluators focused on validating the structure and content of parsed outputs, such as JSON validity and schema conformance.",
+        "role": "analytical"
+      },
+      {
+        "id": "qa_evaluation",
+        "label": "QA Evaluation",
+        "nodes": [
+          "cot_qa_eval_chain",
+          "qa_eval_chain"
+        ],
+        "title": "Question Answering Evaluation",
+        "description": "Components for evaluating the accuracy and contextual relevance of Question Answering systems, including Chain-of-Thought approaches.",
+        "role": "analytical"
+      },
+      {
+        "id": "evaluation_orchestration",
+        "label": "Evaluation Orchestration",
+        "nodes": [
+          "load_evaluators",
+          "run_on_dataset",
+          "arun_on_dataset",
+          "dataset_run_container",
+          "arun_llm_or_chain",
+          "string_run_evaluator_chain"
+        ],
+        "title": "Evaluation Workflow Management",
+        "description": "Tools for loading, configuring, and running various evaluators across datasets, managing the overall evaluation process.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_configs",
+        "label": "Evaluation Configurations",
+        "nodes": [
+          "labeled_score_string_config",
+          "labeled_criteria_config",
+          "embedding_distance_config",
+          "string_distance_config",
+          "qa_config",
+          "context_qa_config",
+          "cot_qa_config",
+          "json_validity_config",
+          "exact_match_config",
+          "regex_match_config"
+        ],
+        "title": "Evaluator Configuration Options",
+        "description": "Classes defining various configuration options for different types of evaluators, used to customize their behavior.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -158,7 +158,12 @@ class ConfigManager:
         if self._config is None:
             return False
         
-        # Accept ADC (Vertex AI mode) as valid credentials even without an API key
+        # When use_vertex_ai is set, ADC is the only valid credential path.
+        # Do NOT fall back to a Gemini API key if ADC is missing — free-tier keys
+        # look "configured" then die on 429s and hide the real ADC failure.
+        # Agents: never force use_vertex_ai=False / GEMINI_API_KEY to "unblock"
+        # generation; fix ADC instead (`gcloud auth application-default login`).
+        # (Model FallbackModel chain is unrelated — keep that.)
         use_vertex = bool(getattr(self._config, 'use_vertex_ai', False))
         if use_vertex:
             try:
@@ -171,13 +176,12 @@ class ConfigManager:
                 if creds.token:
                     return self._config.is_complete()
             except Exception:
-                pass
+                return False
+            return False
         
-        # Fall back to API key check
         if not self.get_api_key():
             return False
         
-        # Check if config is complete
         return self._config.is_complete()
     
     def delete_api_key(self):

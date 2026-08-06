@@ -1,0 +1,149 @@
+{
+    "title": "Core Model Implementations",
+    "summary": "Comprehensive collection of model implementations covering various tasks such as causal language modeling, conditional generation, object detection, segmentation, and multimodal learning.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "causal_language_models",
+                "label": "Causal Language Models",
+                "type": "module",
+                "link": "causal_language_models",
+                "title": "Causal Language Models",
+                "description": "Implementations of models designed for text generation based on preceding tokens."
+            },
+            {
+                "id": "conditional_generation_models",
+                "label": "Conditional Generation Models",
+                "type": "module",
+                "link": "conditional_generation_models",
+                "title": "Conditional Generation Models",
+                "description": "Models performing sequence-to-sequence tasks like translation, summarization, and multimodal generation."
+            },
+            {
+                "id": "object_detection_models",
+                "label": "Object Detection Models",
+                "type": "module",
+                "link": "object_detection_models",
+                "title": "Object Detection Models",
+                "description": "Models specialized in identifying and localizing objects within images or documents."
+            },
+            {
+                "id": "segmentation_models",
+                "label": "Segmentation Models",
+                "type": "module",
+                "link": "segmentation_models",
+                "title": "Segmentation Models",
+                "description": "Implementations for image and video segmentation tasks, including instance, semantic, and panoptic segmentation."
+            },
+            {
+                "id": "time_series_prediction",
+                "label": "Time Series Prediction",
+                "type": "module",
+                "link": "time_series_prediction",
+                "title": "Time Series Prediction",
+                "description": "Models for forecasting future values based on historical time-dependent data."
+            },
+            {
+                "id": "sequence_classification_qa",
+                "label": "Classification & QA Models",
+                "type": "module",
+                "link": "sequence_classification_qa",
+                "title": "Sequence Classification & Question Answering Models",
+                "description": "Models for classifying sequences and answering questions based on provided text or document context."
+            },
+            {
+                "id": "audio_feature_models",
+                "label": "Audio Feature Models",
+                "type": "module",
+                "link": "audio_feature_models",
+                "title": "Audio Feature Models",
+                "description": "Models focusing on extracting and classifying features from audio inputs, such as x-vectors."
+            },
+            {
+                "id": "masked_token_models",
+                "label": "Masked & Token Models",
+                "type": "module",
+                "link": "masked_token_models",
+                "title": "Masked Language & Token Classification Models",
+                "description": "Models for masked language modeling and fine-grained token-level classification tasks."
+            },
+            {
+                "id": "multimodal_models",
+                "label": "Multimodal Integration Models",
+                "type": "module",
+                "link": "multimodal_models",
+                "title": "Multimodal Integration Models",
+                "description": "Models combining and processing information from multiple modalities like vision, text, and audio."
+            },
+            {
+                "id": "document_understanding_models",
+                "label": "Document Understanding Models",
+                "type": "module",
+                "link": "document_understanding_models",
+                "title": "Document Understanding Models",
+                "description": "Models designed for extracting information and understanding the layout of documents."
+            },
+            {
+                "id": "miscellaneous_models",
+                "label": "Miscellaneous Models",
+                "type": "module",
+                "link": "miscellaneous_models",
+                "title": "Miscellaneous Models",
+                "description": "A collection of specialized or unique model architectures not fitting into other primary categories."
+            }
+        ],
+        "edges": [
+            {"source": "causal_language_models", "target": "conditional_generation_models", "label": "text output"},
+            {"source": "multimodal_models", "target": "conditional_generation_models", "label": "multi-modal input/output"},
+            {"source": "object_detection_models", "target": "segmentation_models", "label": "detection-based segmentation"},
+            {"source": "audio_feature_models", "target": "conditional_generation_models", "label": "speech features"},
+            {"source": "document_understanding_models", "target": "object_detection_models", "label": "layout analysis"},
+            {"source": "multimodal_models", "target": "sequence_classification_qa", "label": "visual QA/classification"},
+            {"source": "causal_language_models", "target": "sequence_classification_qa", "label": "text classification/QA"},
+            {"source": "masked_token_models", "target": "causal_language_models", "label": "language understanding"}
+        ],
+        "groups": [
+            {
+                "id": "language_processing",
+                "label": "Language Processing",
+                "title": "Language Processing Models",
+                "description": "Core models for text-based tasks, including generation, masked language modeling, and classification.",
+                "role": "generative",
+                "nodes": ["causal_language_models", "conditional_generation_models", "masked_token_models"]
+            },
+            {
+                "id": "vision_processing",
+                "label": "Vision Processing",
+                "title": "Computer Vision Models",
+                "description": "Models for image and video analysis, such as object detection and segmentation.",
+                "role": "analytical",
+                "nodes": ["object_detection_models", "segmentation_models", "document_understanding_models"]
+            },
+            {
+                "id": "audio_processing",
+                "label": "Audio Processing",
+                "title": "Audio Processing Models",
+                "description": "Models dedicated to processing and understanding audio data.",
+                "role": "analytical",
+                "nodes": ["audio_feature_models"]
+            },
+            {
+                "id": "cross_modal_intelligence",
+                "label": "Cross-Modal Intelligence",
+                "title": "Cross-Modal Integration Models",
+                "description": "Architectures that integrate and reason across different data modalities.",
+                "role": "generative",
+                "nodes": ["multimodal_models"]
+            },
+            {
+                "id": "task_specific_solutions",
+                "label": "Task-Specific Solutions",
+                "title": "Specialized Task Models",
+                "description": "Models tailored for specific applications like time series analysis, protein folding, or general purpose classification.",
+                "role": "analytical",
+                "nodes": ["time_series_prediction", "sequence_classification_qa", "miscellaneous_models"]
+            }
+        ]
+    }
+}

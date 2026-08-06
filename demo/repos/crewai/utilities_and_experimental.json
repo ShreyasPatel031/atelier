@@ -1,0 +1,152 @@
+{
+    "title": "Utilities and Experimental",
+    "summary": "This module provides a collection of general-purpose utility functions, experimental features, hooks, callbacks, and development tools for the CrewAI framework.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "general_utilities",
+                "label": "General Utilities",
+                "type": "module",
+                "link": "general_utilities",
+                "title": "General Utilities Module",
+                "description": "Provides common utility functions for logging, serialization, string manipulation, task output management, and security configurations."
+            },
+            {
+                "id": "hooks_and_callbacks",
+                "label": "Hooks and Callbacks",
+                "type": "module",
+                "link": "hooks_and_callbacks",
+                "title": "Hooks and Callbacks Module",
+                "description": "Offers a flexible system for defining and managing hooks that execute before or after LLM and tool calls, enabling custom logic and logging."
+            },
+            {
+                "id": "experimental_features",
+                "label": "Experimental Features",
+                "type": "module",
+                "link": "experimental_features",
+                "title": "Experimental Features Module",
+                "description": "Contains features under active development, such as conversational AI capabilities and evaluation tools for agents and crews."
+            },
+            {
+                "id": "testing_and_dev_tools",
+                "label": "Testing and Development Tools",
+                "type": "module",
+                "link": "testing_and_dev_tools",
+                "title": "Testing and Development Tools Module",
+                "description": "Includes utilities for testing, development, and telemetry, such as version bumping, documentation checks, and usage tracking."
+            },
+            {
+                "id": "llm_integration",
+                "label": "LLM Integration",
+                "type": "module",
+                "link": "llm_integration",
+                "title": "LLM Integration",
+                "description": "Handles interactions with various Large Language Models (LLMs) and their specific APIs."
+            },
+            {
+                "id": "agent_management",
+                "label": "Agent Management",
+                "type": "module",
+                "link": "agent_management",
+                "title": "Agent Management",
+                "description": "Manages the lifecycle and execution of AI agents, including their interactions with LLMs and tools."
+            },
+            {
+                "id": "event_system",
+                "label": "Event System",
+                "type": "module",
+                "link": "event_system",
+                "title": "Event System",
+                "description": "Manages and dispatches events within the CrewAI framework, enabling logging, tracing, and inter-component communication."
+            }
+        ],
+        "edges": [
+            {
+                "source": "general_utilities",
+                "target": "llm_integration",
+                "label": "sanitizes LLM parameters",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utilities",
+                "target": "agent_management",
+                "label": "provides agent logging",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hooks_and_callbacks",
+                "target": "llm_integration",
+                "label": "intercepts LLM calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "hooks_and_callbacks",
+                "target": "agent_management",
+                "label": "intercepts tool calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "experimental_features",
+                "target": "agent_management",
+                "label": "evaluates agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "testing_and_dev_tools",
+                "target": "event_system",
+                "label": "resets event state",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "testing_and_dev_tools",
+                "target": "general_utilities",
+                "label": "uses telemetry",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_utilities_group",
+                "label": "Core Utilities",
+                "nodes": [
+                    "general_utilities",
+                    "hooks_and_callbacks"
+                ],
+                "title": "Core Utility Functions and Hooks",
+                "description": "This group encompasses essential utility functions for common tasks and a flexible system for injecting custom logic via hooks and callbacks into the CrewAI workflow.",
+                "role": null
+            },
+            {
+                "id": "experimental_and_dev_group",
+                "label": "Experimental & Dev Tools",
+                "nodes": [
+                    "experimental_features",
+                    "testing_and_dev_tools"
+                ],
+                "title": "Experimental Features and Development Tools",
+                "description": "This group includes features under active development, such as conversational AI and evaluation tools, alongside utilities for testing, development, and telemetry.",
+                "role": null
+            },
+            {
+                "id": "framework_dependencies",
+                "label": "Framework Dependencies",
+                "nodes": [
+                    "llm_integration",
+                    "agent_management",
+                    "event_system"
+                ],
+                "title": "Core Framework Dependencies",
+                "description": "These modules represent core components of the CrewAI framework that are utilized or extended by the utilities and experimental features.",
+                "role": null
+            }
+        ]
+    }
+}

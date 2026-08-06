@@ -1,0 +1,300 @@
+{
+  "title": "Agent Management",
+  "summary": "This module defines the core components for managing AI agents, including their lifecycle, execution, tool integration, and interaction with language models.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "agent_meta",
+        "label": "AgentMeta",
+        "type": "component",
+        "link": null,
+        "title": "Agent Metaclass",
+        "description": "A generic metaclass that detects and applies extension fields (like 'a2a') to agent classes, enabling extended functionality."
+      },
+      {
+        "id": "handle_reasoning",
+        "label": "Handle Reasoning",
+        "type": "component",
+        "link": null,
+        "title": "Agent Reasoning Handler",
+        "description": "Manages the reasoning and planning process for an agent before task execution, appending the generated plan to the task description."
+      },
+      {
+        "id": "base_converter_adapter",
+        "label": "BaseConverterAdapter",
+        "type": "component",
+        "link": null,
+        "title": "Base Converter Adapter",
+        "description": "Abstract base class for converting agent outputs into structured formats, supporting JSON and Pydantic, and enhancing system prompts."
+      },
+      {
+        "id": "langgraph_agent_adapter",
+        "label": "LangGraphAgentAdapter",
+        "type": "component",
+        "link": null,
+        "title": "LangGraph Agent Adapter",
+        "description": "Integrates LangGraph's ReAct agents with CrewAI, providing memory persistence, tool integration, and structured output support."
+      },
+      {
+        "id": "openai_agent_adapter",
+        "label": "OpenAIAgentAdapter",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Agent Adapter",
+        "description": "Integrates OpenAI Assistants API with CrewAI, handling tool configuration, structured output, and task execution."
+      },
+      {
+        "id": "crew_agent_executor",
+        "label": "CrewAgentExecutor",
+        "type": "component",
+        "link": null,
+        "title": "Crew Agent Executor",
+        "description": "Manages the execution lifecycle of an agent, including prompt formatting, LLM interactions, tool execution, and feedback handling. (Deprecated)"
+      },
+      {
+        "id": "tools_handler",
+        "label": "ToolsHandler",
+        "type": "component",
+        "link": null,
+        "title": "Tool Usage Handler",
+        "description": "Manages tool usage callbacks and optionally caches tool outputs for agents."
+      },
+      {
+        "id": "lite_agent",
+        "label": "LiteAgent",
+        "type": "component",
+        "link": null,
+        "title": "Lightweight Agent",
+        "description": "A simplified agent for direct message processing and tool usage, designed for interactions where a full crew is not needed. (Deprecated)"
+      },
+      {
+        "id": "llm_integration",
+        "label": "LLM Integration",
+        "type": "module",
+        "link": "llm_integration",
+        "title": "LLM Integration",
+        "description": "Handles interactions with various Large Language Models (LLMs) and their specific APIs."
+      },
+      {
+        "id": "a2a_core",
+        "label": "A2A Core",
+        "type": "module",
+        "link": "a2a_core",
+        "title": "Agent-to-Agent Core",
+        "description": "Provides core functionalities for Agent-to-Agent communication and delegation."
+      },
+      {
+        "id": "event_system",
+        "label": "Event System",
+        "type": "module",
+        "link": "event_system",
+        "title": "Event System",
+        "description": "Manages and dispatches events within the CrewAI framework, enabling logging, tracing, and inter-component communication."
+      },
+      {
+        "id": "general_utilities",
+        "label": "General Utilities",
+        "type": "module",
+        "link": "general_utilities",
+        "title": "General Utilities",
+        "description": "Provides common utility functions and helper classes used across the CrewAI framework."
+      },
+      {
+        "id": "hooks_and_callbacks",
+        "label": "Hooks and Callbacks",
+        "type": "module",
+        "link": "hooks_and_callbacks",
+        "title": "Hooks and Callbacks",
+        "description": "Manages custom hooks and callback functions that can be injected into various stages of agent and LLM operations."
+      },
+      {
+        "id": "memory_management",
+        "label": "Memory Management",
+        "type": "module",
+        "link": "memory_management",
+        "title": "Memory Management",
+        "description": "Handles the storage, retrieval, and analysis of agent memories, enabling agents to recall past interactions and learn."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_meta",
+        "target": "a2a_core",
+        "label": "uses A2A extensions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "handle_reasoning",
+        "target": "general_utilities",
+        "label": "uses reasoning utilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_converter_adapter",
+        "target": "general_utilities",
+        "label": "uses model description",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langgraph_agent_adapter",
+        "target": "base_converter_adapter",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langgraph_agent_adapter",
+        "target": "llm_integration",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langgraph_agent_adapter",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_agent_adapter",
+        "target": "base_converter_adapter",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_agent_adapter",
+        "target": "llm_integration",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_agent_adapter",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "llm_integration",
+        "label": "uses LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "tools_handler",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "general_utilities",
+        "label": "uses utilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "hooks_and_callbacks",
+        "label": "integrates hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tools_handler",
+        "target": "general_utilities",
+        "label": "uses cache handler",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "llm_integration",
+        "label": "uses LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "event_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "general_utilities",
+        "label": "uses utilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "a2a_core",
+        "label": "integrates A2A",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "memory_management",
+        "label": "uses memory",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_core",
+        "label": "Agent Core",
+        "nodes": [
+          "agent_meta",
+          "handle_reasoning"
+        ],
+        "title": "Core Agent Logic",
+        "description": "Components defining the fundamental structure and behavior of agents.",
+        "role": "analytical"
+      },
+      {
+        "id": "agent_adapters",
+        "label": "Agent Adapters",
+        "nodes": [
+          "base_converter_adapter",
+          "langgraph_agent_adapter",
+          "openai_agent_adapter"
+        ],
+        "title": "External Agent System Integration",
+        "description": "Adapters for integrating with different agent frameworks and managing structured output.",
+        "role": "generative"
+      },
+      {
+        "id": "agent_execution",
+        "label": "Agent Execution",
+        "nodes": [
+          "crew_agent_executor",
+          "tools_handler",
+          "lite_agent"
+        ],
+        "title": "Agent Execution Flow",
+        "description": "Manages the execution of agent tasks, including LLM interaction, tool usage, and result processing.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

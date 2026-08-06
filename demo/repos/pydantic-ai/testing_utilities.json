@@ -1,0 +1,172 @@
+{
+  "title": "Testing Utilities",
+  "summary": "This module provides various utilities for testing, including tools for parsing VCR cassettes, checking for orphaned cassettes, uploading test files to different providers, and verifying Google Cloud Storage (GCS) integration with Vertex AI.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "parse_cassette_main",
+        "label": "Parse VCR Cassette",
+        "type": "component",
+        "link": null,
+        "title": "Parse VCR Cassette Files",
+        "description": "Parses a specified VCR cassette YAML file, optionally focusing on a single interaction, to inspect recorded HTTP requests and responses."
+      },
+      {
+        "id": "check_cassettes_main",
+        "label": "Check Orphaned Cassettes",
+        "type": "component",
+        "link": null,
+        "title": "Check for Orphaned VCR Cassettes",
+        "description": "Scans test modules and VCR cassette files to identify and report any cassettes that do not have a corresponding test, helping to clean up dead code."
+      },
+      {
+        "id": "upload_test_files_main",
+        "label": "Upload Test Files",
+        "type": "component",
+        "link": null,
+        "title": "Upload Test Files to Providers",
+        "description": "Uploads various test files to different AI model providers (e.g., OpenAI, Anthropic, Google, Bedrock) to facilitate testing of file-based inputs."
+      },
+      {
+        "id": "verify_vertex_gcs_all_types_main",
+        "label": "Verify Vertex GCS All Types",
+        "type": "component",
+        "link": null,
+        "title": "Verify Vertex AI GCS Integration for All File Types",
+        "description": "Tests the integration of Vertex AI with Google Cloud Storage (GCS) across various file types, ensuring that models can correctly process GCS URIs."
+      },
+      {
+        "id": "verify_vertex_gcs_tool_result",
+        "label": "Verify Vertex GCS Tool Result",
+        "type": "component",
+        "link": null,
+        "title": "Verify Vertex AI GCS Tool Result Handling",
+        "description": "Verifies that Vertex AI models correctly handle GCS URIs provided within tool results, both directly in function responses and as separate file_data parts."
+      },
+      {
+        "id": "vcr_cassettes",
+        "label": "VCR Cassette Files",
+        "type": "external",
+        "link": null,
+        "title": "VCR Cassette Files",
+        "description": "YAML files containing recorded HTTP interactions used for testing."
+      },
+      {
+        "id": "test_modules",
+        "label": "Test Modules",
+        "type": "external",
+        "link": null,
+        "title": "Python Test Modules",
+        "description": "Python files containing unit and integration tests, often marked for VCR usage."
+      },
+      {
+        "id": "ai_providers",
+        "label": "AI Model Providers",
+        "type": "external",
+        "link": null,
+        "title": "External AI Model Providers",
+        "description": "Various AI model services like OpenAI, Anthropic, Google, and Bedrock, used for testing file uploads and model interactions."
+      },
+      {
+        "id": "google_cloud_storage",
+        "label": "Google Cloud Storage",
+        "type": "external",
+        "link": null,
+        "title": "Google Cloud Storage (GCS)",
+        "description": "Cloud object storage service used for hosting test files and verifying Vertex AI integration."
+      },
+      {
+        "id": "vertex_ai",
+        "label": "Google Vertex AI",
+        "type": "external",
+        "link": null,
+        "title": "Google Vertex AI",
+        "description": "Google's unified machine learning platform, used for testing model interactions with GCS data."
+      }
+    ],
+    "edges": [
+      {
+        "source": "parse_cassette_main",
+        "target": "vcr_cassettes",
+        "label": "reads cassette data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_cassettes_main",
+        "target": "vcr_cassettes",
+        "label": "reads cassette metadata",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_cassettes_main",
+        "target": "test_modules",
+        "label": "scans for VCR-marked tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "upload_test_files_main",
+        "target": "ai_providers",
+        "label": "uploads files to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "verify_vertex_gcs_all_types_main",
+        "target": "google_cloud_storage",
+        "label": "accesses GCS URIs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "verify_vertex_gcs_all_types_main",
+        "target": "vertex_ai",
+        "label": "sends requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "verify_vertex_gcs_tool_result",
+        "target": "google_cloud_storage",
+        "label": "accesses GCS URIs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "verify_vertex_gcs_tool_result",
+        "target": "vertex_ai",
+        "label": "sends requests to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cassette_management",
+        "label": "Cassette Management",
+        "nodes": [
+          "parse_cassette_main",
+          "check_cassettes_main"
+        ],
+        "title": "VCR Cassette Management",
+        "description": "Tools for inspecting and validating VCR (Video Cassette Recorder) HTTP interaction recordings used in tests.",
+        "role": "analytical"
+      },
+      {
+        "id": "cloud_testing",
+        "label": "Cloud Service Testing",
+        "nodes": [
+          "upload_test_files_main",
+          "verify_vertex_gcs_all_types_main",
+          "verify_vertex_gcs_tool_result"
+        ],
+        "title": "Cloud Service Integration Testing",
+        "description": "Utilities for testing interactions with various cloud-based AI model providers and storage services.",
+        "role": "generative"
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "title": "Text Splitters",
+  "summary": "This module provides various strategies for splitting text into smaller, manageable chunks, including token-based, HTML-aware, JSON-aware, and spaCy-based methods, while preserving semantic structure and metadata.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "token_text_splitter",
+        "label": "Token Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Token Text Splitter",
+        "description": "Splits text into tokens using a specified model tokenizer (e.g., GPT-2's tiktoken), allowing for precise control over chunk size and overlap based on token counts."
+      },
+      {
+        "id": "html_header_text_splitter",
+        "label": "HTML Header Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "HTML Header Text Splitter",
+        "description": "Splits HTML content into structured documents based on specified header tags (e.g., h1, h2), preserving the hierarchical semantic structure and associating text with header metadata."
+      },
+      {
+        "id": "html_semantic_preserving_splitter",
+        "label": "HTML Semantic Preserving Splitter",
+        "type": "component",
+        "link": null,
+        "title": "HTML Semantic Preserving Splitter",
+        "description": "Splits HTML content into generalized chunks while preserving semantic structure, handling links, images, and other elements, and using a recursive splitter for further chunking if needed."
+      },
+      {
+        "id": "html_section_splitter",
+        "label": "HTML Section Splitter",
+        "type": "component",
+        "link": null,
+        "title": "HTML Section Splitter",
+        "description": "Splits HTML files into sections based on specified header tags, converting certain HTML tags to headers for consistent parsing and creating documents with associated metadata."
+      },
+      {
+        "id": "recursive_json_splitter",
+        "label": "Recursive JSON Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Recursive JSON Splitter",
+        "description": "Splits JSON data into smaller, structured chunks (dictionaries or strings) while preserving the hierarchical structure, based on configurable maximum and minimum chunk sizes."
+      },
+      {
+        "id": "spacy_text_splitter",
+        "label": "SpaCy Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "SpaCy Text Splitter",
+        "description": "Splits text into sentences using the spaCy natural language processing library, providing language-aware text segmentation with configurable pipeline and maximum length."
+      },
+      {
+        "id": "document_loader",
+        "label": "Document Loader",
+        "type": "external",
+        "link": null,
+        "title": "Document Loader",
+        "description": "External component responsible for loading raw text or structured data into a standardized Document format for processing."
+      },
+      {
+        "id": "document_transformer",
+        "label": "Document Transformer",
+        "type": "external",
+        "link": null,
+        "title": "Document Transformer",
+        "description": "External component that transforms a sequence of documents, often used as an interface for splitters that operate on Document objects."
+      }
+    ],
+    "edges": [
+      {
+        "source": "document_loader",
+        "target": "token_text_splitter",
+        "label": "raw text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_loader",
+        "target": "html_header_text_splitter",
+        "label": "HTML content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_loader",
+        "target": "html_section_splitter",
+        "label": "HTML content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_loader",
+        "target": "recursive_json_splitter",
+        "label": "JSON data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_loader",
+        "target": "spacy_text_splitter",
+        "label": "raw text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_transformer",
+        "target": "html_semantic_preserving_splitter",
+        "label": "documents",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "token_based_splitting",
+        "label": "Token-Based Splitting",
+        "nodes": [
+          "token_text_splitter"
+        ],
+        "title": "Token-Based Splitting",
+        "description": "Components that split text based on token counts, often using language model tokenizers for precise control.",
+        "role": "analytical"
+      },
+      {
+        "id": "html_splitting",
+        "label": "HTML Splitting",
+        "nodes": [
+          "html_header_text_splitter",
+          "html_semantic_preserving_splitter",
+          "html_section_splitter"
+        ],
+        "title": "HTML Content Splitting",
+        "description": "Components designed to parse and split HTML content, preserving its semantic structure and extracting relevant information.",
+        "role": "analytical"
+      },
+      {
+        "id": "structured_data_splitting",
+        "label": "Structured Data Splitting",
+        "nodes": [
+          "recursive_json_splitter"
+        ],
+        "title": "Structured Data Splitting",
+        "description": "Components for splitting structured data formats like JSON while maintaining their hierarchical integrity.",
+        "role": "analytical"
+      },
+      {
+        "id": "nlp_based_splitting",
+        "label": "NLP-Based Splitting",
+        "nodes": [
+          "spacy_text_splitter"
+        ],
+        "title": "NLP-Based Splitting",
+        "description": "Components leveraging natural language processing libraries to split text based on linguistic structures like sentences.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

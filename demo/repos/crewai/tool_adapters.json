@@ -1,0 +1,86 @@
+{
+  "title": "Tool Adapters",
+  "summary": "This module provides adapters for integrating various external tools and data sources, such as enterprise action kits, LanceDB, and RAG systems, into the CrewAI framework.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "enterprise_action_kit_adapter",
+        "label": "Enterprise Action Kit Adapter",
+        "type": "component",
+        "link": null,
+        "title": "EnterpriseActionKitToolAdapter",
+        "description": "Adapts enterprise-defined actions into usable BaseTool instances, fetching action schemas from an API and generating detailed tool descriptions."
+      },
+      {
+        "id": "lancedb_adapter",
+        "label": "LanceDB Adapter",
+        "type": "component",
+        "link": null,
+        "title": "LanceDBAdapter",
+        "description": "Provides an interface to LanceDB for vector-based search and data addition, utilizing an embedding function for queries."
+      },
+      {
+        "id": "rag_adapter",
+        "label": "RAG Adapter",
+        "type": "component",
+        "link": null,
+        "title": "RAGAdapter",
+        "description": "Integrates with a Retrieval-Augmented Generation (RAG) system for querying and adding data, configurable with different embedding models and API keys."
+      },
+      {
+        "id": "tool_definitions",
+        "label": "Tool Definitions",
+        "type": "module",
+        "link": "tool_definitions",
+        "title": "Tool Definitions",
+        "description": "Defines the structure and behavior of various tools available within the CrewAI ecosystem."
+      },
+      {
+        "id": "rag_system",
+        "label": "RAG System",
+        "type": "module",
+        "link": "rag_system",
+        "title": "RAG System",
+        "description": "Manages the core Retrieval-Augmented Generation (RAG) functionalities, including embedding, indexing, and retrieval."
+      }
+    ],
+    "edges": [
+      {
+        "source": "enterprise_action_kit_adapter",
+        "target": "tool_definitions",
+        "label": "creates BaseTool instances",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lancedb_adapter",
+        "target": "rag_system",
+        "label": "uses embedding functions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_adapter",
+        "target": "rag_system",
+        "label": "integrates with RAG",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_integration",
+        "label": "Tool Integration",
+        "nodes": [
+          "enterprise_action_kit_adapter",
+          "lancedb_adapter",
+          "rag_adapter"
+        ],
+        "title": "Tool Integration",
+        "description": "Components responsible for adapting various external tools and data sources into a standardized format for use within the system.",
+        "role": "generative"
+      }
+    ]
+  }
+}

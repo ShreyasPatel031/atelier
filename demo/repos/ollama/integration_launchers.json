@@ -1,0 +1,191 @@
+{
+  "title": "Integration Launchers",
+  "summary": "This module orchestrates the launch, configuration, and management of various external integrations, ensuring proper setup, model selection, and user interaction for tools like Cline, Codex, Hermes, and Kimi.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "module",
+        "link": "command_line_interface",
+        "title": "CLI Commands",
+        "description": "Handles various command-line interface operations, including launching interactive models and managing server runs."
+      },
+      {
+        "id": "integration_launch",
+        "label": "Launch Integration",
+        "type": "component",
+        "link": null,
+        "title": "Launch Integration",
+        "description": "Initiates the launch process for a specified integration, handling configuration, model selection, and execution."
+      },
+      {
+        "id": "integration_config",
+        "label": "Configure Integrations",
+        "type": "component",
+        "link": null,
+        "title": "Configure Integrations",
+        "description": "Manages the configuration for various integrations, including model selection, persistence, and handling of missing or unauthorized models."
+      },
+      {
+        "id": "model_resolution",
+        "label": "Resolve Run Model",
+        "type": "component",
+        "link": null,
+        "title": "Resolve Run Model",
+        "description": "Determines the model to be used for an integration, considering overrides, saved configurations, and user interaction."
+      },
+      {
+        "id": "user_interaction",
+        "label": "User Interaction Prompts",
+        "type": "component",
+        "link": null,
+        "title": "User Interaction Prompts",
+        "description": "Provides interactive prompts for user input, such as model selection, confirmation, sign-in, and upgrade requests."
+      },
+      {
+        "id": "external_integrations",
+        "label": "External Integrations (Cline, Codex, Hermes, Kimi, Qwen, VSCode, OpenClaw, Pi)",
+        "type": "external",
+        "link": null,
+        "title": "External Integrations",
+        "description": "Represents various external tools and platforms integrated by this module, such as Cline, Codex, Hermes, Kimi, Qwen, VSCode, OpenClaw, and Pi."
+      },
+      {
+        "id": "ollama_api",
+        "label": "Ollama API",
+        "type": "external",
+        "link": null,
+        "title": "Ollama API",
+        "description": "External API for interacting with Ollama services, including model show, pull, and status checks."
+      },
+      {
+        "id": "configuration_management",
+        "label": "Configuration Management",
+        "type": "module",
+        "link": "configuration_management",
+        "title": "Configuration Management",
+        "description": "Manages the persistence and retrieval of system configurations, including integration settings."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_commands",
+        "target": "integration_launch",
+        "label": "launch requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_launch",
+        "target": "model_resolution",
+        "label": "model requirements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_resolution",
+        "target": "user_interaction",
+        "label": "model selection prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_resolution",
+        "target": "configuration_management",
+        "label": "load/save model config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_launch",
+        "target": "integration_config",
+        "label": "configure integration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_config",
+        "target": "configuration_management",
+        "label": "load/save integration config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_config",
+        "target": "user_interaction",
+        "label": "onboarding/setup prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_launch",
+        "target": "external_integrations",
+        "label": "execute integration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_resolution",
+        "target": "ollama_api",
+        "label": "check/pull models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "integration_config",
+        "target": "ollama_api",
+        "label": "model catalog updates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "entry_points",
+        "label": "Entry Points",
+        "nodes": [
+          "cli_commands"
+        ],
+        "title": "Entry Points",
+        "description": "User-facing interfaces for initiating integration launches and commands.",
+        "role": "surface"
+      },
+      {
+        "id": "core_orchestration",
+        "label": "Core Orchestration",
+        "nodes": [
+          "integration_launch",
+          "integration_config",
+          "model_resolution"
+        ],
+        "title": "Core Orchestration",
+        "description": "Handles the central logic for launching, configuring, and resolving models for various integrations.",
+        "role": "analytical"
+      },
+      {
+        "id": "support_services",
+        "label": "Support Services",
+        "nodes": [
+          "user_interaction",
+          "configuration_management"
+        ],
+        "title": "Support Services",
+        "description": "Provides essential services like user interaction and configuration persistence to the core orchestration.",
+        "role": "data"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "external_integrations",
+          "ollama_api"
+        ],
+        "title": "External Dependencies",
+        "description": "Represents the various external tools and APIs that this module interacts with.",
+        "role": "external"
+      }
+    ]
+  }
+}

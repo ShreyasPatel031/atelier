@@ -1,0 +1,63 @@
+{
+  "repo_name": "transformers",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/transformers",
+  "repo_size_mb": 448956.86328125,
+  "total_files": 0,
+  "total_code_files": 4484,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 9.991690158843994,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 36.447314977645874,
+      "tokens_used": 28925,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 70.70718598365784,
+      "tokens_used": 1501706,
+      "files_created": 23,
+      "files_created_list": [
+        "core_mixins.json",
+        "multimodal_models.json",
+        "general_processing.json",
+        "model_architectures.json",
+        "text_models.json",
+        "first_module_tree.json",
+        "conversion_tools.json",
+        "utilities_and_integrations.json",
+        "quantization.json",
+        "metadata.json",
+        "pipelines.json",
+        "vision_models.json",
+        "integrations.json",
+        "module_tree.json",
+        "overview.json",
+        "text_processing.json",
+        "audio_processing.json",
+        "image_processing.json",
+        "sync_issues.json",
+        "data_processing.json",
+        "audio_models.json",
+        "pipelines_and_cli.json",
+        "cli_tools.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 117.59051775932312,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/transformers/docs/overview.json",
+  "total_duration": 117.59057688713074,
+  "total_tokens": 1530631,
+  "estimated_cost_usd": 0.2774,
+  "total_llm_calls": 48,
+  "total_files_created": 23,
+  "start_time": 1781381651.8398342,
+  "end_time": 1781381769.430411
+}

@@ -1,0 +1,186 @@
+{
+  "title": "Hooks and Callbacks",
+  "summary": "This module provides a flexible system for defining and managing hooks and callbacks that execute before or after LLM and tool calls, allowing for custom logic, logging, and intervention.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "clear_all_global_hooks",
+        "label": "Clear All Global Hooks",
+        "type": "component",
+        "link": null,
+        "title": "Clear All Global Hooks",
+        "description": "A utility function to clear all registered global hooks for both LLM and tool calls, useful for resetting the system state."
+      },
+      {
+        "id": "decorator_factory",
+        "label": "Hook Decorator Factory",
+        "type": "component",
+        "link": null,
+        "title": "Hook Decorator Factory",
+        "description": "A factory function that generates decorators for registering hooks, supporting filtering by tools and agents."
+      },
+      {
+        "id": "before_llm_call",
+        "label": "Before LLM Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Before LLM Call Hook",
+        "description": "A decorator to register functions that execute before an LLM call, allowing for pre-processing or logging."
+      },
+      {
+        "id": "after_llm_call",
+        "label": "After LLM Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "After LLM Call Hook",
+        "description": "A decorator to register functions that execute after an LLM call, enabling post-processing, response modification, or logging."
+      },
+      {
+        "id": "before_tool_call",
+        "label": "Before Tool Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Before Tool Call Hook",
+        "description": "A decorator to register functions that execute before a tool call, useful for validation, approval flows, or logging."
+      },
+      {
+        "id": "after_tool_call",
+        "label": "After Tool Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "After Tool Call Hook",
+        "description": "A decorator to register functions that execute after a tool call, allowing for result processing, sanitization, or logging."
+      },
+      {
+        "id": "before_llm_call_hook_method",
+        "label": "Before LLM Call Hook Method Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Before LLM Call Hook Method Wrapper",
+        "description": "Wraps methods intended as 'before LLM call' hooks within CrewBase classes, enabling their detection and registration."
+      },
+      {
+        "id": "after_llm_call_hook_method",
+        "label": "After LLM Call Hook Method Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "After LLM Call Hook Method Wrapper",
+        "description": "Wraps methods intended as 'after LLM call' hooks within CrewBase classes, facilitating their registration and execution."
+      },
+      {
+        "id": "before_tool_call_hook_method",
+        "label": "Before Tool Call Hook Method Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Before Tool Call Hook Method Wrapper",
+        "description": "Wraps methods intended as 'before tool call' hooks within CrewBase classes, allowing for proper registration and filtering."
+      },
+      {
+        "id": "after_tool_call_hook_method",
+        "label": "After Tool Call Hook Method Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "After Tool Call Hook Method Wrapper",
+        "description": "Wraps methods intended as 'after tool call' hooks within CrewBase classes, ensuring their correct registration and execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "decorator_factory",
+        "target": "before_llm_call",
+        "label": "creates decorator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "after_llm_call",
+        "label": "creates decorator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "before_tool_call",
+        "label": "creates decorator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "after_tool_call",
+        "label": "creates decorator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_llm_call",
+        "target": "before_llm_call_hook_method",
+        "label": "registers/wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "after_llm_call",
+        "target": "after_llm_call_hook_method",
+        "label": "registers/wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_tool_call",
+        "target": "before_tool_call_hook_method",
+        "label": "registers/wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "after_tool_call",
+        "target": "after_tool_call_hook_method",
+        "label": "registers/wraps",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "hook_registration",
+        "label": "Hook Registration",
+        "nodes": [
+          "decorator_factory",
+          "before_llm_call",
+          "after_llm_call",
+          "before_tool_call",
+          "after_tool_call"
+        ],
+        "title": "Hook Registration",
+        "description": "Components responsible for defining and registering various types of hooks that can be triggered during LLM and tool interactions.",
+        "role": "generative"
+      },
+      {
+        "id": "hook_management",
+        "label": "Hook Management",
+        "nodes": [
+          "clear_all_global_hooks"
+        ],
+        "title": "Hook Management",
+        "description": "Utilities for managing the lifecycle of registered hooks, such as clearing them.",
+        "role": "analytical"
+      },
+      {
+        "id": "hook_wrappers",
+        "label": "Hook Method Wrappers",
+        "nodes": [
+          "before_llm_call_hook_method",
+          "after_llm_call_hook_method",
+          "before_tool_call_hook_method",
+          "after_tool_call_hook_method"
+        ],
+        "title": "Hook Method Wrappers",
+        "description": "Classes that wrap methods to enable their use as hooks within CrewBase classes, providing context and filtering capabilities.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

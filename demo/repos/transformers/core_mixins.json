@@ -1,0 +1,81 @@
+{
+  "title": "Core Mixins",
+  "summary": "This module provides foundational mixin classes for model generation and fusion, enabling advanced functionalities like continuous batching, various generation strategies, and optimized model operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "generation_mixin",
+        "label": "GenerationMixin",
+        "type": "component",
+        "link": null,
+        "title": "Generation Mixin",
+        "description": "Provides core functionalities for text generation, including greedy decoding, multinomial sampling, beam search, and assisted decoding strategies."
+      },
+      {
+        "id": "continuous_mixin",
+        "label": "ContinuousMixin",
+        "type": "component",
+        "link": null,
+        "title": "Continuous Batching Mixin",
+        "description": "Adds continuous batching capabilities to models, optimizing inference for multiple requests by managing a shared batching manager."
+      },
+      {
+        "id": "patch_embeddings_fusion_spec",
+        "label": "PatchEmbeddingsFusionSpec",
+        "type": "component",
+        "link": null,
+        "title": "Patch Embeddings Fusion Specification",
+        "description": "Defines how to fuse compatible Conv3d patch embeddings into flattened Linear projections for model optimization."
+      },
+      {
+        "id": "diffusion_gemma_generation_mixin",
+        "label": "DiffusionGemmaGenerationMixin",
+        "type": "module",
+        "link": "diffusion_gemma",
+        "title": "Diffusion Gemma Generation Mixin",
+        "description": "Specialized mixin for Diffusion Gemma models, handling autoregressive canvas generation and inner diffusion loops for text generation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "continuous_mixin",
+        "target": "generation_mixin",
+        "label": "extends capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generation_mixin",
+        "target": "diffusion_gemma_generation_mixin",
+        "label": "specializes for diffusion models",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "generation_logic",
+        "label": "Generation Logic",
+        "nodes": [
+          "generation_mixin",
+          "continuous_mixin",
+          "diffusion_gemma_generation_mixin"
+        ],
+        "title": "Model Generation Logic",
+        "description": "Classes and methods responsible for controlling how models generate output sequences, including various decoding strategies and batching optimizations.",
+        "role": "generative"
+      },
+      {
+        "id": "model_optimization",
+        "label": "Model Optimization",
+        "nodes": [
+          "patch_embeddings_fusion_spec"
+        ],
+        "title": "Model Optimization Utilities",
+        "description": "Components focused on optimizing model architecture and performance, such as fusing layers for efficiency.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

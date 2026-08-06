@@ -1,0 +1,138 @@
+{
+    "title": "Low-Level Model Operations",
+    "summary": "This module provides foundational functionalities for model creation, quantization, MLX model execution, cache management, image generation, and neural network components. It underpins the core model serving and management capabilities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "model_creation_and_quantization",
+                "label": "Model Creation & Quantization",
+                "type": "module",
+                "link": "model_creation_and_quantization",
+                "title": "Model Creation & Quantization",
+                "description": "Handles the creation of models from various sources and applies quantization techniques to optimize their size and performance."
+            },
+            {
+                "id": "mlx_runner_and_cache_management",
+                "label": "MLX Runner & Cache Management",
+                "type": "module",
+                "link": "mlx_runner_and_cache_management",
+                "title": "MLX Runner & Cache Management",
+                "description": "Manages the execution of MLX models, including efficient key-value cache handling and snapshotting for conversational context."
+            },
+            {
+                "id": "image_generation_engine",
+                "label": "Image Generation Engine",
+                "type": "module",
+                "link": "image_generation_engine",
+                "title": "Image Generation Engine",
+                "description": "Provides the core logic for generating images using various models and handles HTTP requests for image completion."
+            },
+            {
+                "id": "neural_network_components",
+                "label": "Neural Network Components",
+                "type": "module",
+                "link": "neural_network_components",
+                "title": "Neural Network Components",
+                "description": "Implements fundamental neural network layers and operations, focusing on recurrent mechanisms and gated delta networks."
+            },
+            {
+                "id": "tool_registry_and_websearch",
+                "label": "Tool Registry & Websearch",
+                "type": "module",
+                "link": "tool_registry_and_websearch",
+                "title": "Tool Registry & Websearch",
+                "description": "Manages a registry of available tools and provides functionality for executing them, including web search capabilities."
+            },
+            {
+                "id": "model_serving_and_management",
+                "label": "Model Serving & Management",
+                "type": "module",
+                "link": "model_serving_and_management",
+                "title": "Model Serving & Management",
+                "description": "The higher-level module that orchestrates model loading, scheduling, and API interactions."
+            }
+        ],
+        "edges": [
+            {
+                "source": "model_creation_and_quantization",
+                "target": "model_serving_and_management",
+                "label": "provides created models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mlx_runner_and_cache_management",
+                "target": "model_serving_and_management",
+                "label": "executes MLX models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_generation_engine",
+                "target": "model_serving_and_management",
+                "label": "provides image generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "neural_network_components",
+                "target": "mlx_runner_and_cache_management",
+                "label": "implements NN layers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_registry_and_websearch",
+                "target": "model_serving_and_management",
+                "label": "provides tool execution",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_lifecycle",
+                "label": "Model Lifecycle Management",
+                "nodes": [
+                    "model_creation_and_quantization",
+                    "mlx_runner_and_cache_management"
+                ],
+                "title": "Model Lifecycle Management",
+                "description": "Handles the entire lifecycle of models, from their initial creation and optimization to their efficient execution and state management.",
+                "role": "analytical"
+            },
+            {
+                "id": "specialized_engines",
+                "label": "Specialized Engines",
+                "nodes": [
+                    "image_generation_engine",
+                    "tool_registry_and_websearch"
+                ],
+                "title": "Specialized Engines",
+                "description": "Provides dedicated engines for specific functionalities like image generation and external tool integration.",
+                "role": "generative"
+            },
+            {
+                "id": "foundational_components",
+                "label": "Foundational Components",
+                "nodes": [
+                    "neural_network_components"
+                ],
+                "title": "Foundational Components",
+                "description": "Contains the basic building blocks and core algorithms for neural network operations.",
+                "role": "data"
+            },
+            {
+                "id": "integration_point",
+                "label": "Integration Point",
+                "nodes": [
+                    "model_serving_and_management"
+                ],
+                "title": "Integration Point",
+                "description": "The primary module that integrates and orchestrates the low-level model operations for external consumption.",
+                "role": "surface"
+            }
+        ]
+    }
+}

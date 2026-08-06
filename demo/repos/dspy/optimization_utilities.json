@@ -1,0 +1,136 @@
+{
+  "title": "Optimization Utilities",
+  "summary": "This module provides utility functions for program optimization, including patching forward passes for tracing, appending rules and demonstrations based on feedback, and logging token usage during optimization trials.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "patched_forward",
+        "label": "Patch Program Forward Pass",
+        "type": "component",
+        "link": null,
+        "title": "Patched Forward Pass",
+        "description": "Intercepts and modifies the forward pass of a program to enable tracing of execution, especially for handling parsing errors and logging failed predictions during optimization."
+      },
+      {
+        "id": "append_a_rule",
+        "label": "Append Optimization Rule",
+        "type": "component",
+        "link": null,
+        "title": "Append a Rule",
+        "description": "Generates and appends a new optimization rule to a program's predictors based on contrasting good and bad execution trajectories, aiming to improve future performance."
+      },
+      {
+        "id": "append_a_demo",
+        "label": "Append Few-shot Demo",
+        "type": "component",
+        "link": null,
+        "title": "Append a Demo",
+        "description": "Adds a few-shot demonstration to a program's predictors based on successful execution traces, helping the model learn from good examples."
+      },
+      {
+        "id": "offer_feedback_signature",
+        "label": "Offer Feedback Signature",
+        "type": "component",
+        "link": null,
+        "title": "Offer Feedback Signature",
+        "description": "Defines the signature for generating advice to program modules, contrasting better and worse execution trajectories to provide concrete, actionable feedback."
+      },
+      {
+        "id": "log_token_usage",
+        "label": "Log Token Usage",
+        "type": "component",
+        "link": null,
+        "title": "Log Token Usage",
+        "description": "Extracts and logs the total input and output token usage for each language model involved in an optimization trial, providing insights into resource consumption."
+      },
+      {
+        "id": "calculate_proposed_quality",
+        "label": "Calculate Proposed Quality",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Proposed Quality",
+        "description": "Evaluates the average and best quality of recently proposed programs over a specified number of trials, assessing the effectiveness of optimization proposals."
+      },
+      {
+        "id": "get_task_model_history",
+        "label": "Get Task Model History",
+        "type": "component",
+        "link": null,
+        "title": "Get Task Model History",
+        "description": "Retrieves the full execution trace and history of a task model for a given candidate program, useful for detailed analysis and debugging during optimization."
+      }
+    ],
+    "edges": [
+      {
+        "source": "patched_forward",
+        "target": "append_a_rule",
+        "label": "failed prediction trace",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward",
+        "target": "append_a_demo",
+        "label": "successful prediction trace",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "append_a_rule",
+        "target": "offer_feedback_signature",
+        "label": "trajectory comparison",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback_signature",
+        "target": "append_a_rule",
+        "label": "module advice",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "log_token_usage",
+        "target": "calculate_proposed_quality",
+        "label": "token usage data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calculate_proposed_quality",
+        "target": "get_task_model_history",
+        "label": "program evaluation results",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "trace_and_feedback",
+        "label": "Execution Tracing & Feedback",
+        "nodes": [
+          "patched_forward",
+          "append_a_rule",
+          "append_a_demo",
+          "offer_feedback_signature"
+        ],
+        "title": "Execution Tracing and Feedback",
+        "description": "Components responsible for monitoring program execution, capturing traces, and generating feedback or demonstrations to improve program performance.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_and_logging",
+        "label": "Evaluation & Logging",
+        "nodes": [
+          "log_token_usage",
+          "calculate_proposed_quality",
+          "get_task_model_history"
+        ],
+        "title": "Evaluation and Logging",
+        "description": "Utilities for evaluating the quality of proposed programs, logging resource usage, and inspecting model execution history during optimization trials.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

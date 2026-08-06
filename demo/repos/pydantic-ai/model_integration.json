@@ -1,0 +1,234 @@
+{
+  "title": "Model Integration",
+  "summary": "This module provides a unified interface for interacting with various AI models, handling requests, streaming responses, and managing model-specific configurations and fallbacks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "model_interface",
+        "label": "Model Interface",
+        "type": "component",
+        "link": null,
+        "title": "Model Interface",
+        "description": "Defines the core abstract classes and interfaces for AI models and their streamed responses, ensuring consistent interaction patterns across different model implementations."
+      },
+      {
+        "id": "model_implementations",
+        "label": "Model Implementations",
+        "type": "component",
+        "link": null,
+        "title": "Model Implementations",
+        "description": "Concrete implementations for various AI models like Gemini, OpenAI, and Function models, handling their specific API interactions and data formats."
+      },
+      {
+        "id": "stream_management",
+        "label": "Stream Management",
+        "type": "component",
+        "link": null,
+        "title": "Stream Management",
+        "description": "Manages the asynchronous streaming of model responses, including event processing, cancellation, and partial result aggregation for various providers."
+      },
+      {
+        "id": "tool_forcing_logic",
+        "label": "Tool Forcing Logic",
+        "type": "component",
+        "link": null,
+        "title": "Tool Forcing Logic",
+        "description": "Handles model-specific logic for forcing tool use, ensuring compatibility with different AI providers and their unique capabilities."
+      },
+      {
+        "id": "usage_and_metadata_mapping",
+        "label": "Usage & Metadata Mapping",
+        "type": "component",
+        "link": null,
+        "title": "Usage and Metadata Mapping",
+        "description": "Translates model-specific usage details and metadata into a standardized internal format for consistent reporting and analysis."
+      },
+      {
+        "id": "model_wrappers_and_orchestration",
+        "label": "Model Wrappers & Orchestration",
+        "type": "component",
+        "link": null,
+        "title": "Model Wrappers and Orchestration",
+        "description": "Provides mechanisms for extending model functionality, enforcing concurrency limits, and orchestrating multiple models (e.g., fallback models)."
+      },
+      {
+        "id": "model_settings_and_messages",
+        "label": "Model Settings & Messages",
+        "type": "component",
+        "link": null,
+        "title": "Model Settings and Messages",
+        "description": "Manages configuration parameters for AI models and defines standardized message formats for communication, including prompts and responses."
+      },
+      {
+        "id": "http_client_cache",
+        "label": "HTTP Client Cache",
+        "type": "component",
+        "link": null,
+        "title": "Cached HTTP Client",
+        "description": "Provides a cached asynchronous HTTP client for efficient and reusable network connections to model providers, reducing latency and resource usage."
+      },
+      {
+        "id": "mcp_integration",
+        "label": "MCP Integration",
+        "type": "component",
+        "link": null,
+        "title": "MCP Integration",
+        "description": "Handles integration with the Model Context Protocol (MCP) for sampling models and managing server sessions, enabling advanced model interaction patterns."
+      },
+      {
+        "id": "outlines_integration",
+        "label": "Outlines Integration",
+        "type": "component",
+        "link": null,
+        "title": "Outlines Integration",
+        "description": "Integrates with the Outlines library to support structured generation with non-API based models, leveraging various local backends."
+      },
+      {
+        "id": "ai_core",
+        "label": "AI Core",
+        "type": "external",
+        "link": "ai_core",
+        "title": "AI Core",
+        "description": "The foundational AI core module, providing essential utilities and base functionalities for AI operations."
+      },
+      {
+        "id": "graph_and_mcp",
+        "label": "Graph and MCP",
+        "type": "external",
+        "link": "graph_and_mcp",
+        "title": "Graph and MCP",
+        "description": "The module responsible for graph-based computations and the Model Context Protocol (MCP) server interactions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "model_interface",
+        "target": "model_implementations",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_interface",
+        "target": "stream_management",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_implementations",
+        "target": "tool_forcing_logic",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_implementations",
+        "target": "usage_and_metadata_mapping",
+        "label": "generates data for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_implementations",
+        "target": "http_client_cache",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_wrappers_and_orchestration",
+        "target": "model_interface",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_settings_and_messages",
+        "target": "model_interface",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_integration",
+        "target": "model_interface",
+        "label": "provides sampling for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "outlines_integration",
+        "target": "model_interface",
+        "label": "provides local models for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ai_core",
+        "target": "model_interface",
+        "label": "depends on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph_and_mcp",
+        "target": "mcp_integration",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "model_interface",
+          "model_settings_and_messages"
+        ],
+        "title": "Core Abstractions",
+        "description": "Defines the fundamental interfaces and base classes for all AI models and their interactions within the system.",
+        "role": "analytical"
+      },
+      {
+        "id": "model_providers",
+        "label": "Model Providers",
+        "nodes": [
+          "model_implementations",
+          "tool_forcing_logic",
+          "stream_management",
+          "usage_and_metadata_mapping",
+          "http_client_cache"
+        ],
+        "title": "Model Providers",
+        "description": "Encapsulates the specific integrations and logic for various external and internal AI model providers.",
+        "role": "generative"
+      },
+      {
+        "id": "advanced_features",
+        "label": "Advanced Features",
+        "nodes": [
+          "model_wrappers_and_orchestration",
+          "mcp_integration",
+          "outlines_integration"
+        ],
+        "title": "Advanced Features",
+        "description": "Provides advanced capabilities such as model orchestration, fallback mechanisms, and integration with specialized model protocols and libraries.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "ai_core",
+          "graph_and_mcp"
+        ],
+        "title": "External Dependencies",
+        "description": "Modules outside of model_integration that this module relies on for core functionalities or specific protocols.",
+        "role": "data"
+      }
+    ]
+  }
+}

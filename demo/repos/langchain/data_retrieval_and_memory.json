@@ -1,0 +1,120 @@
+{
+    "title": "Data Retrieval and Memory",
+    "summary": "This module provides functionalities for efficient data retrieval and robust memory management, enabling AI applications to access relevant information and maintain conversational context.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "retrievers",
+                "label": "Retrievers",
+                "type": "module",
+                "link": "retrievers",
+                "title": "Retrievers Module",
+                "description": "Provides tools for efficient document retrieval, offering various strategies to fetch relevant information from diverse sources based on a given query."
+            },
+            {
+                "id": "memory",
+                "label": "Memory Management",
+                "type": "module",
+                "link": "memory",
+                "title": "Memory Management Module",
+                "description": "Provides various memory implementations for storing and managing conversation history in AI applications, ranging from simple buffers to more advanced summarization and entity-aware memories."
+            },
+            {
+                "id": "embeddings_and_vectorstores",
+                "label": "Embeddings and Vectorstores",
+                "type": "module",
+                "link": "embeddings_and_vectorstores",
+                "title": "Embeddings and Vectorstores Module",
+                "description": "Provides functionalities for generating text embeddings and storing them in vector databases, including tools for creating, managing, and querying vector stores, as well as caching embedding results."
+            },
+            {
+                "id": "llm",
+                "label": "Language Model",
+                "type": "external",
+                "link": "language_model_interfaces",
+                "title": "Language Model",
+                "description": "An external component representing a Large Language Model, used for generating queries, extracting information, or filtering documents."
+            },
+            {
+                "id": "documents",
+                "label": "Documents",
+                "type": "external",
+                "link": "data_handling",
+                "title": "Documents",
+                "description": "Structured pieces of information, often text, that are processed and stored for retrieval."
+            }
+        ],
+        "edges": [
+            {
+                "source": "retrievers",
+                "target": "embeddings_and_vectorstores",
+                "label": "uses vector stores from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrievers",
+                "target": "llm",
+                "label": "uses for query generation/filtering",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "embeddings_and_vectorstores",
+                "target": "documents",
+                "label": "processes to create embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "memory",
+                "target": "llm",
+                "label": "provides context to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "memory",
+                "target": "embeddings_and_vectorstores",
+                "label": "can use vector stores for long-term storage",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_access",
+                "label": "Data Access Layer",
+                "nodes": [
+                    "retrievers",
+                    "embeddings_and_vectorstores"
+                ],
+                "title": "Data Access Layer",
+                "description": "Components responsible for fetching, indexing, and storing data, primarily through vector embeddings and retrieval mechanisms.",
+                "role": null
+            },
+            {
+                "id": "context_management",
+                "label": "Context Management",
+                "nodes": [
+                    "memory"
+                ],
+                "title": "Context Management",
+                "description": "Components dedicated to maintaining and managing conversational history and other stateful information for AI applications.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "llm",
+                    "documents"
+                ],
+                "title": "External Dependencies",
+                "description": "Key external components that interact with the data retrieval and memory modules, such as language models and raw documents.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -300,10 +300,18 @@ def _resolve_gemini_api_key(config: Config) -> str:
 
 
 def _use_adc_mode(config: Config) -> bool:
-    """Return True when Vertex AI + ADC should be used instead of a static API key."""
+    """Return True when Vertex AI + ADC should be used instead of a static API key.
+
+    If ``use_vertex_ai`` is enabled (or GOOGLE_USE_ADC=1), stay on Vertex+ADC.
+    Do not bypass a missing ADC by flipping use_vertex_ai=False or injecting
+    GEMINI_API_KEY — that hits free-tier Gemini 429s and masks ADC setup bugs.
+    Fix credentials: ``gcloud auth application-default login``.
+    """
+    if bool(getattr(config, "use_vertex_ai", False)):
+        return True
     if os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes"):
         return True
-    return bool(getattr(config, "use_vertex_ai", False))
+    return False
 
 
 def _get_adc_credentials():

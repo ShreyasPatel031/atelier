@@ -1,0 +1,42 @@
+{
+    "title": "Seq. Class. & QA Models",
+    "summary": "Provides various model implementations for sequence classification and question answering tasks, leveraging different transformer architectures.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "sequence_classification_models",
+                "label": "Sequence Classification Models",
+                "type": "module",
+                "link": "sequence_classification_models",
+                "title": "Sequence Classification Models",
+                "description": "Collection of models designed for classifying entire input sequences into predefined categories. These models typically output a single label for the entire input."
+            },
+            {
+                "id": "question_answering_models",
+                "label": "Question Answering Models",
+                "type": "module",
+                "link": "question_answering_models",
+                "title": "Question Answering Models",
+                "description": "Set of models optimized for extracting answers to questions from a given text. These models identify start and end positions of the answer within the input."
+            }
+        ],
+        "edges": [
+            {
+                "source": "sequence_classification_models",
+                "target": "question_answering_models",
+                "label": "shared core capabilities"
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_implementations",
+                "label": "Model Implementations",
+                "title": "Core Model Implementations",
+                "description": "Encapsulates specific model architectures adapted for different NLP tasks, such as classification and question answering.",
+                "role": "generative",
+                "nodes": ["sequence_classification_models", "question_answering_models"]
+            }
+        ]
+    }
+}
