@@ -808,7 +808,12 @@ def _call_anthropic_rest(
     if system_instruction:
         prompt_tokens_estimated += count_tokens(system_instruction)
 
-    max_tokens = 8192
+    # Haiku 4.5 supports large outputs; clustering needs >>8k or GROUPED_COMPONENTS truncates.
+    from codewiki.src.config import MODEL_OUTPUT_LIMITS, DEFAULT_OUTPUT_LIMIT
+    max_tokens = int(MODEL_OUTPUT_LIMITS.get(model, DEFAULT_OUTPUT_LIMIT) or DEFAULT_OUTPUT_LIMIT)
+    max_tokens = max(max_tokens, 16384)
+    # Anthropic hard ceiling for most Claude models
+    max_tokens = min(max_tokens, 64000)
     body: dict = {
         "model": model,
         "max_tokens": max_tokens,

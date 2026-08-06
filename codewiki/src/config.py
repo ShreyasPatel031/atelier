@@ -97,10 +97,10 @@ MODEL_OUTPUT_LIMITS = {
     'claude-3-opus': 4_000,
     'claude-3-sonnet': 4_000,
     'claude-3-haiku': 4_000,
-    'claude-haiku-4-5': 8_192,
-    'claude-haiku-4-5-20251001': 8_192,
-    'claude-sonnet-4': 8_192,
-    'claude-sonnet-4-5': 8_192,
+    'claude-haiku-4-5': 16_000,
+    'claude-haiku-4-5-20251001': 16_000,
+    'claude-sonnet-4': 16_000,
+    'claude-sonnet-4-5': 16_000,
     'glm-4p5': 4_000,
 }
 DEFAULT_OUTPUT_LIMIT = 8_000
