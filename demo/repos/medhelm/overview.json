@@ -1,0 +1,241 @@
+{
+    "title": "medhelm",
+    "summary": "MedHELM is a comprehensive medical AI benchmark suite that evaluates language models on diverse healthcare tasks including clinical QA, medical dialogue, EHR analysis, and clinical note generation. It provides end-to-end infrastructure for scenario definition, model adaptation, inference execution, metric computation, and result visualization across single and multi-GPU environments.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "user",
+                "label": "Researcher / Developer",
+                "type": "external",
+                "link": null,
+                "title": "Human user",
+                "description": "Defines benchmarks, configures runs, executes evaluations, and analyzes results through the MedHELM system."
+            },
+            {
+                "id": "run_management",
+                "label": "Orchestrate Benchmark Runs",
+                "type": "module",
+                "link": "run_management",
+                "title": "Run orchestration",
+                "description": "Coordinates end-to-end benchmark execution from specification through result generation. Manages single-GPU, multi-GPU, and SLURM-based job scheduling with support for re-evaluation workflows."
+            },
+            {
+                "id": "run_specs",
+                "label": "Define Run Specifications",
+                "type": "module",
+                "link": "run_specs",
+                "title": "Run configuration",
+                "description": "Specifies benchmark configurations including model selection, adapter settings, and evaluation parameters. Factory functions generate task-specific run specs for medical and general benchmarks."
+            },
+            {
+                "id": "scenario_and_data",
+                "label": "Load Scenarios and Data",
+                "type": "module",
+                "link": "scenario_and_data",
+                "title": "Data loading",
+                "description": "Retrieves and preprocesses benchmark scenarios and test data. Supports diverse medical datasets (clinical QA, EHR, dialogue) and general-purpose benchmarks with optional data augmentation."
+            },
+            {
+                "id": "adapters",
+                "label": "Adapt Models to Tasks",
+                "type": "module",
+                "link": "adapters",
+                "title": "Model adaptation",
+                "description": "Applies task-specific adapters to prepare models for evaluation. Handles prompt engineering, in-context learning, and input formatting for different task types."
+            },
+            {
+                "id": "augmentations",
+                "label": "Apply Data Augmentations",
+                "type": "module",
+                "link": "augmentations",
+                "title": "Robustness testing",
+                "description": "Applies text perturbations (typos, contractions, dialect shifts, gender terms) to test model robustness across input variations and demographic fairness."
+            },
+            {
+                "id": "client_and_inference",
+                "label": "Execute Model Inference",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Inference execution",
+                "description": "Executes inference across language models, vision-language models, audio models, and image generation services. Abstracts API differences and manages token counting and cost estimation."
+            },
+            {
+                "id": "metrics",
+                "label": "Compute Performance Metrics",
+                "type": "module",
+                "link": "metrics",
+                "title": "Metric calculation",
+                "description": "Calculates quantitative metrics (accuracy, BLEU, F1, etc.) on model outputs. Supports classification, generation, summarization, and image quality assessment across task types."
+            },
+            {
+                "id": "annotation",
+                "label": "Manage Annotations",
+                "type": "module",
+                "link": "annotation",
+                "title": "Annotation workflow",
+                "description": "Orchestrates human and automated annotation processes. Handles annotator selection, result aggregation, and quality control for evaluation tasks."
+            },
+            {
+                "id": "presentation",
+                "label": "Present Results",
+                "type": "module",
+                "link": "presentation",
+                "title": "Result presentation",
+                "description": "Generates visualizations, interactive dashboards, and comprehensive evaluation reports. Produces JSON, HTML, and summary documents for stakeholder review."
+            },
+            {
+                "id": "infrastructure_and_utilities",
+                "label": "Provide Infrastructure Services",
+                "type": "module",
+                "link": "infrastructure_and_utilities",
+                "title": "Infrastructure support",
+                "description": "Supplies tokenization, proxy services, window management, logging, and utilities. Enables distributed execution, remote communication, and token cost tracking."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user",
+                "target": "run_management",
+                "label": "initiates runs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_management",
+                "target": "run_specs",
+                "label": "reads specifications",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_management",
+                "target": "scenario_and_data",
+                "label": "requests data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "scenario_and_data",
+                "target": "adapters",
+                "label": "provides instances",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapters",
+                "target": "augmentations",
+                "label": "applies perturbations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "augmentations",
+                "target": "client_and_inference",
+                "label": "sends prompts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "client_and_inference",
+                "target": "metrics",
+                "label": "returns outputs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "annotation",
+                "target": "metrics",
+                "label": "provides labels",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "metrics",
+                "target": "presentation",
+                "label": "aggregates scores",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "presentation",
+                "target": "user",
+                "label": "displays results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "infrastructure_and_utilities",
+                "target": "client_and_inference",
+                "label": "tokenization, proxies",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "infrastructure_and_utilities",
+                "target": "run_management",
+                "label": "logging, utilities",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_interaction",
+                "label": "User Interaction",
+                "nodes": [
+                    "user"
+                ],
+                "title": "User entry point",
+                "description": "Researchers and developers interact with MedHELM to define, execute, and analyze medical AI benchmarks.",
+                "role": null
+            },
+            {
+                "id": "orchestration",
+                "label": "Orchestration",
+                "nodes": [
+                    "run_management",
+                    "run_specs"
+                ],
+                "title": "Execution control",
+                "description": "Manages overall benchmark workflow and coordinates all downstream components through specifications and run lifecycle management.",
+                "role": null
+            },
+            {
+                "id": "data_preparation",
+                "label": "Data Preparation",
+                "nodes": [
+                    "scenario_and_data",
+                    "adapters",
+                    "augmentations"
+                ],
+                "title": "Input setup",
+                "description": "Loads medical scenarios, adapts models for task-specific evaluation, and applies robustness augmentations to test fairness and resilience.",
+                "role": null
+            },
+            {
+                "id": "execution_evaluation",
+                "label": "Execution and Evaluation",
+                "nodes": [
+                    "client_and_inference",
+                    "metrics",
+                    "annotation"
+                ],
+                "title": "Core processing",
+                "description": "Runs inference, computes metrics, and manages annotations to measure model performance on medical benchmarks.",
+                "role": null
+            },
+            {
+                "id": "output_support",
+                "label": "Output and Support",
+                "nodes": [
+                    "presentation",
+                    "infrastructure_and_utilities"
+                ],
+                "title": "Results and infrastructure",
+                "description": "Presents results through visualizations and reports while providing underlying infrastructure for tokenization, proxies, and distributed execution.",
+                "role": null
+            }
+        ]
+    }
+}

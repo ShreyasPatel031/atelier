@@ -1,0 +1,50 @@
+{
+  "repo_name": "medhelm",
+  "repo_path": "/workspace/demo/repos-src/medhelm",
+  "repo_size_mb": 10182.05078125,
+  "total_files": 0,
+  "total_code_files": 629,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 1.5634260177612305,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 67.94194388389587,
+      "tokens_used": 25943,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 107.13511037826538,
+      "tokens_used": 975509,
+      "files_created": 10,
+      "files_created_list": [
+        "overview.json",
+        "sync_issues.json",
+        "metadata.json",
+        "module_tree.json",
+        "model_adaptation.json",
+        "infrastructure_and_utilities.json",
+        "benchmark_execution.json",
+        "client_and_inference.json",
+        "evaluation_and_metrics.json",
+        "first_module_tree.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 176.6706018447876,
+  "first_overview_file": "/workspace/demo/repos-src/medhelm/atelier_docs/overview.json",
+  "total_duration": 176.67064356803894,
+  "total_tokens": 1001452,
+  "estimated_cost_usd": 5.8133,
+  "total_llm_calls": 43,
+  "total_files_created": 10,
+  "start_time": 1785984544.9358628,
+  "end_time": 1785984721.6065063
+}

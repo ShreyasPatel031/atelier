@@ -1,0 +1,196 @@
+{
+    "title": "Client and Inference",
+    "summary": "Provides unified interfaces for interacting with diverse language models, multimodal models, and image generation services. Abstracts API differences across providers to enable seamless model inference and token management.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "request_intake",
+                "label": "Accept inference requests",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Request intake",
+                "description": "Receives and normalizes inference requests from benchmark runners and adapters, handling prompt formatting and parameter validation."
+            },
+            {
+                "id": "model_routing",
+                "label": "Route to appropriate model client",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Model routing",
+                "description": "Dispatches requests to the correct client implementation based on model identifier and type (language, vision, audio, image generation)."
+            },
+            {
+                "id": "language_models",
+                "label": "Language model clients",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Language models",
+                "description": "Implements clients for text-based models including OpenAI, Anthropic, HuggingFace, Together, and other providers with unified completion interface."
+            },
+            {
+                "id": "multimodal_models",
+                "label": "Multimodal model clients",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Multimodal models",
+                "description": "Handles vision-language and audio-language models including IDEFICS, Qwen VLM, and Llama Omni for cross-modal inference tasks."
+            },
+            {
+                "id": "image_generation",
+                "label": "Image generation clients",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Image generation",
+                "description": "Manages text-to-image models like DALL-E, Stable Diffusion, and CogView2 with unified generation and quality assessment."
+            },
+            {
+                "id": "token_management",
+                "label": "Count and estimate tokens",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Token management",
+                "description": "Tracks token usage across requests, estimates costs, and enforces context window limits for each model provider."
+            },
+            {
+                "id": "response_processing",
+                "label": "Parse and normalize responses",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Response processing",
+                "description": "Converts provider-specific response formats into standardized completion objects with metadata and error handling."
+            },
+            {
+                "id": "result_return",
+                "label": "Return inference results",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Result return",
+                "description": "Delivers processed completions back to benchmark runners with token counts, latency, and provider-specific metadata."
+            }
+        ],
+        "edges": [
+            {
+                "source": "request_intake",
+                "target": "model_routing",
+                "label": "normalized request",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_routing",
+                "target": "language_models",
+                "label": "text completion",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_routing",
+                "target": "multimodal_models",
+                "label": "multimodal input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_routing",
+                "target": "image_generation",
+                "label": "image prompt",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_models",
+                "target": "token_management",
+                "label": "request tokens",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "multimodal_models",
+                "target": "token_management",
+                "label": "request tokens",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_generation",
+                "target": "token_management",
+                "label": "request tokens",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_models",
+                "target": "response_processing",
+                "label": "raw response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "multimodal_models",
+                "target": "response_processing",
+                "label": "raw response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_generation",
+                "target": "response_processing",
+                "label": "raw response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "token_management",
+                "target": "response_processing",
+                "label": "token counts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "response_processing",
+                "target": "result_return",
+                "label": "completion object",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_layer",
+                "label": "Model Clients",
+                "nodes": [
+                    "language_models",
+                    "multimodal_models",
+                    "image_generation"
+                ],
+                "title": "Model client implementations",
+                "description": "Specialized client implementations for different model types and providers, each handling provider-specific APIs and protocols.",
+                "role": null
+            },
+            {
+                "id": "inference_pipeline",
+                "label": "Inference Pipeline",
+                "nodes": [
+                    "request_intake",
+                    "model_routing",
+                    "response_processing",
+                    "result_return"
+                ],
+                "title": "End-to-end inference flow",
+                "description": "Main request-response pipeline from intake through routing, model execution, and result delivery.",
+                "role": null
+            },
+            {
+                "id": "support_services",
+                "label": "Support Services",
+                "nodes": [
+                    "token_management"
+                ],
+                "title": "Cross-cutting services",
+                "description": "Shared utilities for token counting, cost estimation, and response normalization across all model types.",
+                "role": null
+            }
+        ]
+    }
+}

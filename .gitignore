@@ -80,3 +80,4 @@ tmp/
 *.bak
 .vercel
 .env*.local
+demo/repos-src/
