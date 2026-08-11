@@ -1,0 +1,111 @@
+{
+    "title": "Evaluation and Metrics",
+    "summary": "Computes performance metrics, generates visualizations, and produces evaluation reports for benchmark runs. Integrates metric calculation, annotation workflows, and result presentation into a cohesive evaluation pipeline.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "metric_calc",
+                "label": "Calculate Performance Metrics",
+                "type": "module",
+                "link": "metrics",
+                "title": "Metric Computation",
+                "description": "Computes quantitative metrics (accuracy, BLEU, F1, etc.) on model outputs. Supports classification, generation, summarization, and image quality assessment across diverse task types."
+            },
+            {
+                "id": "annotation_flow",
+                "label": "Manage Annotations",
+                "type": "module",
+                "link": "annotation",
+                "title": "Annotation Workflow",
+                "description": "Orchestrates human and automated annotation processes. Handles annotator selection, result aggregation, and quality control for evaluation tasks."
+            },
+            {
+                "id": "result_agg",
+                "label": "Aggregate Results",
+                "type": "module",
+                "link": "presentation",
+                "title": "Result Aggregation",
+                "description": "Combines metrics and annotations into structured result sets. Prepares data for downstream visualization and reporting."
+            },
+            {
+                "id": "viz_gen",
+                "label": "Generate Visualizations",
+                "type": "module",
+                "link": "presentation",
+                "title": "Visualization Generation",
+                "description": "Creates plots, charts, and interactive dashboards. Renders performance comparisons, trend analysis, and robustness summaries for human review."
+            },
+            {
+                "id": "report_gen",
+                "label": "Produce Evaluation Reports",
+                "type": "module",
+                "link": "presentation",
+                "title": "Report Generation",
+                "description": "Synthesizes metrics, visualizations, and metadata into comprehensive evaluation reports. Outputs JSON, HTML, and summary documents for stakeholders."
+            }
+        ],
+        "edges": [
+            {
+                "source": "metric_calc",
+                "target": "result_agg",
+                "label": "computed metrics",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "annotation_flow",
+                "target": "result_agg",
+                "label": "annotated data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "result_agg",
+                "target": "viz_gen",
+                "label": "aggregated results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "result_agg",
+                "target": "report_gen",
+                "label": "aggregated results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "viz_gen",
+                "target": "report_gen",
+                "label": "visualizations",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "eval_core",
+                "label": "Evaluation Core",
+                "nodes": [
+                    "metric_calc",
+                    "annotation_flow"
+                ],
+                "title": "Core Evaluation",
+                "description": "Metric computation and annotation management form the foundation of evaluation, producing raw scores and labeled data.",
+                "role": null
+            },
+            {
+                "id": "result_pipeline",
+                "label": "Result Pipeline",
+                "nodes": [
+                    "result_agg",
+                    "viz_gen",
+                    "report_gen"
+                ],
+                "title": "Result Processing",
+                "description": "Aggregates evaluation outputs and prepares them for presentation through visualization and reporting.",
+                "role": null
+            }
+        ]
+    }
+}

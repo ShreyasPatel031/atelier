@@ -1,182 +1,125 @@
 {
-    "title": "Data Management and I/O Operations",
-    "summary": "This module provides core data management capabilities, focusing on file input/output operations. It handles reading and writing data in various formats, such as JSON and CSV, to temporary storage.",
+    "title": "Data Management Module",
+    "summary": "This module centralizes all data handling operations, providing robust mechanisms for data validation, transformation, and persistence across various storage solutions.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "run_io_func",
-                "label": "Orchestrate File I/O",
-                "type": "component",
-                "link": null,
-                "title": "Main I/O Orchestrator",
-                "description": "The primary function that orchestrates the creation, writing, and reading of temporary JSON and CSV files to demonstrate I/O capabilities."
+                "id": "data_validation",
+                "label": "Validate Data Integrity",
+                "type": "module",
+                "link": "data_management/data_validation",
+                "title": "Data Validation",
+                "description": "Ensures incoming and outgoing data conforms to predefined schemas and business rules, preventing corruption and maintaining consistency."
             },
             {
-                "id": "temp_dir_manager",
-                "label": "Manage Temporary Directory",
-                "type": "component",
-                "link": null,
-                "title": "Temporary Directory Manager",
-                "description": "Manages the lifecycle of a temporary directory, ensuring files are created and cleaned up within a controlled environment."
+                "id": "data_transformation",
+                "label": "Transform Data Formats",
+                "type": "module",
+                "link": "data_management/data_transformation",
+                "title": "Data Transformation",
+                "description": "Converts data between different structures and formats, preparing it for processing, storage, or external consumption."
             },
             {
-                "id": "json_writer",
-                "label": "Write JSON Data",
-                "type": "component",
-                "link": null,
-                "title": "JSON File Writer",
-                "description": "Serializes Python dictionaries into JSON format and writes the structured data to a specified temporary file."
+                "id": "data_persistence",
+                "label": "Store and Retrieve Data",
+                "type": "module",
+                "link": "data_management/data_persistence",
+                "title": "Data Persistence",
+                "description": "Manages the storage and retrieval of data from various persistent layers, including databases and file systems."
             },
             {
-                "id": "json_reader",
-                "label": "Read JSON Data",
-                "type": "component",
-                "link": null,
-                "title": "JSON File Reader",
-                "description": "Reads and deserializes JSON data from a specified temporary file back into Python dictionaries for processing."
+                "id": "input_output_handling",
+                "label": "Handle File I/O",
+                "type": "module",
+                "link": "data_management/input_output_handling",
+                "title": "Input/Output Handling",
+                "description": "Provides utilities for reading from and writing to different file types, such as JSON and CSV, facilitating data exchange."
             },
             {
-                "id": "csv_writer",
-                "label": "Write CSV Data",
-                "type": "component",
-                "link": null,
-                "title": "CSV File Writer",
-                "description": "Writes tabular data, represented as rows of dictionaries, into a CSV file with appropriate headers."
-            },
-            {
-                "id": "csv_reader",
-                "label": "Read CSV Data",
-                "type": "component",
-                "link": null,
-                "title": "CSV File Reader",
-                "description": "Reads tabular data from a CSV file, parsing each row into a structured format, typically a dictionary."
-            },
-            {
-                "id": "json_file",
-                "label": "JSON Output File",
-                "type": "external",
-                "link": null,
-                "title": "Temporary JSON File",
-                "description": "A temporary file used as an intermediary storage for JSON formatted data during I/O operations."
-            },
-            {
-                "id": "csv_file",
-                "label": "CSV Output File",
-                "type": "external",
-                "link": null,
-                "title": "Temporary CSV File",
-                "description": "A temporary file used as an intermediary storage for CSV formatted data during I/O operations."
+                "id": "core_logic",
+                "label": "Core Logic Modules",
+                "type": "module",
+                "link": "core_logic",
+                "title": "Core Logic Modules",
+                "description": "Represents the main application logic that interacts with data management services for processing and storage."
             }
         ],
         "edges": [
             {
-                "source": "run_io_func",
-                "target": "temp_dir_manager",
-                "label": "Uses",
+                "source": "core_logic",
+                "target": "data_validation",
+                "label": "sends raw data for validation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_io_func",
-                "target": "json_writer",
-                "label": "Initializes & Uses",
+                "source": "data_validation",
+                "target": "data_transformation",
+                "label": "sends validated data",
                 "title": null,
                 "description": null
             },
             {
-                "source": "json_writer",
-                "target": "json_file",
-                "label": "Writes Data To",
+                "source": "data_transformation",
+                "target": "data_persistence",
+                "label": "sends transformed data for storage",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_io_func",
-                "target": "json_reader",
-                "label": "Initializes & Uses",
+                "source": "data_persistence",
+                "target": "core_logic",
+                "label": "provides stored data",
                 "title": null,
                 "description": null
             },
             {
-                "source": "json_file",
-                "target": "json_reader",
-                "label": "Reads Data From",
+                "source": "input_output_handling",
+                "target": "data_validation",
+                "label": "provides external data",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_io_func",
-                "target": "csv_writer",
-                "label": "Initializes & Uses",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "csv_writer",
-                "target": "csv_file",
-                "label": "Writes Data To",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "run_io_func",
-                "target": "csv_reader",
-                "label": "Initializes & Uses",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "csv_file",
-                "target": "csv_reader",
-                "label": "Reads Data From",
+                "source": "data_persistence",
+                "target": "input_output_handling",
+                "label": "requests file export",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "surface_group",
-                "label": "Primary Orchestration",
+                "id": "data_processing_pipeline",
+                "label": "Data Processing Pipeline",
                 "nodes": [
-                    "run_io_func",
-                    "temp_dir_manager"
+                    "data_validation",
+                    "data_transformation"
                 ],
-                "title": "Primary Entry & Setup",
-                "description": "The main function orchestrating file I/O operations and managing temporary resources for data handling.",
+                "title": "Data Processing Pipeline",
+                "description": "The sequential flow for ensuring data quality and preparing it for various uses within the system.",
                 "role": null
             },
             {
-                "id": "generative_group",
-                "label": "Data Writing Components",
+                "id": "data_storage_access",
+                "label": "Data Storage & Access",
                 "nodes": [
-                    "json_writer",
-                    "csv_writer"
+                    "data_persistence",
+                    "input_output_handling"
                 ],
-                "title": "Data Serialization & Writing",
-                "description": "Components responsible for serializing data into specific formats (JSON, CSV) and writing them to files.",
+                "title": "Data Storage and Access",
+                "description": "Components responsible for the reliable storage, retrieval, and external exchange of data.",
                 "role": null
             },
             {
-                "id": "analytical_group",
-                "label": "Data Reading Components",
+                "id": "external_interaction",
+                "label": "External Interaction",
                 "nodes": [
-                    "json_reader",
-                    "csv_reader"
+                    "core_logic"
                 ],
-                "title": "Data Deserialization & Reading",
-                "description": "Components responsible for reading data from files and deserializing them back into structured formats (JSON, CSV).",
-                "role": null
-            },
-            {
-                "id": "data_group",
-                "label": "File Storage",
-                "nodes": [
-                    "json_file",
-                    "csv_file"
-                ],
-                "title": "Temporary Data Storage",
-                "description": "Represents the temporary files used as intermediary storage for JSON and CSV formatted data during I/O operations.",
+                "title": "External Interaction",
+                "description": "Represents the primary consumers and producers of data managed by this module.",
                 "role": null
             }
         ]

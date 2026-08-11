@@ -1,0 +1,119 @@
+{
+  "title": "Public API Module",
+  "summary": "This module defines and runs the public-facing API server, handling incoming requests and routing them to appropriate internal services.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_api",
+        "label": "Initialize and Run API Server",
+        "type": "component",
+        "link": null,
+        "title": "Initialize and Run API Server",
+        "description": "Sets up the API server, configures it from environment variables, and handles incoming HTTP requests for health checks and data retrieval."
+      },
+      {
+        "id": "config_loader",
+        "label": "Load Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Load Configuration",
+        "description": "Retrieves system configuration parameters from environment variables to initialize the API server."
+      },
+      {
+        "id": "api_server",
+        "label": "API Server",
+        "type": "component",
+        "link": null,
+        "title": "API Server Instance",
+        "description": "Represents the core server instance responsible for listening to HTTP requests and dispatching them to handlers."
+      },
+      {
+        "id": "health_check_handler",
+        "label": "Handle Health Check",
+        "type": "component",
+        "link": null,
+        "title": "Health Check Handler",
+        "description": "Processes requests to the /health endpoint, returning the system's operational status."
+      },
+      {
+        "id": "records_handler",
+        "label": "Handle Records Request",
+        "type": "component",
+        "link": null,
+        "title": "Records Request Handler",
+        "description": "Processes requests to the /records endpoint, retrieving and returning data records."
+      },
+      {
+        "id": "api_interface",
+        "label": "API Interface",
+        "type": "external",
+        "link": "api_interface",
+        "title": "API Interface Module",
+        "description": "The parent module defining the overall API structure and contracts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "config_loader",
+        "target": "run_api",
+        "label": "configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_server",
+        "target": "run_api",
+        "label": "server instance",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_api",
+        "target": "health_check_handler",
+        "label": "GET /health",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_api",
+        "target": "records_handler",
+        "label": "GET /records",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_interface",
+        "target": "run_api",
+        "label": "API definition",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_initialization",
+        "label": "API Initialization",
+        "nodes": [
+          "run_api",
+          "config_loader",
+          "api_server"
+        ],
+        "title": "API Initialization and Setup",
+        "description": "Components responsible for setting up and starting the public API server, including configuration loading.",
+        "role": "generative"
+      },
+      {
+        "id": "request_handling",
+        "label": "Request Handling",
+        "nodes": [
+          "health_check_handler",
+          "records_handler"
+        ],
+        "title": "API Request Handling",
+        "description": "Components that process specific types of incoming API requests, such as health checks and data retrieval.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

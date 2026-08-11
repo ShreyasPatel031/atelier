@@ -1,0 +1,109 @@
+{
+  "title": "Input/Output Handling",
+  "summary": "This module manages all file-based input and output operations, including reading from and writing to JSON and CSV formats.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_io",
+        "label": "Execute I/O Operations",
+        "type": "component",
+        "link": null,
+        "title": "Execute I/O Operations",
+        "description": "Orchestrates the reading and writing of data to various file formats, such as JSON and CSV, within a temporary directory."
+      },
+      {
+        "id": "json_writer",
+        "label": "Write JSON Data",
+        "type": "component",
+        "link": null,
+        "title": "Write JSON Data",
+        "description": "Handles the serialization of Python dictionaries into JSON format and writes them to a specified file path."
+      },
+      {
+        "id": "json_reader",
+        "label": "Read JSON Data",
+        "type": "component",
+        "link": null,
+        "title": "Read JSON Data",
+        "description": "Manages the deserialization of JSON data from a file path into Python dictionaries."
+      },
+      {
+        "id": "csv_writer",
+        "label": "Write CSV Data",
+        "type": "component",
+        "link": null,
+        "title": "Write CSV Data",
+        "description": "Facilitates the writing of tabular data to CSV files, including header management and row serialization."
+      },
+      {
+        "id": "csv_reader",
+        "label": "Read CSV Data",
+        "type": "component",
+        "link": null,
+        "title": "Read CSV Data",
+        "description": "Provides functionality to read and parse data from CSV files, converting rows into structured data."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_io",
+        "target": "json_writer",
+        "label": "writes data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_writer",
+        "target": "json_reader",
+        "label": "produces file",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_reader",
+        "target": "run_io",
+        "label": "reads data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_io",
+        "target": "csv_writer",
+        "label": "writes data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "csv_writer",
+        "target": "csv_reader",
+        "label": "produces file",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "csv_reader",
+        "target": "run_io",
+        "label": "reads data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "file_operations",
+        "label": "File Operations",
+        "nodes": [
+          "run_io",
+          "json_writer",
+          "json_reader",
+          "csv_writer",
+          "csv_reader"
+        ],
+        "title": "File Operations",
+        "description": "Encapsulates the core logic for reading from and writing to various file formats.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,28 +1,28 @@
 {
     "api_interface": {
-        "path": "",
+        "path": "api_interface",
         "components": [],
         "children": {
-            "external_api": {
-                "path": "",
+            "public_api": {
+                "path": "api_interface/public_api",
                 "components": [
                     "run_api.run_api"
                 ]
             }
         }
     },
-    "core_workflow": {
-        "path": "",
+    "core_logic": {
+        "path": "core_logic",
         "components": [],
         "children": {
-            "main_logic": {
-                "path": "",
+            "main_execution_flow": {
+                "path": "core_logic/main_execution_flow",
                 "components": [
                     "run_core.run_core"
                 ]
             },
             "data_processing": {
-                "path": "",
+                "path": "core_logic/data_processing",
                 "components": [
                     "run_processing.run_processing"
                 ]
@@ -30,11 +30,11 @@
         }
     },
     "data_management": {
-        "path": "",
+        "path": "data_management",
         "components": [],
         "children": {
-            "input_output": {
-                "path": "",
+            "input_output_handling": {
+                "path": "data_management/input_output_handling",
                 "components": [
                     "run_io.run_io"
                 ]
@@ -42,11 +42,11 @@
         }
     },
     "observability": {
-        "path": "",
+        "path": "observability",
         "components": [],
         "children": {
             "system_metrics": {
-                "path": "",
+                "path": "observability/system_metrics",
                 "components": [
                     "run_metrics.run_metrics"
                 ]

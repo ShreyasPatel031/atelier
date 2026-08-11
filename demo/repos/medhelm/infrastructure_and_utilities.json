@@ -1,0 +1,136 @@
+{
+    "title": "Infrastructure and Utilities",
+    "summary": "Provides core infrastructure services including tokenization, proxy services, window management, and common utilities that support the benchmark execution pipeline. Enables token counting, model communication, context window handling, and logging across the system.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "tokenization",
+                "label": "Tokenize and Count Tokens",
+                "type": "module",
+                "link": "tokenization",
+                "title": "Tokenization layer",
+                "description": "Converts text into tokens and counts token usage for various language models. Supports multiple tokenizer backends including Anthropic and HuggingFace implementations."
+            },
+            {
+                "id": "proxy_services",
+                "label": "Route Requests and Manage Services",
+                "type": "module",
+                "link": "proxy_and_services",
+                "title": "Proxy and service layer",
+                "description": "Handles request routing, service orchestration, and remote communication. Provides server endpoints and manages interactions between clients and backend services."
+            },
+            {
+                "id": "window_services",
+                "label": "Manage Context Windows",
+                "type": "module",
+                "link": "window_services",
+                "title": "Window management",
+                "description": "Tracks and manages context window sizes for different models. Ensures prompts fit within model constraints and handles window-specific operations like CLIP for image generation."
+            },
+            {
+                "id": "token_counters",
+                "label": "Count and Estimate Tokens",
+                "type": "module",
+                "link": "proxy_and_services",
+                "title": "Token counting service",
+                "description": "Estimates token costs and counts tokens across different model families. Provides automatic token counter selection based on model type."
+            },
+            {
+                "id": "common_utilities",
+                "label": "Provide Logging and Utilities",
+                "type": "module",
+                "link": "common",
+                "title": "Common utilities",
+                "description": "Supplies shared infrastructure including logging configuration, error handling, and utility functions used throughout the system."
+            },
+            {
+                "id": "frontend",
+                "label": "Render Web Interface",
+                "type": "module",
+                "link": "frontend",
+                "title": "Frontend interface",
+                "description": "Provides web-based user interface for viewing and interacting with benchmark results and run information."
+            }
+        ],
+        "edges": [
+            {
+                "source": "tokenization",
+                "target": "token_counters",
+                "label": "token counts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "token_counters",
+                "target": "proxy_services",
+                "label": "cost estimates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "window_services",
+                "target": "proxy_services",
+                "label": "context constraints",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "common_utilities",
+                "target": "tokenization",
+                "label": "logging config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "common_utilities",
+                "target": "proxy_services",
+                "label": "logging config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "proxy_services",
+                "target": "frontend",
+                "label": "API responses",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "token_management",
+                "label": "Token Management",
+                "nodes": [
+                    "tokenization",
+                    "token_counters"
+                ],
+                "title": "Token handling",
+                "description": "Tokenization and token counting services that measure and manage token usage across models.",
+                "role": null
+            },
+            {
+                "id": "service_layer",
+                "label": "Service Layer",
+                "nodes": [
+                    "proxy_services",
+                    "window_services"
+                ],
+                "title": "Core services",
+                "description": "Proxy and window services that route requests and manage model-specific constraints.",
+                "role": null
+            },
+            {
+                "id": "support_layer",
+                "label": "Support Layer",
+                "nodes": [
+                    "common_utilities",
+                    "frontend"
+                ],
+                "title": "Supporting infrastructure",
+                "description": "Common utilities and frontend that provide logging, configuration, and user interface.",
+                "role": null
+            }
+        ]
+    }
+}

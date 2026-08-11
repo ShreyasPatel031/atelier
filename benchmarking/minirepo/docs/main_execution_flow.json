@@ -1,0 +1,93 @@
+{
+  "title": "Main Execution Flow",
+  "summary": "This module orchestrates the primary execution logic, initializing configurations and preparing data batches for further processing.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_core",
+        "label": "Execute Core Logic",
+        "type": "component",
+        "link": null,
+        "title": "Execute Core Logic",
+        "description": "Initializes the system configuration, validates it, and prepares an initial data batch for subsequent processing steps."
+      },
+      {
+        "id": "config_validation",
+        "label": "Validate Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Validate Configuration",
+        "description": "Checks the loaded system configuration for any errors or inconsistencies to ensure stable operation."
+      },
+      {
+        "id": "data_batch_creation",
+        "label": "Create Data Batch",
+        "type": "component",
+        "link": null,
+        "title": "Create Data Batch",
+        "description": "Generates an initial data batch with a unique ID and adds a sample record, ready for downstream processing."
+      },
+      {
+        "id": "public_api",
+        "label": "Public API",
+        "type": "module",
+        "link": "public_api",
+        "title": "Public API Interface",
+        "description": "Handles external requests and serves as the entry point for user interactions with the system."
+      },
+      {
+        "id": "data_processing",
+        "label": "Data Processing",
+        "type": "module",
+        "link": "data_processing",
+        "title": "Data Processing Module",
+        "description": "Responsible for transforming and analyzing data batches received from the core execution flow."
+      }
+    ],
+    "edges": [
+      {
+        "source": "public_api",
+        "target": "run_core",
+        "label": "initiates execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_core",
+        "target": "config_validation",
+        "label": "loads and validates config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "config_validation",
+        "target": "data_batch_creation",
+        "label": "config validated",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_batch_creation",
+        "target": "data_processing",
+        "label": "sends initial batch",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_execution",
+        "label": "Core Execution Logic",
+        "nodes": [
+          "run_core",
+          "config_validation",
+          "data_batch_creation"
+        ],
+        "title": "Core Execution Logic",
+        "description": "Encapsulates the primary steps for initializing the system and preparing data.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -33,7 +33,20 @@ def config_group():
 @click.option(
     "--api-key",
     type=str,
-    help="LLM API key (stored securely in system keychain)"
+    help="Gemini/OpenAI LLM API key (stored in ~/.codewiki/config.json)"
+)
+@click.option(
+    "--anthropic-api-key",
+    type=str,
+    default=None,
+    help="Anthropic API key for Claude provider"
+)
+@click.option(
+    "--provider",
+    "llm_provider",
+    type=click.Choice(["gemini", "claude"], case_sensitive=False),
+    default=None,
+    help="LLM provider: gemini (Vertex ADC) or claude (Anthropic)"
 )
 @click.option(
     "--base-url",
@@ -52,6 +65,8 @@ def config_group():
 )
 def config_set(
     api_key: Optional[str],
+    anthropic_api_key: Optional[str],
+    llm_provider: Optional[str],
     base_url: Optional[str],
     main_model: Optional[str],
     cluster_model: Optional[str]
@@ -59,25 +74,21 @@ def config_set(
     """
     Set configuration values for CodeWiki.
     
-    API keys are stored securely in your system keychain:
-      • macOS: Keychain Access
-      • Windows: Credential Manager  
-      • Linux: Secret Service (GNOME Keyring, KWallet)
-    
     Examples:
     
     \b
-    # Set all configuration
-    $ codewiki config set --api-key sk-abc123 --base-url https://api.anthropic.com \\
-        --main-model claude-sonnet-4 --cluster-model claude-sonnet-4
+    # Claude Haiku (keeps Gemini Vertex ADC available via --provider gemini)
+    $ codewiki config set --provider claude --anthropic-api-key sk-ant-... \\
+        --main-model claude-haiku-4-5 --cluster-model claude-haiku-4-5
     
     \b
-    # Update only API key
-    $ codewiki config set --api-key sk-new-key
+    # Gemini / Vertex
+    $ codewiki config set --provider gemini --main-model gemini-2.5-flash \\
+        --cluster-model gemini-2.5-flash
     """
     try:
         # Check if at least one option is provided
-        if not any([api_key, base_url, main_model, cluster_model]):
+        if not any([api_key, anthropic_api_key, llm_provider, base_url, main_model, cluster_model]):
             click.echo("No options provided. Use --help for usage information.")
             sys.exit(EXIT_CONFIG_ERROR)
         
@@ -86,6 +97,12 @@ def config_set(
         
         if api_key:
             validated_data['api_key'] = validate_api_key(api_key)
+
+        if anthropic_api_key:
+            validated_data['anthropic_api_key'] = validate_api_key(anthropic_api_key)
+
+        if llm_provider:
+            validated_data['llm_provider'] = llm_provider.strip().lower()
         
         if base_url:
             validated_data['base_url'] = validate_url(base_url)
@@ -104,7 +121,9 @@ def config_set(
             api_key=validated_data.get('api_key'),
             base_url=validated_data.get('base_url'),
             main_model=validated_data.get('main_model'),
-            cluster_model=validated_data.get('cluster_model')
+            cluster_model=validated_data.get('cluster_model'),
+            llm_provider=validated_data.get('llm_provider'),
+            anthropic_api_key=validated_data.get('anthropic_api_key'),
         )
         
         # Display success messages
@@ -117,6 +136,12 @@ def config_set(
                     "⚠️  System keychain unavailable. API key stored in encrypted file.",
                     fg="yellow"
                 )
+
+        if anthropic_api_key:
+            click.secho("✓ Anthropic API key saved", fg="green")
+
+        if llm_provider:
+            click.secho(f"✓ Provider: {llm_provider}", fg="green")
         
         if base_url:
             click.secho(f"✓ Base URL: {base_url}", fg="green")

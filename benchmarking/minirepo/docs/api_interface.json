@@ -1,85 +1,94 @@
 {
-    "title": "External API Integration",
-    "summary": "This module provides a unified interface for interacting with external application servers, handling configuration, health checks, and data retrieval to ensure seamless communication.",
+    "title": "API Interface",
+    "summary": "This module defines the public-facing API, handling all external requests and routing them to the appropriate internal services for processing. It acts as the primary entry point for user interaction with the system.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "api_orchestrator",
-                "label": "Orchestrate External API Calls",
-                "type": "component",
-                "link": "external_api",
-                "title": "Main API Call Orchestration",
-                "description": "Manages the lifecycle of API interactions, including initialization, health checks, and data retrieval from external services."
+                "id": "public_api",
+                "label": "Public API Server",
+                "type": "module",
+                "link": "public_api",
+                "title": "Public API Server",
+                "description": "The public-facing API server that listens for incoming HTTP requests and dispatches them to the relevant handlers."
             },
             {
-                "id": "config_loader",
-                "label": "Load API Configuration",
+                "id": "request_handlers",
+                "label": "API Request Handlers",
                 "type": "component",
-                "link": "external_api",
-                "title": "API Configuration Management",
-                "description": "Responsible for loading and providing necessary configuration parameters, such as endpoints and credentials, for external API communication."
-            },
-            {
-                "id": "external_service",
-                "label": "External Application Server",
-                "type": "external",
                 "link": null,
-                "title": "External Service Endpoint",
-                "description": "Represents the external system or application that this module communicates with to perform its operations."
+                "title": "API Request Handlers",
+                "description": "Components responsible for processing specific API endpoints, such as health checks or data retrieval requests."
+            },
+            {
+                "id": "core_logic",
+                "label": "Core Logic Module",
+                "type": "module",
+                "link": "core_logic",
+                "title": "Core Logic Module",
+                "description": "The central module containing the main business logic and data processing pipelines."
+            },
+            {
+                "id": "observability",
+                "label": "Observability Module",
+                "type": "module",
+                "link": "observability",
+                "title": "Observability Module",
+                "description": "Provides system metrics and logging capabilities to monitor the application's health and performance."
             }
         ],
         "edges": [
             {
-                "source": "config_loader",
-                "target": "api_orchestrator",
-                "label": "Provides configuration",
+                "source": "public_api",
+                "target": "request_handlers",
+                "label": "routes requests to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_orchestrator",
-                "target": "external_service",
-                "label": "Interacts with",
+                "source": "request_handlers",
+                "target": "core_logic",
+                "label": "invokes business logic",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_orchestrator",
-                "target": "external_service",
-                "label": "Performs health checks",
+                "source": "public_api",
+                "target": "observability",
+                "label": "reports metrics to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_orchestrator",
-                "target": "external_service",
-                "label": "Requests data",
+                "source": "request_handlers",
+                "target": "observability",
+                "label": "logs events to",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "api_core_group",
-                "label": "API Interaction Core",
+                "id": "api_entrypoint",
+                "label": "API Entrypoint",
                 "nodes": [
-                    "api_orchestrator",
-                    "config_loader"
+                    "public_api",
+                    "request_handlers"
                 ],
-                "title": "Core API Interaction Logic",
-                "description": "Encapsulates the primary functions for configuring and executing calls to external APIs.",
-                "role": null
+                "title": "API Entrypoint and Handling",
+                "description": "This group represents the external interface of the application, receiving and initially processing all incoming API requests.",
+                "role": "generative"
             },
             {
-                "id": "external_deps_group",
-                "label": "External Dependencies",
+                "id": "internal_services",
+                "label": "Internal Services",
                 "nodes": [
-                    "external_service"
+                    "core_logic",
+                    "observability"
                 ],
-                "title": "External API Dependencies",
-                "description": "Represents the external services or systems that the module integrates with.",
-                "role": null
+                "title": "Internal Processing and Monitoring",
+                "description": "These modules provide the core functionality and monitoring capabilities that support the API's operations.",
+                "role": "analytical"
             }
         ]
     }

@@ -40,6 +40,11 @@
     "description": "4-tool MCP surface verified end-to-end"
   },
   {
+    "id": "medhelm",
+    "label": "Medhelm",
+    "description": "Medical HELM benchmark architecture."
+  },
+  {
     "id": "minirepo",
     "label": "Minirepo",
     "description": ""

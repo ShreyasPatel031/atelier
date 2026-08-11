@@ -1,135 +1,68 @@
 {
-  "title": "System Metrics Collection and Logging",
-  "summary": "This module is responsible for collecting system-level metrics such as event counters and queue depths. It initializes logging, updates metric values, generates a snapshot of current metrics, and logs this snapshot for monitoring.",
+  "title": "System Metrics Collection",
+  "summary": "This module is responsible for collecting and exposing system-level metrics, providing insights into the application's operational health and performance.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "run_metrics_node",
-        "label": "Collect & Log System Metrics",
+        "id": "run_metrics",
+        "label": "Collect and Snapshot Metrics",
         "type": "component",
         "link": null,
-        "title": "System Metrics Runner",
-        "description": "Orchestrates the entire metrics collection process, including logging setup, metric value updates, snapshot generation, and logging the final metrics data for system monitoring."
+        "title": "Collect and Snapshot Metrics",
+        "description": "Initializes the metrics collector, increments counters, sets gauge values, and captures a snapshot of the current metrics state for logging and analysis."
       },
       {
-        "id": "logging_setup_node",
-        "label": "Configure Logging",
-        "type": "external",
-        "link": null,
-        "title": "Logging Configuration",
-        "description": "Sets up the logging environment, defining parameters such as the logging level and the destination for log messages, ensuring proper observability."
-      },
-      {
-        "id": "metrics_collector_node",
-        "label": "Manage Metrics Data",
+        "id": "metrics_collector",
+        "label": "Metrics Collector",
         "type": "component",
         "link": null,
         "title": "Metrics Collector",
-        "description": "An internal component that manages the lifecycle of various metrics, allowing for their creation, incremental updates, and the generation of a comprehensive snapshot."
+        "description": "An internal component that manages and aggregates various types of metrics, such as counters and gauges, allowing for their collection and snapshotting."
       },
       {
-        "id": "metrics_snapshot_node",
-        "label": "Metrics Snapshot Data",
-        "type": "data",
-        "link": null,
-        "title": "Collected Metrics Snapshot",
-        "description": "A structured, immutable data object containing the current values of all collected system metrics, such as event counters and gauge readings, at a specific moment."
-      },
-      {
-        "id": "log_output_node",
-        "label": "Output Metrics Log",
+        "id": "logging_system",
+        "label": "Logging System",
         "type": "external",
         "link": null,
-        "title": "Metrics Log Destination",
-        "description": "Represents the external interface or destination where the processed metrics snapshot is written, typically for persistent storage, real-time dashboards, or debugging."
+        "title": "Logging System",
+        "description": "The application's centralized logging infrastructure used to record operational events, metric snapshots, and debugging information."
       }
     ],
     "edges": [
       {
-        "source": "run_metrics_node",
-        "target": "logging_setup_node",
-        "label": "configures",
+        "source": "run_metrics",
+        "target": "metrics_collector",
+        "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "run_metrics_node",
-        "target": "metrics_collector_node",
-        "label": "uses to update",
+        "source": "metrics_collector",
+        "target": "run_metrics",
+        "label": "returns snapshot",
         "title": null,
         "description": null
       },
       {
-        "source": "metrics_collector_node",
-        "target": "metrics_snapshot_node",
-        "label": "generates",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "run_metrics_node",
-        "target": "metrics_snapshot_node",
-        "label": "receives",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "run_metrics_node",
-        "target": "log_output_node",
-        "label": "sends data to",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "metrics_snapshot_node",
-        "target": "log_output_node",
-        "label": "is logged",
+        "source": "run_metrics",
+        "target": "logging_system",
+        "label": "logs snapshot",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "analytical_group",
-        "label": "Analytical Components",
+        "id": "metrics_collection_process",
+        "label": "Metrics Collection Process",
         "nodes": [
-          "run_metrics_node"
+          "run_metrics",
+          "metrics_collector"
         ],
-        "title": "Analytical Components",
-        "description": "Components responsible for processing, analyzing, or orchestrating data flows.",
+        "title": "Metrics Collection Process",
+        "description": "Encapsulates the core logic for initializing, updating, and capturing system metrics within the module.",
         "role": "analytical"
-      },
-      {
-        "id": "generative_group",
-        "label": "Generative Components",
-        "nodes": [
-          "metrics_collector_node"
-        ],
-        "title": "Generative Components",
-        "description": "Components that create or generate new data or structures.",
-        "role": "generative"
-      },
-      {
-        "id": "data_group",
-        "label": "Data Structures",
-        "nodes": [
-          "metrics_snapshot_node"
-        ],
-        "title": "Data Structures",
-        "description": "Nodes representing data entities or structures within the module.",
-        "role": "data"
-      },
-      {
-        "id": "surface_group",
-        "label": "Surface Interactions",
-        "nodes": [
-          "logging_setup_node",
-          "log_output_node"
-        ],
-        "title": "Surface Interactions",
-        "description": "Components that interact with the system's external boundaries or user interfaces.",
-        "role": "surface"
       }
     ]
   }

@@ -92,5 +92,16 @@
       "missing_title": 5,
       "missing_description": 5
     }
+  },
+  {
+    "timestamp": "2026-06-14T02:14:38.525062",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
   }
 ]

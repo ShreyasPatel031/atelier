@@ -1,125 +1,116 @@
 {
-    "title": "Observability Module Overview",
-    "summary": "This module provides comprehensive observability for the system by collecting and logging critical system-level metrics. It ensures that operational data, such as event counters and queue depths, is captured and made available for monitoring and analysis.",
+    "title": "Observability Module",
+    "summary": "This module provides tools for monitoring and understanding the system's behavior, including logging, metrics collection, and health checks. It helps ensure the application's operational health and performance.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "run_metrics_node",
-                "label": "Collect & Log System Metrics",
-                "type": "component",
-                "link": "system_metrics",
-                "title": "System Metrics Runner",
-                "description": "Orchestrates the entire metrics collection process, including logging setup, metric value updates, snapshot generation, and logging the final metrics data for system monitoring."
+                "id": "logging",
+                "label": "Logging System",
+                "type": "module",
+                "link": "logging",
+                "title": "Logging System",
+                "description": "Captures and stores application events, errors, and debugging information for analysis and troubleshooting."
             },
             {
-                "id": "logging_setup_node",
-                "label": "Configure Logging",
+                "id": "metrics",
+                "label": "System Metrics",
+                "type": "module",
+                "link": "system_metrics",
+                "title": "System Metrics Collection",
+                "description": "Collects and exposes key performance indicators and operational statistics to monitor system health and performance."
+            },
+            {
+                "id": "health_checks",
+                "label": "Health Checks",
+                "type": "component",
+                "link": null,
+                "title": "Health Check Endpoints",
+                "description": "Provides endpoints for external systems to verify the application's operational status and readiness."
+            },
+            {
+                "id": "alerting",
+                "label": "Alerting Mechanism",
+                "type": "component",
+                "link": null,
+                "title": "Alerting Mechanism",
+                "description": "Triggers notifications based on predefined thresholds or anomalies detected in logs or metrics."
+            },
+            {
+                "id": "external_monitoring",
+                "label": "External Monitoring Tools",
                 "type": "external",
                 "link": null,
-                "title": "Logging Configuration",
-                "description": "Sets up the logging environment, defining parameters such as the logging level and the destination for log messages, ensuring proper observability."
-            },
-            {
-                "id": "metrics_collector_node",
-                "label": "Manage Metrics Data",
-                "type": "component",
-                "link": "system_metrics",
-                "title": "Metrics Collector",
-                "description": "An internal component that manages the lifecycle of various metrics, allowing for their creation, incremental updates, and the generation of a comprehensive snapshot."
-            },
-            {
-                "id": "metrics_snapshot_node",
-                "label": "Metrics Snapshot Data",
-                "type": "data",
-                "link": null,
-                "title": "Collected Metrics Snapshot",
-                "description": "A structured, immutable data object containing the current values of all collected system metrics, such as event counters and gauge readings, at a specific moment."
-            },
-            {
-                "id": "log_output_node",
-                "label": "Output Metrics Log",
-                "type": "external",
-                "link": null,
-                "title": "Metrics Log Destination",
-                "description": "Represents the external interface or destination where the processed metrics snapshot is written, typically for persistent storage, real-time dashboards, or debugging."
+                "title": "External Monitoring Tools",
+                "description": "Third-party systems or dashboards that consume observability data for visualization and analysis."
             }
         ],
         "edges": [
             {
-                "source": "run_metrics_node",
-                "target": "logging_setup_node",
-                "label": "configures",
+                "source": "logging",
+                "target": "alerting",
+                "label": "sends events for analysis",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_metrics_node",
-                "target": "metrics_collector_node",
-                "label": "uses to update",
+                "source": "metrics",
+                "target": "alerting",
+                "label": "sends metrics for analysis",
                 "title": null,
                 "description": null
             },
             {
-                "source": "metrics_collector_node",
-                "target": "metrics_snapshot_node",
-                "label": "generates",
+                "source": "health_checks",
+                "target": "external_monitoring",
+                "label": "provides status",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_metrics_node",
-                "target": "metrics_snapshot_node",
-                "label": "receives",
+                "source": "alerting",
+                "target": "external_monitoring",
+                "label": "sends alerts",
                 "title": null,
                 "description": null
             },
             {
-                "source": "run_metrics_node",
-                "target": "log_output_node",
-                "label": "sends data to",
+                "source": "logging",
+                "target": "external_monitoring",
+                "label": "sends logs",
                 "title": null,
                 "description": null
             },
             {
-                "source": "metrics_snapshot_node",
-                "target": "log_output_node",
-                "label": "is logged",
+                "source": "metrics",
+                "target": "external_monitoring",
+                "label": "sends metrics",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "orchestration_group",
-                "label": "Orchestration & Logging",
+                "id": "data_sources",
+                "label": "Observability Data Sources",
                 "nodes": [
-                    "run_metrics_node",
-                    "logging_setup_node"
+                    "logging",
+                    "metrics",
+                    "health_checks"
                 ],
-                "title": "Metrics Orchestration & Setup",
-                "description": "Components responsible for initiating the metrics collection process, configuring the logging environment, and coordinating the flow of metric data.",
+                "title": "Observability Data Sources",
+                "description": "These components generate the raw data necessary for monitoring and understanding the system's state and performance.",
                 "role": null
             },
             {
-                "id": "data_management_group",
-                "label": "Metrics Data Management",
+                "id": "data_consumers",
+                "label": "Observability Data Consumers",
                 "nodes": [
-                    "metrics_collector_node",
-                    "metrics_snapshot_node"
+                    "alerting",
+                    "external_monitoring"
                 ],
-                "title": "Metric Data Handling",
-                "description": "Manages the creation, updates, and snapshot generation of system metrics, ensuring data integrity and consistency for reporting.",
-                "role": null
-            },
-            {
-                "id": "output_interface_group",
-                "label": "External Output",
-                "nodes": [
-                    "log_output_node"
-                ],
-                "title": "Metrics Output Destination",
-                "description": "Represents the external system or interface where the collected and processed metrics are finally delivered for storage, visualization, or further analysis.",
+                "title": "Observability Data Consumers",
+                "description": "These components utilize the collected observability data to provide insights, trigger alerts, and visualize system health.",
                 "role": null
             }
         ]

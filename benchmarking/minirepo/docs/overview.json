@@ -1,132 +1,150 @@
 {
     "title": "minirepo",
-    "summary": "This repository provides a modular framework for building applications, demonstrating key functionalities like external API integration, core workflow orchestration, data management, and system observability. It serves as a foundational example for developers to understand and implement structured application components. The system allows users to initiate processes, interact with external services, handle data persistence, and monitor application health.",
+    "summary": "minirepo is a lightweight system designed to process and manage data through a public API. It allows users to submit data, which then undergoes a core execution flow, data processing, and robust data management. The system also provides comprehensive observability features for monitoring its health and performance.",
     "diagram": {
         "direction": "LR",
         "nodes": [
             {
                 "id": "user",
-                "label": "Developer / Operator",
+                "label": "User / Client Application",
                 "type": "external",
                 "link": null,
-                "title": "Application User",
-                "description": "Interacts with the system to initiate workflows, configure settings, and monitor operations, serving as the primary human interface."
-            },
-            {
-                "id": "core_workflow",
-                "label": "Orchestrate Main Application Logic",
-                "type": "module",
-                "link": "core_workflow",
-                "title": "Core Workflow Engine",
-                "description": "Manages the primary application flow, including configuration, data batch initialization, and execution of data processing pipelines to achieve business goals."
+                "title": "User / Client Application",
+                "description": "Interacts with the system by sending requests to the public API to initiate data processing or retrieve information."
             },
             {
                 "id": "api_interface",
-                "label": "Integrate External APIs",
+                "label": "Public API",
                 "type": "module",
                 "link": "api_interface",
-                "title": "External API Connector",
-                "description": "Provides a unified interface for communicating with external application servers, handling configuration, health checks, and data retrieval for seamless integration."
+                "title": "Public API Interface",
+                "description": "The primary entry point for external interactions, handling incoming requests and routing them to the core logic."
+            },
+            {
+                "id": "core_logic",
+                "label": "Core Processing Logic",
+                "type": "module",
+                "link": "core_logic",
+                "title": "Core Processing Logic",
+                "description": "Orchestrates the main execution flow, including configuration, data batching, and initiating data transformations."
             },
             {
                 "id": "data_management",
-                "label": "Manage Data I/O",
+                "label": "Data Management",
                 "type": "module",
                 "link": "data_management",
-                "title": "Data Handling & Storage",
-                "description": "Handles file input/output operations, supporting various formats like JSON and CSV for temporary data persistence and retrieval within the application."
+                "title": "Data Management Services",
+                "description": "Handles data validation, transformation, persistence, and file-based I/O operations for all data within the system."
             },
             {
                 "id": "observability",
-                "label": "Monitor System Metrics",
+                "label": "System Observability",
                 "type": "module",
                 "link": "observability",
-                "title": "System Monitoring & Logging",
-                "description": "Collects and logs critical system-level metrics, such as event counters and queue depths, to ensure comprehensive application observability and performance tracking."
+                "title": "System Observability",
+                "description": "Collects metrics, logs events, and provides health checks to monitor the system's operational status and performance."
+            },
+            {
+                "id": "external_monitoring",
+                "label": "Monitoring Tools",
+                "type": "external",
+                "link": null,
+                "title": "External Monitoring Tools",
+                "description": "External systems or dashboards that consume observability data for visualization, alerting, and analysis."
             }
         ],
         "edges": [
             {
                 "source": "user",
-                "target": "core_workflow",
-                "label": "Initiates processes",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "user",
                 "target": "api_interface",
-                "label": "Configures external integrations",
+                "label": "sends requests to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
+                "source": "api_interface",
+                "target": "core_logic",
+                "label": "initiates processing in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_logic",
                 "target": "data_management",
-                "label": "Manages data files",
+                "label": "processes & stores data via",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
+                "source": "data_management",
+                "target": "core_logic",
+                "label": "provides data to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_logic",
                 "target": "observability",
-                "label": "Reviews system metrics",
+                "label": "reports metrics to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_workflow",
-                "target": "api_interface",
-                "label": "Invokes external services",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "core_workflow",
-                "target": "data_management",
-                "label": "Persists/retrieves data",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "core_workflow",
+                "source": "api_interface",
                 "target": "observability",
-                "label": "Reports operational events",
+                "label": "logs API activity to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "observability",
+                "target": "external_monitoring",
+                "label": "sends data to",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "user_group",
-                "label": "User Interaction",
+                "id": "external_actors",
+                "label": "External Actors",
                 "nodes": [
-                    "user"
+                    "user",
+                    "external_monitoring"
                 ],
-                "title": "User & Developer",
-                "description": "The human actor interacting with the system to initiate processes, configure settings, and review outcomes.",
+                "title": "External Actors",
+                "description": "Entities outside the system that interact with it or consume its output.",
                 "role": null
             },
             {
-                "id": "core_services_group",
-                "label": "Core Application Services",
+                "id": "system_entry_point",
+                "label": "System Entry Point",
                 "nodes": [
-                    "core_workflow",
                     "api_interface"
                 ],
-                "title": "Core Application Services",
-                "description": "The central components responsible for orchestrating main application logic and integrating with external systems to deliver core functionality.",
+                "title": "System Entry Point",
+                "description": "The module responsible for handling all external communication and initial request processing.",
                 "role": null
             },
             {
-                "id": "utility_services_group",
-                "label": "Support & Utility Services",
+                "id": "core_system",
+                "label": "Core System",
                 "nodes": [
-                    "data_management",
+                    "core_logic",
+                    "data_management"
+                ],
+                "title": "Core System Functionality",
+                "description": "The central modules that perform the primary business logic, data processing, and data persistence.",
+                "role": null
+            },
+            {
+                "id": "monitoring_and_logging",
+                "label": "Monitoring & Logging",
+                "nodes": [
                     "observability"
                 ],
-                "title": "Support & Utility Services",
-                "description": "Provides essential functionalities like data persistence, file handling, and comprehensive system monitoring and logging for operational insights.",
+                "title": "Monitoring and Logging",
+                "description": "The module dedicated to collecting operational data, metrics, and logs for system health and performance analysis.",
                 "role": null
             }
         ]

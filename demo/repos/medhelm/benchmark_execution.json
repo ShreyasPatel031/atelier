@@ -1,0 +1,191 @@
+{
+    "title": "Benchmark Execution",
+    "summary": "Orchestrates end-to-end benchmark runs by coordinating scenario data loading, model adaptation, metric evaluation, and result presentation. Manages execution workflows across single and multi-GPU environments.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "run_mgmt",
+                "label": "Manage Run Lifecycle",
+                "type": "module",
+                "link": "run_management",
+                "title": "Run Management",
+                "description": "Coordinates benchmark execution from start to finish. Handles single-GPU, multi-GPU, and SLURM-based job scheduling. Supports re-evaluation of existing runs."
+            },
+            {
+                "id": "scenario_load",
+                "label": "Load Scenarios & Data",
+                "type": "module",
+                "link": "scenario_and_data",
+                "title": "Scenario & Data Loading",
+                "description": "Retrieves benchmark scenarios and test data. Preprocesses and augments data as needed. Supports diverse medical and general-purpose datasets."
+            },
+            {
+                "id": "run_spec",
+                "label": "Define Run Specifications",
+                "type": "module",
+                "link": "run_specs",
+                "title": "Run Specifications",
+                "description": "Defines benchmark configurations including model selection, adapter settings, and evaluation parameters. Factory functions generate task-specific run specs."
+            },
+            {
+                "id": "adapt_model",
+                "label": "Adapt Model to Task",
+                "type": "module",
+                "link": "model_adaptation",
+                "title": "Model Adaptation",
+                "description": "Applies task-specific adapters and augmentations to prepare models for evaluation. Handles prompt engineering and input transformations."
+            },
+            {
+                "id": "infer",
+                "label": "Generate Model Outputs",
+                "type": "module",
+                "link": "client_and_inference",
+                "title": "Inference & Clients",
+                "description": "Executes model inference across language, vision, audio, and image generation models. Manages API calls and local model execution."
+            },
+            {
+                "id": "eval_metrics",
+                "label": "Compute Metrics",
+                "type": "module",
+                "link": "evaluation_and_metrics",
+                "title": "Evaluation & Metrics",
+                "description": "Calculates performance metrics, annotations, and robustness measures. Generates detailed evaluation reports and visualizations."
+            },
+            {
+                "id": "present",
+                "label": "Present Results",
+                "type": "module",
+                "link": "evaluation_and_metrics",
+                "title": "Result Presentation",
+                "description": "Summarizes benchmark results and creates interactive dashboards. Generates plots, tables, and comparative analysis across runs."
+            },
+            {
+                "id": "infra",
+                "label": "Infrastructure & Utilities",
+                "type": "module",
+                "link": "infrastructure_and_utilities",
+                "title": "Infrastructure Support",
+                "description": "Provides tokenization, proxy services, window management, and logging. Enables distributed execution and remote service communication."
+            }
+        ],
+        "edges": [
+            {
+                "source": "run_mgmt",
+                "target": "run_spec",
+                "label": "reads",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_mgmt",
+                "target": "scenario_load",
+                "label": "requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "scenario_load",
+                "target": "adapt_model",
+                "label": "provides instances",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_spec",
+                "target": "adapt_model",
+                "label": "specifies adapters",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapt_model",
+                "target": "infer",
+                "label": "sends prompts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "infer",
+                "target": "eval_metrics",
+                "label": "returns outputs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_metrics",
+                "target": "present",
+                "label": "aggregates scores",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "run_mgmt",
+                "target": "infra",
+                "label": "uses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "infer",
+                "target": "infra",
+                "label": "uses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_metrics",
+                "target": "infra",
+                "label": "uses",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "orchestration",
+                "label": "Orchestration",
+                "nodes": [
+                    "run_mgmt",
+                    "run_spec"
+                ],
+                "title": "Execution Control",
+                "description": "Manages the overall benchmark workflow and coordinates all downstream components.",
+                "role": null
+            },
+            {
+                "id": "data_prep",
+                "label": "Data Preparation",
+                "nodes": [
+                    "scenario_load",
+                    "adapt_model"
+                ],
+                "title": "Input Setup",
+                "description": "Loads scenarios, preprocesses data, and adapts models for task-specific evaluation.",
+                "role": null
+            },
+            {
+                "id": "execution",
+                "label": "Execution & Evaluation",
+                "nodes": [
+                    "infer",
+                    "eval_metrics"
+                ],
+                "title": "Core Processing",
+                "description": "Runs inference and computes metrics to measure model performance.",
+                "role": null
+            },
+            {
+                "id": "output",
+                "label": "Output & Support",
+                "nodes": [
+                    "present",
+                    "infra"
+                ],
+                "title": "Results & Infrastructure",
+                "description": "Presents results and provides underlying infrastructure services.",
+                "role": null
+            }
+        ]
+    }
+}

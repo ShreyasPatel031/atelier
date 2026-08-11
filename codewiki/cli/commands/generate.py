@@ -259,6 +259,12 @@ def generate_command(
                 'api_key': api_key,
                 'use_vertex_ai': getattr(config, 'use_vertex_ai', False),
                 'gcp_project': getattr(config, 'gcp_project', ''),
+                'llm_provider': getattr(config, 'llm_provider', 'gemini') or 'gemini',
+                'anthropic_api_key': (
+                    getattr(config, 'anthropic_api_key', '')
+                    or config_manager.get_anthropic_api_key()
+                    or ''
+                ),
             },
             verbose=verbose,
             generate_html=github_pages,

@@ -1,0 +1,111 @@
+{
+    "title": "Core Logic Module",
+    "summary": "This module encapsulates the primary business logic, orchestrating the main execution flow and data processing pipelines. It coordinates various sub-modules to transform raw inputs into structured outputs.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "main_execution_flow",
+                "label": "Main Execution Flow",
+                "type": "module",
+                "link": "main_execution_flow",
+                "title": "Main Execution Flow",
+                "description": "Orchestrates the primary sequence of operations, initializing configurations and preparing data batches."
+            },
+            {
+                "id": "data_processing",
+                "label": "Data Processing",
+                "type": "module",
+                "link": "data_processing",
+                "title": "Data Processing Module",
+                "description": "Transforms and analyzes data batches received from the core execution flow, applying business rules."
+            },
+            {
+                "id": "api_interface",
+                "label": "API Interface",
+                "type": "module",
+                "link": "api_interface",
+                "title": "API Interface Module",
+                "description": "Handles external requests and serves as the entry point for user interactions with the system."
+            },
+            {
+                "id": "data_management",
+                "label": "Data Management",
+                "type": "module",
+                "link": "data_management",
+                "title": "Data Management Module",
+                "description": "Manages all file-based input and output operations, including reading from and writing to various formats."
+            },
+            {
+                "id": "observability",
+                "label": "Observability",
+                "type": "module",
+                "link": "observability",
+                "title": "Observability Module",
+                "description": "Responsible for collecting and exposing system-level metrics, providing insights into operational health and performance."
+            }
+        ],
+        "edges": [
+            {
+                "source": "api_interface",
+                "target": "main_execution_flow",
+                "label": "initiates core operations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "main_execution_flow",
+                "target": "data_processing",
+                "label": "sends data batches",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_processing",
+                "target": "data_management",
+                "label": "reads/writes processed data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "main_execution_flow",
+                "target": "observability",
+                "label": "reports metrics",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_processing",
+                "target": "observability",
+                "label": "reports processing metrics",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_operations",
+                "label": "Core Operations",
+                "nodes": [
+                    "main_execution_flow",
+                    "data_processing"
+                ],
+                "title": "Core Operations",
+                "description": "The central components responsible for orchestrating the system's primary logic and data transformations.",
+                "role": null
+            },
+            {
+                "id": "system_integration",
+                "label": "System Integration",
+                "nodes": [
+                    "api_interface",
+                    "data_management",
+                    "observability"
+                ],
+                "title": "System Integration",
+                "description": "Modules that handle external interactions, data persistence, and system monitoring to support core operations.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,32 +1,31 @@
 {
   "repo_name": "minirepo",
-  "repo_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo",
-  "repo_size_mb": 447001.4921875,
+  "repo_path": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/benchmarking/minirepo",
+  "repo_size_mb": 449015.62109375,
   "total_files": 0,
   "total_code_files": 20,
   "stages": {
     "Dependency Analysis": {
       "stage_name": "Dependency Analysis",
-      "duration": 0.9296000003814697,
+      "duration": 1.1826560497283936,
       "tokens_used": 0,
       "files_created": 0,
       "files_created_list": []
     },
     "Module Clustering": {
       "stage_name": "Module Clustering",
-      "duration": 8.791358947753906,
-      "tokens_used": 781,
+      "duration": 4.155231952667236,
+      "tokens_used": 843,
       "files_created": 0,
       "files_created_list": []
     },
     "Documentation Generation": {
       "stage_name": "Documentation Generation",
-      "duration": 60.770238161087036,
-      "tokens_used": 63052,
+      "duration": 22.473978996276855,
+      "tokens_used": 56501,
       "files_created": 14,
       "files_created_list": [
-        "external_api.json",
-        "main_logic.json",
+        "main_execution_flow.json",
         "system_metrics.json",
         "first_module_tree.json",
         "metadata.json",
@@ -34,21 +33,22 @@
         "api_interface.json",
         "module_tree.json",
         "overview.json",
+        "input_output_handling.json",
         "sync_issues.json",
-        "core_workflow.json",
         "data_processing.json",
-        "input_output.json",
-        "data_management.json"
+        "core_logic.json",
+        "data_management.json",
+        "public_api.json"
       ]
     }
   },
-  "time_to_first_overview": 70.49389410018921,
-  "first_overview_file": "/Users/shreyaspatel/atelier/benchmarking/minirepo/docs/overview.json",
-  "total_duration": 70.49396800994873,
-  "total_tokens": 63833,
-  "estimated_cost_usd": 0.0148,
+  "time_to_first_overview": 27.81611132621765,
+  "first_overview_file": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/benchmarking/minirepo/docs/overview.json",
+  "total_duration": 27.816164255142212,
+  "total_tokens": 57344,
+  "estimated_cost_usd": 0.0125,
   "total_llm_calls": 11,
   "total_files_created": 14,
-  "start_time": 1779635617.499651,
-  "end_time": 1779635687.993619
+  "start_time": 1781383450.7150238,
+  "end_time": 1781383478.531188
 }
